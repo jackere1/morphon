@@ -1,0 +1,223 @@
+# BFS Traversal - First manifest example
+# This is the "design document" for what our manifest format looks like
+
+meta:
+  title: "Breadth-First Search Traversal"
+  topic: "graph-traversal"
+  duration: 12s
+  canvas:
+    width: 1920
+    height: 1080
+    background: "#1a1a2e"
+
+# Define the objects that exist in the scene
+objects:
+  - id: graph
+    type: graph
+    layout: force-directed
+    nodes:
+      - { id: A, label: "A", x: 400, y: 300 }
+      - { id: B, label: "B", x: 250, y: 500 }
+      - { id: C, label: "C", x: 550, y: 500 }
+      - { id: D, label: "D", x: 150, y: 700 }
+      - { id: E, label: "E", x: 350, y: 700 }
+      - { id: F, label: "F", x: 650, y: 700 }
+    edges:
+      - { from: A, to: B }
+      - { from: A, to: C }
+      - { from: B, to: D }
+      - { from: B, to: E }
+      - { from: C, to: F }
+    style:
+      nodeRadius: 30
+      nodeColor: "#4a4a6a"
+      nodeStroke: "#7c7caa"
+      edgeColor: "#3a3a5a"
+      labelColor: "#ffffff"
+      labelFont: "16px monospace"
+
+  - id: queue
+    type: data-structure
+    variant: queue
+    position: { x: 960, y: 900 }
+    style:
+      cellWidth: 60
+      cellHeight: 40
+      fillColor: "#2a2a4a"
+      borderColor: "#5a5a8a"
+      textColor: "#ffffff"
+
+  - id: title-text
+    type: text
+    content: "Breadth-First Search"
+    position: { x: 960, y: 80 }
+    style:
+      font: "bold 36px sans-serif"
+      color: "#e0e0ff"
+      align: center
+
+  - id: step-label
+    type: text
+    content: ""
+    position: { x: 960, y: 150 }
+    style:
+      font: "20px sans-serif"
+      color: "#aaaacc"
+      align: center
+
+# Animation timeline - sequential by default, use `parallel` for simultaneous
+timeline:
+  # Scene intro
+  - action: fade-in
+    target: title-text
+    duration: 0.5s
+
+  - action: fade-in
+    target: graph
+    duration: 1s
+
+  - action: fade-in
+    target: queue
+    duration: 0.5s
+
+  # Step 1: Start at A
+  - action: set-text
+    target: step-label
+    value: "Start: visit node A"
+    duration: 0s
+
+  - action: highlight-node
+    target: graph
+    node: A
+    color: "#ff6b6b"
+    duration: 0.5s
+
+  - action: enqueue
+    target: queue
+    values: [B, C]
+    duration: 0.8s
+
+  - action: set-text
+    target: step-label
+    value: "Add A's neighbors to queue: B, C"
+    duration: 0s
+
+  - action: pause
+    duration: 1s
+
+  # Step 2: Visit B (dequeue)
+  - action: dequeue
+    target: queue
+    duration: 0.5s
+
+  - action: highlight-node
+    target: graph
+    node: B
+    color: "#ff6b6b"
+    duration: 0.5s
+
+  - action: highlight-edge
+    target: graph
+    edge: [A, B]
+    color: "#ff6b6b"
+    duration: 0.3s
+
+  - action: enqueue
+    target: queue
+    values: [D, E]
+    duration: 0.8s
+
+  - action: set-text
+    target: step-label
+    value: "Visit B, add neighbors: D, E"
+    duration: 0s
+
+  - action: pause
+    duration: 1s
+
+  # Step 3: Visit C (dequeue)
+  - action: dequeue
+    target: queue
+    duration: 0.5s
+
+  - action: highlight-node
+    target: graph
+    node: C
+    color: "#ff6b6b"
+    duration: 0.5s
+
+  - action: highlight-edge
+    target: graph
+    edge: [A, C]
+    color: "#ff6b6b"
+    duration: 0.3s
+
+  - action: enqueue
+    target: queue
+    values: [F]
+    duration: 0.8s
+
+  - action: set-text
+    target: step-label
+    value: "Visit C, add neighbor: F"
+    duration: 0s
+
+  - action: pause
+    duration: 1s
+
+  # Step 4-6: Visit remaining (D, E, F)
+  - action: dequeue
+    target: queue
+    duration: 0.3s
+
+  - action: highlight-node
+    target: graph
+    node: D
+    color: "#ff6b6b"
+    duration: 0.4s
+
+  - action: highlight-edge
+    target: graph
+    edge: [B, D]
+    color: "#ff6b6b"
+    duration: 0.3s
+
+  - action: dequeue
+    target: queue
+    duration: 0.3s
+
+  - action: highlight-node
+    target: graph
+    node: E
+    color: "#ff6b6b"
+    duration: 0.4s
+
+  - action: highlight-edge
+    target: graph
+    edge: [B, E]
+    color: "#ff6b6b"
+    duration: 0.3s
+
+  - action: dequeue
+    target: queue
+    duration: 0.3s
+
+  - action: highlight-node
+    target: graph
+    node: F
+    color: "#ff6b6b"
+    duration: 0.4s
+
+  - action: highlight-edge
+    target: graph
+    edge: [C, F]
+    color: "#ff6b6b"
+    duration: 0.3s
+
+  - action: set-text
+    target: step-label
+    value: "All nodes visited! BFS complete."
+    duration: 0s
+
+  - action: pause
+    duration: 1.5s
