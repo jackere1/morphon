@@ -1,0 +1,53 @@
+# BFS Complete Course — Multi-Scene Show
+# Renders 4 scenes with transitions between them
+
+meta:
+  title: "BFS Complete Course"
+  topic: "bfs-course"
+  canvas:
+    width: 1920
+    height: 1080
+    background: "#1a1a2e"
+  defaults:
+    graph:
+      nodeRadius: 30
+      nodeColor: "#4a4a6a"
+      nodeStroke: "#7c7caa"
+      edgeColor: "#3a3a5a"
+      labelColor: "#ffffff"
+      labelFont: "16px monospace"
+    data-structure:
+      cellWidth: 60
+      cellHeight: 40
+      fillColor: "#2a2a4a"
+      borderColor: "#5a5a8a"
+      textColor: "#ffffff"
+    text:
+      font: "20px sans-serif"
+      color: "#e0e0ff"
+  palette:
+    visited: "#ff6b6b"
+    queued: "#ffd93d"
+    current: "#6bff6b"
+    highlight: "#ff9f43"
+    dim: "#3a3a5a"
+  easing: easeInOutCubic
+
+scenes:
+  - file: scenes/intro.yaml
+    transition: none
+
+  - file: scenes/walkthrough.yaml
+    transition:
+      type: crossfade
+      duration: 1s
+
+  - file: scenes/recap.yaml
+    transition:
+      type: fade
+      duration: 0.8s
+
+  - file: scenes/outro.yaml
+    transition:
+      type: slide-left
+      duration: 0.6s

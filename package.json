@@ -1,15 +1,23 @@
 {
   "name": "cs-animations",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Text-to-animation platform for CS education",
   "type": "module",
   "scripts": {
     "validate": "node src/manifest/validate.js",
-    "render": "node src/renderer/render.js",
-    "demo": "node src/renderer/render.js src/examples/bfs-traversal.yaml"
+    "render": "npx vite-node src/revideo/render.ts",
+    "dev": "npx vite",
+    "demo": "npx vite-node src/revideo/render.ts src/examples/bfs-traversal-v2.yaml"
   },
   "dependencies": {
-    "yaml": "^2.7.0",
-    "canvas": "^3.1.0"
+    "@revideo/2d": "^0.10.4",
+    "@revideo/core": "^0.10.4",
+    "@revideo/renderer": "^0.10.4",
+    "@revideo/ui": "^0.10.4",
+    "@revideo/vite-plugin": "^0.10.4",
+    "typescript": "^5.9.3",
+    "vite": "^7.3.1",
+    "vite-node": "^5.3.0",
+    "yaml": "^2.7.0"
   }
 }

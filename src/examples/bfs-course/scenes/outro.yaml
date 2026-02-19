@@ -1,0 +1,81 @@
+# Scene 4: Outro — What's next
+
+meta:
+  title: "Outro"
+  canvas:
+    width: 1920
+    height: 1080
+    background: "#1a1a2e"
+
+objects:
+  - id: thanks
+    type: text
+    content: ""
+    position: { x: 960, y: 350 }
+    style:
+      font: "bold 48px sans-serif"
+      align: center
+
+  - id: next-topic
+    type: text
+    content: ""
+    position: { x: 960, y: 460 }
+    style:
+      font: "24px sans-serif"
+      align: center
+      color: "#a0a0cc"
+
+  - id: cta
+    type: text
+    content: ""
+    position: { x: 960, y: 600 }
+    style:
+      font: "22px sans-serif"
+      align: center
+      color: "#ffd93d"
+
+timeline:
+  - action: set-text
+    target: thanks
+    value: "Thanks for watching!"
+  - action: fade-in
+    target: thanks
+    duration: 0.8s
+
+  - action: pause
+    duration: 1.5s
+
+  - action: set-text
+    target: next-topic
+    value: "Next up: Depth-First Search (DFS)"
+  - action: fade-in
+    target: next-topic
+    duration: 0.6s
+
+  - action: pause
+    duration: 1.5s
+
+  - action: set-text
+    target: cta
+    value: "Practice BFS on your own — try different starting nodes!"
+  - action: fade-in
+    target: cta
+    duration: 0.5s
+
+  - action: pause
+    duration: 3s
+
+  # Fade out
+  - parallel:
+      - action: fade-out
+        target: thanks
+        duration: 0.8s
+      - action: fade-out
+        target: next-topic
+        duration: 0.8s
+      - action: fade-out
+        target: cta
+        duration: 0.8s
+
+  - action: pause
+    duration: 0.5s

@@ -1,0 +1,153 @@
+# Scene 3: Key Takeaways & Recap
+
+meta:
+  title: "BFS Recap"
+  canvas:
+    width: 1920
+    height: 1080
+    background: "#1a1a2e"
+
+objects:
+  - id: title
+    type: text
+    content: ""
+    position: { x: 960, y: 150 }
+    style:
+      font: "bold 44px sans-serif"
+      align: center
+
+  - id: point1-title
+    type: text
+    content: ""
+    position: { x: 960, y: 300 }
+    style:
+      font: "bold 26px sans-serif"
+      align: center
+      color: "#6bff6b"
+
+  - id: point1-desc
+    type: text
+    content: ""
+    position: { x: 960, y: 350 }
+    style:
+      font: "20px sans-serif"
+      align: center
+
+  - id: point2-title
+    type: text
+    content: ""
+    position: { x: 960, y: 450 }
+    style:
+      font: "bold 26px sans-serif"
+      align: center
+      color: "#ffd93d"
+
+  - id: point2-desc
+    type: text
+    content: ""
+    position: { x: 960, y: 500 }
+    style:
+      font: "20px sans-serif"
+      align: center
+
+  - id: point3-title
+    type: text
+    content: ""
+    position: { x: 960, y: 600 }
+    style:
+      font: "bold 26px sans-serif"
+      align: center
+      color: "#ff6b6b"
+
+  - id: point3-desc
+    type: text
+    content: ""
+    position: { x: 960, y: 650 }
+    style:
+      font: "20px sans-serif"
+      align: center
+
+  - id: complexity
+    type: text
+    content: ""
+    position: { x: 960, y: 800 }
+    style:
+      font: "bold 28px monospace"
+      align: center
+      color: "#ff9f43"
+
+timeline:
+  - action: set-text
+    target: title
+    value: "Key Takeaways"
+  - action: fade-in
+    target: title
+    duration: 0.6s
+
+  - action: pause
+    duration: 1s
+
+  # Point 1: Queue
+  - action: set-text
+    target: point1-title
+    value: "1. BFS uses a Queue"
+  - action: set-text
+    target: point1-desc
+    value: "FIFO ordering ensures level-by-level exploration"
+  - parallel:
+      - action: fade-in
+        target: point1-title
+        duration: 0.5s
+      - action: fade-in
+        target: point1-desc
+        duration: 0.5s
+
+  - action: pause
+    duration: 2s
+
+  # Point 2: Shortest path
+  - action: set-text
+    target: point2-title
+    value: "2. Guarantees Shortest Path"
+  - action: set-text
+    target: point2-desc
+    value: "In unweighted graphs, BFS always finds the minimum-hop path"
+  - parallel:
+      - action: fade-in
+        target: point2-title
+        duration: 0.5s
+      - action: fade-in
+        target: point2-desc
+        duration: 0.5s
+
+  - action: pause
+    duration: 2s
+
+  # Point 3: Applications
+  - action: set-text
+    target: point3-title
+    value: "3. Real-World Applications"
+  - action: set-text
+    target: point3-desc
+    value: "Social networks, web crawlers, GPS navigation, puzzle solving"
+  - parallel:
+      - action: fade-in
+        target: point3-title
+        duration: 0.5s
+      - action: fade-in
+        target: point3-desc
+        duration: 0.5s
+
+  - action: pause
+    duration: 2s
+
+  # Complexity
+  - action: set-text
+    target: complexity
+    value: "Time: O(V + E)    Space: O(V)"
+  - action: fade-in
+    target: complexity
+    duration: 0.6s
+
+  - action: pause
+    duration: 3s

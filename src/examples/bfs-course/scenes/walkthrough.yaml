@@ -1,0 +1,309 @@
+# Scene 2: BFS Step-by-Step Walkthrough
+
+meta:
+  title: "BFS Walkthrough"
+  canvas:
+    width: 1920
+    height: 1080
+    background: "#1a1a2e"
+  palette:
+    visited: "#ff6b6b"
+    queued: "#ffd93d"
+    current: "#6bff6b"
+    highlight: "#ff9f43"
+
+objects:
+  - id: heading
+    type: text
+    content: ""
+    position: { x: 960, y: 60 }
+    style:
+      font: "bold 36px sans-serif"
+      align: center
+
+  - id: step-label
+    type: text
+    content: ""
+    position: { x: 960, y: 120 }
+    style:
+      font: "22px sans-serif"
+      align: center
+      color: "#a0a0cc"
+
+  # Graph with 6 nodes
+  - id: graph
+    type: graph
+    nodes:
+      - { id: A, label: A, x: 960, y: 300 }
+      - { id: B, label: B, x: 760, y: 450 }
+      - { id: C, label: C, x: 1160, y: 450 }
+      - { id: D, label: D, x: 660, y: 620 }
+      - { id: E, label: E, x: 860, y: 620 }
+      - { id: F, label: F, x: 1060, y: 620 }
+    edges:
+      - { from: A, to: B }
+      - { from: A, to: C }
+      - { from: B, to: D }
+      - { from: B, to: E }
+      - { from: C, to: F }
+
+  # Queue visualization
+  - id: queue
+    type: data-structure
+    variant: queue
+    position: { x: 960, y: 850 }
+
+  - id: queue-label
+    type: text
+    content: ""
+    position: { x: 960, y: 790 }
+    style:
+      font: "bold 20px monospace"
+      align: center
+      color: "#ffd93d"
+
+timeline:
+  # Show heading
+  - action: set-text
+    target: heading
+    value: "BFS Step-by-Step"
+  - action: fade-in
+    target: heading
+    duration: 0.5s
+
+  # Show queue label
+  - action: set-text
+    target: queue-label
+    value: "Queue"
+  - action: fade-in
+    target: queue-label
+    duration: 0.3s
+
+  # Fade in the graph
+  - action: fade-in
+    target: graph
+    duration: 0.8s
+
+  - action: pause
+    duration: 1s
+
+  # ── Step 1: Start at A ──
+  - action: set-text
+    target: step-label
+    value: "Step 1: Start at node A — mark as visited, add to queue"
+  - action: fade-in
+    target: step-label
+    duration: 0.3s
+
+  - action: highlight-node
+    target: graph
+    node: A
+    color: "$current"
+    duration: 0.5s
+
+  - action: enqueue
+    target: queue
+    values: ["A"]
+    duration: 0.4s
+
+  - action: pause
+    duration: 2s
+
+  # ── Step 2: Dequeue A, visit neighbors B, C ──
+  - action: set-text
+    target: step-label
+    value: "Step 2: Dequeue A — visit neighbors B and C"
+
+  - action: dequeue
+    target: queue
+    duration: 0.4s
+
+  - action: highlight-node
+    target: graph
+    node: A
+    color: "$visited"
+    duration: 0.4s
+
+  - action: pause
+    duration: 0.5s
+
+  # Highlight edges A→B and A→C
+  - parallel:
+      - action: highlight-edge
+        target: graph
+        edge: [A, B]
+        color: "$highlight"
+        duration: 0.5s
+      - action: highlight-edge
+        target: graph
+        edge: [A, C]
+        color: "$highlight"
+        duration: 0.5s
+
+  # Queue B and C
+  - parallel:
+      - action: highlight-node
+        target: graph
+        node: B
+        color: "$queued"
+        duration: 0.4s
+      - action: highlight-node
+        target: graph
+        node: C
+        color: "$queued"
+        duration: 0.4s
+
+  - action: enqueue
+    target: queue
+    values: ["B", "C"]
+    duration: 0.4s
+
+  - action: pause
+    duration: 2s
+
+  # ── Step 3: Dequeue B, visit neighbors D, E ──
+  - action: set-text
+    target: step-label
+    value: "Step 3: Dequeue B — visit neighbors D and E"
+
+  - action: dequeue
+    target: queue
+    duration: 0.4s
+
+  - action: highlight-node
+    target: graph
+    node: B
+    color: "$visited"
+    duration: 0.4s
+
+  - action: pause
+    duration: 0.5s
+
+  - parallel:
+      - action: highlight-edge
+        target: graph
+        edge: [B, D]
+        color: "$highlight"
+        duration: 0.5s
+      - action: highlight-edge
+        target: graph
+        edge: [B, E]
+        color: "$highlight"
+        duration: 0.5s
+
+  - parallel:
+      - action: highlight-node
+        target: graph
+        node: D
+        color: "$queued"
+        duration: 0.4s
+      - action: highlight-node
+        target: graph
+        node: E
+        color: "$queued"
+        duration: 0.4s
+
+  - action: enqueue
+    target: queue
+    values: ["D", "E"]
+    duration: 0.4s
+
+  - action: pause
+    duration: 2s
+
+  # ── Step 4: Dequeue C, visit neighbor F ──
+  - action: set-text
+    target: step-label
+    value: "Step 4: Dequeue C — visit neighbor F"
+
+  - action: dequeue
+    target: queue
+    duration: 0.4s
+
+  - action: highlight-node
+    target: graph
+    node: C
+    color: "$visited"
+    duration: 0.4s
+
+  - action: highlight-edge
+    target: graph
+    edge: [C, F]
+    color: "$highlight"
+    duration: 0.5s
+
+  - action: highlight-node
+    target: graph
+    node: F
+    color: "$queued"
+    duration: 0.4s
+
+  - action: enqueue
+    target: queue
+    values: ["F"]
+    duration: 0.4s
+
+  - action: pause
+    duration: 2s
+
+  # ── Step 5: Dequeue D (no unvisited neighbors) ──
+  - action: set-text
+    target: step-label
+    value: "Step 5: Dequeue D — no unvisited neighbors"
+
+  - action: dequeue
+    target: queue
+    duration: 0.4s
+
+  - action: highlight-node
+    target: graph
+    node: D
+    color: "$visited"
+    duration: 0.4s
+
+  - action: pause
+    duration: 1.5s
+
+  # ── Step 6: Dequeue E (no unvisited neighbors) ──
+  - action: set-text
+    target: step-label
+    value: "Step 6: Dequeue E — no unvisited neighbors"
+
+  - action: dequeue
+    target: queue
+    duration: 0.4s
+
+  - action: highlight-node
+    target: graph
+    node: E
+    color: "$visited"
+    duration: 0.4s
+
+  - action: pause
+    duration: 1.5s
+
+  # ── Step 7: Dequeue F (no unvisited neighbors) ──
+  - action: set-text
+    target: step-label
+    value: "Step 7: Dequeue F — queue is now empty. BFS complete!"
+
+  - action: dequeue
+    target: queue
+    duration: 0.4s
+
+  - action: highlight-node
+    target: graph
+    node: F
+    color: "$visited"
+    duration: 0.4s
+
+  - action: pause
+    duration: 2s
+
+  # Final message
+  - action: set-text
+    target: step-label
+    value: "All nodes visited! Traversal order: A → B → C → D → E → F"
+
+  - action: pause
+    duration: 3s

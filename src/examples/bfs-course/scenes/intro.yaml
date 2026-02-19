@@ -1,0 +1,142 @@
+# Scene 1: Introduction — What is BFS?
+
+meta:
+  title: "Introduction to BFS"
+  canvas:
+    width: 1920
+    height: 1080
+    background: "#1a1a2e"
+
+objects:
+  - id: title
+    type: text
+    content: ""
+    position: { x: 960, y: 300 }
+    style:
+      font: "bold 56px sans-serif"
+      align: center
+
+  - id: subtitle
+    type: text
+    content: ""
+    position: { x: 960, y: 400 }
+    style:
+      font: "28px sans-serif"
+      align: center
+      color: "#a0a0cc"
+
+  - id: description
+    type: text
+    content: ""
+    position: { x: 960, y: 550 }
+    style:
+      font: "22px sans-serif"
+      align: center
+      color: "#c0c0e0"
+
+  - id: bullet1
+    type: text
+    content: ""
+    position: { x: 960, y: 650 }
+    style:
+      font: "20px sans-serif"
+      align: center
+
+  - id: bullet2
+    type: text
+    content: ""
+    position: { x: 960, y: 700 }
+    style:
+      font: "20px sans-serif"
+      align: center
+
+  - id: bullet3
+    type: text
+    content: ""
+    position: { x: 960, y: 750 }
+    style:
+      font: "20px sans-serif"
+      align: center
+
+timeline:
+  # Title appears
+  - action: set-text
+    target: title
+    value: "Breadth-First Search"
+  - action: fade-in
+    target: title
+    duration: 0.8s
+
+  - action: pause
+    duration: 0.5s
+
+  # Subtitle
+  - action: set-text
+    target: subtitle
+    value: "A fundamental graph traversal algorithm"
+  - action: fade-in
+    target: subtitle
+    duration: 0.6s
+
+  - action: pause
+    duration: 1.5s
+
+  # Description
+  - action: set-text
+    target: description
+    value: "BFS explores a graph level by level, visiting all neighbors before moving deeper."
+  - action: fade-in
+    target: description
+    duration: 0.5s
+
+  - action: pause
+    duration: 2s
+
+  # Key properties
+  - action: set-text
+    target: bullet1
+    value: "Uses a Queue (FIFO) data structure"
+  - action: set-text
+    target: bullet2
+    value: "Finds shortest path in unweighted graphs"
+  - action: set-text
+    target: bullet3
+    value: "Time complexity: O(V + E)"
+
+  - parallel:
+      - action: fade-in
+        target: bullet1
+        duration: 0.4s
+      - action: fade-in
+        target: bullet2
+        duration: 0.4s
+      - action: fade-in
+        target: bullet3
+        duration: 0.4s
+
+  - action: pause
+    duration: 3s
+
+  # Fade everything out before transition
+  - parallel:
+      - action: fade-out
+        target: title
+        duration: 0.6s
+      - action: fade-out
+        target: subtitle
+        duration: 0.6s
+      - action: fade-out
+        target: description
+        duration: 0.6s
+      - action: fade-out
+        target: bullet1
+        duration: 0.6s
+      - action: fade-out
+        target: bullet2
+        duration: 0.6s
+      - action: fade-out
+        target: bullet3
+        duration: 0.6s
+
+  - action: pause
+    duration: 0.3s

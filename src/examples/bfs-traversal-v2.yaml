@@ -1,0 +1,1031 @@
+# BFS Traversal - Extended 5+ minute educational video
+# Manifest v2 with parallel blocks, palette, easing, detailed narration
+
+meta:
+  title: "Breadth-First Search Traversal"
+  topic: "bfs-traversal"
+  canvas:
+    width: 1920
+    height: 1080
+    background: "#1a1a2e"
+  defaults:
+    graph:
+      nodeRadius: 30
+      nodeColor: "#4a4a6a"
+      nodeStroke: "#7c7caa"
+      edgeColor: "#3a3a5a"
+      labelColor: "#ffffff"
+      labelFont: "16px monospace"
+    data-structure:
+      cellWidth: 60
+      cellHeight: 40
+      fillColor: "#2a2a4a"
+      borderColor: "#5a5a8a"
+      textColor: "#ffffff"
+    text:
+      font: "20px sans-serif"
+      color: "#e0e0ff"
+  palette:
+    visited: "#ff6b6b"
+    queued: "#ffd93d"
+    current: "#6bff6b"
+    highlight: "#ff9f43"
+  easing: easeInOutCubic
+
+objects:
+  # ── Title & Narration ──
+  - id: title-text
+    type: text
+    content: ""
+    position: { x: 960, y: 80 }
+    style:
+      font: "bold 42px sans-serif"
+      align: center
+
+  - id: subtitle
+    type: text
+    content: ""
+    position: { x: 960, y: 140 }
+    style:
+      font: "22px sans-serif"
+      color: "#8888bb"
+      align: center
+
+  - id: step-label
+    type: text
+    content: ""
+    position: { x: 960, y: 980 }
+    style:
+      font: "20px sans-serif"
+      color: "#aaaacc"
+      align: center
+
+  - id: narration
+    type: text
+    content: ""
+    position: { x: 1300, y: 350 }
+    style:
+      font: "18px sans-serif"
+      color: "#ccccee"
+      align: center
+
+  - id: narration2
+    type: text
+    content: ""
+    position: { x: 1300, y: 400 }
+    style:
+      font: "18px sans-serif"
+      color: "#ccccee"
+      align: center
+
+  - id: narration3
+    type: text
+    content: ""
+    position: { x: 1300, y: 450 }
+    style:
+      font: "18px sans-serif"
+      color: "#ccccee"
+      align: center
+
+  - id: complexity-label
+    type: text
+    content: ""
+    position: { x: 1300, y: 550 }
+    style:
+      font: "bold 18px monospace"
+      color: "#ffd93d"
+      align: center
+
+  # ── Graph ──
+  - id: graph
+    type: graph
+    layout: force-directed
+    nodes:
+      - { id: A, label: "A", x: 380, y: 320 }
+      - { id: B, label: "B", x: 230, y: 500 }
+      - { id: C, label: "C", x: 530, y: 500 }
+      - { id: D, label: "D", x: 130, y: 680 }
+      - { id: E, label: "E", x: 330, y: 680 }
+      - { id: F, label: "F", x: 630, y: 680 }
+    edges:
+      - { from: A, to: B }
+      - { from: A, to: C }
+      - { from: B, to: D }
+      - { from: B, to: E }
+      - { from: C, to: F }
+
+  # ── Queue ──
+  - id: queue
+    type: data-structure
+    variant: queue
+    position: { x: 380, y: 880 }
+
+  # ── Legend / Key ──
+  - id: legend-title
+    type: text
+    content: ""
+    position: { x: 1300, y: 650 }
+    style:
+      font: "bold 16px sans-serif"
+      color: "#8888bb"
+      align: center
+
+  - id: legend-visited
+    type: text
+    content: ""
+    position: { x: 1300, y: 690 }
+    style:
+      font: "16px sans-serif"
+      color: "#ff6b6b"
+      align: center
+
+  - id: legend-unvisited
+    type: text
+    content: ""
+    position: { x: 1300, y: 720 }
+    style:
+      font: "16px sans-serif"
+      color: "#7c7caa"
+      align: center
+
+timeline:
+  # ═══════════════════════════════════════════
+  # SECTION 1: INTRO (0:00 - 1:00)
+  # ═══════════════════════════════════════════
+
+  - action: fade-in
+    target: title-text
+    duration: 0.01s
+
+  - action: set-text
+    target: title-text
+    value: "Breadth-First Search"
+
+  - action: fade-in
+    target: title-text
+    duration: 1.5s
+    easing: easeOutCubic
+
+  - action: pause
+    duration: 3s
+
+  - action: fade-in
+    target: subtitle
+    duration: 0.01s
+
+  - action: set-text
+    target: subtitle
+    value: "A fundamental graph traversal algorithm"
+
+  - action: fade-in
+    target: subtitle
+    duration: 1s
+    easing: easeOutCubic
+
+  - action: pause
+    duration: 5s
+
+  # Intro explanation
+  - action: fade-in
+    target: narration
+    duration: 0.01s
+
+  - action: set-text
+    target: narration
+    value: "BFS explores a graph level by level."
+
+  - action: fade-in
+    target: narration
+    duration: 0.8s
+
+  - action: pause
+    duration: 5s
+
+  - action: fade-in
+    target: narration2
+    duration: 0.01s
+
+  - action: set-text
+    target: narration2
+    value: "Starting from a source node, it visits"
+
+  - action: fade-in
+    target: narration2
+    duration: 0.8s
+
+  - action: pause
+    duration: 2s
+
+  - action: fade-in
+    target: narration3
+    duration: 0.01s
+
+  - action: set-text
+    target: narration3
+    value: "all neighbors before going deeper."
+
+  - action: fade-in
+    target: narration3
+    duration: 0.8s
+
+  - action: pause
+    duration: 6s
+
+  # Clear intro narration
+  - action: set-text
+    target: narration
+    value: "It uses a queue data structure"
+
+  - action: set-text
+    target: narration2
+    value: "to keep track of which nodes"
+
+  - action: set-text
+    target: narration3
+    value: "to visit next."
+
+  - action: pause
+    duration: 7s
+
+  - action: fade-in
+    target: complexity-label
+    duration: 0.01s
+
+  - action: set-text
+    target: complexity-label
+    value: "Time: O(V + E)  |  Space: O(V)"
+
+  - action: fade-in
+    target: complexity-label
+    duration: 0.8s
+
+  - action: pause
+    duration: 7s
+
+  # ═══════════════════════════════════════════
+  # SECTION 2: SHOW THE GRAPH (1:00 - 1:40)
+  # ═══════════════════════════════════════════
+
+  # Clear narration for graph section
+  - action: set-text
+    target: narration
+    value: "Let's trace through BFS"
+
+  - action: set-text
+    target: narration2
+    value: "on this example graph."
+
+  - action: set-text
+    target: narration3
+    value: ""
+
+  - action: pause
+    duration: 3s
+
+  # Fade in graph
+  - action: fade-in
+    target: graph
+    duration: 2s
+    easing: easeOutCubic
+
+  - action: pause
+    duration: 5s
+
+  - action: set-text
+    target: narration
+    value: "We have 6 nodes: A through F,"
+
+  - action: set-text
+    target: narration2
+    value: "connected by 5 edges forming"
+
+  - action: set-text
+    target: narration3
+    value: "a tree-like structure."
+
+  - action: pause
+    duration: 7s
+
+  # Show the queue
+  - action: set-text
+    target: narration
+    value: "Below the graph is our queue."
+
+  - action: set-text
+    target: narration2
+    value: "Nodes enter from the right"
+
+  - action: set-text
+    target: narration3
+    value: "and leave from the left (FIFO)."
+
+  - action: fade-in
+    target: queue
+    duration: 1s
+    easing: easeOutCubic
+
+  - action: pause
+    duration: 7s
+
+  # Show legend
+  - parallel:
+      - action: fade-in
+        target: legend-title
+        duration: 0.01s
+      - action: fade-in
+        target: legend-visited
+        duration: 0.01s
+      - action: fade-in
+        target: legend-unvisited
+        duration: 0.01s
+
+  - parallel:
+      - action: set-text
+        target: legend-title
+        value: "Legend"
+      - action: set-text
+        target: legend-visited
+        value: "● Visited node"
+      - action: set-text
+        target: legend-unvisited
+        value: "● Unvisited node"
+
+  - parallel:
+      - action: fade-in
+        target: legend-title
+        duration: 0.5s
+      - action: fade-in
+        target: legend-visited
+        duration: 0.5s
+      - action: fade-in
+        target: legend-unvisited
+        duration: 0.5s
+
+  - action: pause
+    duration: 3s
+
+  # Show step label
+  - action: fade-in
+    target: step-label
+    duration: 0.01s
+
+  # ═══════════════════════════════════════════
+  # SECTION 3: ALGORITHM WALKTHROUGH (1:40 - 4:30)
+  # ═══════════════════════════════════════════
+
+  # ── Step 1: Start at A ──
+  - action: set-text
+    target: narration
+    value: "Step 1: Choose a starting node."
+
+  - action: set-text
+    target: narration2
+    value: "We'll begin at node A."
+
+  - action: set-text
+    target: narration3
+    value: ""
+
+  - action: pause
+    duration: 5s
+
+  - parallel:
+      - action: highlight-node
+        target: graph
+        node: A
+        color: $visited
+        duration: 1s
+      - action: set-text
+        target: step-label
+        value: "Step 1: Visit starting node A"
+
+  - action: pause
+    duration: 5s
+
+  - action: set-text
+    target: narration
+    value: "Mark A as visited."
+
+  - action: set-text
+    target: narration2
+    value: "Now add A's unvisited"
+
+  - action: set-text
+    target: narration3
+    value: "neighbors to the queue."
+
+  - action: pause
+    duration: 5s
+
+  - action: set-text
+    target: step-label
+    value: "Enqueue A's neighbors: B, C"
+
+  - action: enqueue
+    target: queue
+    values: [B, C]
+    duration: 1.5s
+    easing: easeOutCubic
+
+  - action: pause
+    duration: 3s
+
+  - action: set-text
+    target: narration
+    value: "B and C are now in the queue."
+
+  - action: set-text
+    target: narration2
+    value: "They will be visited in order:"
+
+  - action: set-text
+    target: narration3
+    value: "B first (it entered first), then C."
+
+  - action: pause
+    duration: 7s
+
+  # ── Step 2: Visit B ──
+  - action: set-text
+    target: narration
+    value: "Step 2: Dequeue the front of"
+
+  - action: set-text
+    target: narration2
+    value: "the queue. That's node B."
+
+  - action: set-text
+    target: narration3
+    value: ""
+
+  - action: pause
+    duration: 5s
+
+  - action: set-text
+    target: step-label
+    value: "Step 2: Dequeue B"
+
+  - action: dequeue
+    target: queue
+    duration: 0.8s
+    easing: easeOutCubic
+
+  - action: pause
+    duration: 1.5s
+
+  - parallel:
+      - action: highlight-node
+        target: graph
+        node: B
+        color: $visited
+        duration: 0.8s
+      - action: highlight-edge
+        target: graph
+        edge: [A, B]
+        color: $visited
+        duration: 0.6s
+      - action: set-text
+        target: step-label
+        value: "Step 2: Visit B (via edge A→B)"
+
+  - action: pause
+    duration: 3s
+
+  - action: set-text
+    target: narration
+    value: "B has two unvisited neighbors:"
+
+  - action: set-text
+    target: narration2
+    value: "D and E. Add them both"
+
+  - action: set-text
+    target: narration3
+    value: "to the back of the queue."
+
+  - action: pause
+    duration: 5s
+
+  - action: set-text
+    target: step-label
+    value: "Enqueue B's neighbors: D, E"
+
+  - action: enqueue
+    target: queue
+    values: [D, E]
+    duration: 1.5s
+    easing: easeOutCubic
+
+  - action: pause
+    duration: 2s
+
+  - action: set-text
+    target: narration
+    value: "Queue now: [C, D, E]"
+
+  - action: set-text
+    target: narration2
+    value: "C is at the front — it goes next."
+
+  - action: set-text
+    target: narration3
+    value: ""
+
+  - action: pause
+    duration: 6s
+
+  # ── Step 3: Visit C ──
+  - action: set-text
+    target: narration
+    value: "Step 3: Dequeue C."
+
+  - action: set-text
+    target: narration2
+    value: ""
+
+  - action: set-text
+    target: narration3
+    value: ""
+
+  - action: pause
+    duration: 2s
+
+  - action: set-text
+    target: step-label
+    value: "Step 3: Dequeue C"
+
+  - action: dequeue
+    target: queue
+    duration: 0.8s
+    easing: easeOutCubic
+
+  - action: pause
+    duration: 1.5s
+
+  - parallel:
+      - action: highlight-node
+        target: graph
+        node: C
+        color: $visited
+        duration: 0.8s
+      - action: highlight-edge
+        target: graph
+        edge: [A, C]
+        color: $visited
+        duration: 0.6s
+      - action: set-text
+        target: step-label
+        value: "Step 3: Visit C (via edge A→C)"
+
+  - action: pause
+    duration: 3s
+
+  - action: set-text
+    target: narration
+    value: "Notice: we've now visited"
+
+  - action: set-text
+    target: narration2
+    value: "ALL of A's neighbors (B and C)"
+
+  - action: set-text
+    target: narration3
+    value: "before going to the next level."
+
+  - action: pause
+    duration: 7s
+
+  - action: set-text
+    target: narration
+    value: "This is what makes BFS"
+
+  - action: set-text
+    target: narration2
+    value: "'breadth-first' — it explores"
+
+  - action: set-text
+    target: narration3
+    value: "the full width of each level."
+
+  - action: pause
+    duration: 7s
+
+  - action: set-text
+    target: narration
+    value: "C has one unvisited neighbor: F."
+
+  - action: set-text
+    target: narration2
+    value: "Add it to the queue."
+
+  - action: set-text
+    target: narration3
+    value: ""
+
+  - action: pause
+    duration: 2s
+
+  - action: set-text
+    target: step-label
+    value: "Enqueue C's neighbor: F"
+
+  - action: enqueue
+    target: queue
+    values: [F]
+    duration: 1s
+    easing: easeOutCubic
+
+  - action: pause
+    duration: 3s
+
+  # ── Step 4: Visit D ──
+  - action: set-text
+    target: narration
+    value: "Step 4: Dequeue D."
+
+  - action: set-text
+    target: narration2
+    value: "We're now on the third level"
+
+  - action: set-text
+    target: narration3
+    value: "of the graph."
+
+  - action: pause
+    duration: 5s
+
+  - action: set-text
+    target: step-label
+    value: "Step 4: Dequeue D"
+
+  - action: dequeue
+    target: queue
+    duration: 0.8s
+    easing: easeOutCubic
+
+  - action: pause
+    duration: 1.5s
+
+  - parallel:
+      - action: highlight-node
+        target: graph
+        node: D
+        color: $visited
+        duration: 0.8s
+      - action: highlight-edge
+        target: graph
+        edge: [B, D]
+        color: $visited
+        duration: 0.6s
+      - action: set-text
+        target: step-label
+        value: "Step 4: Visit D (via edge B→D)"
+
+  - action: pause
+    duration: 3s
+
+  - action: set-text
+    target: narration
+    value: "D is a leaf node — it has"
+
+  - action: set-text
+    target: narration2
+    value: "no unvisited neighbors."
+
+  - action: set-text
+    target: narration3
+    value: "Nothing to enqueue."
+
+  - action: pause
+    duration: 6s
+
+  # ── Step 5: Visit E ──
+  - action: set-text
+    target: narration
+    value: "Step 5: Dequeue E."
+
+  - action: set-text
+    target: narration2
+    value: ""
+
+  - action: set-text
+    target: narration3
+    value: ""
+
+  - action: pause
+    duration: 2s
+
+  - action: set-text
+    target: step-label
+    value: "Step 5: Dequeue E"
+
+  - action: dequeue
+    target: queue
+    duration: 0.8s
+    easing: easeOutCubic
+
+  - action: pause
+    duration: 1.5s
+
+  - parallel:
+      - action: highlight-node
+        target: graph
+        node: E
+        color: $visited
+        duration: 0.8s
+      - action: highlight-edge
+        target: graph
+        edge: [B, E]
+        color: $visited
+        duration: 0.6s
+      - action: set-text
+        target: step-label
+        value: "Step 5: Visit E (via edge B→E)"
+
+  - action: pause
+    duration: 3s
+
+  - action: set-text
+    target: narration
+    value: "E is also a leaf."
+
+  - action: set-text
+    target: narration2
+    value: "No new nodes to add."
+
+  - action: set-text
+    target: narration3
+    value: ""
+
+  - action: pause
+    duration: 5s
+
+  # ── Step 6: Visit F (final) ──
+  - action: set-text
+    target: narration
+    value: "Step 6: Dequeue F — the last"
+
+  - action: set-text
+    target: narration2
+    value: "node in our queue."
+
+  - action: set-text
+    target: narration3
+    value: ""
+
+  - action: pause
+    duration: 5s
+
+  - action: set-text
+    target: step-label
+    value: "Step 6: Dequeue F"
+
+  - action: dequeue
+    target: queue
+    duration: 0.8s
+    easing: easeOutCubic
+
+  - action: pause
+    duration: 1.5s
+
+  - parallel:
+      - action: highlight-node
+        target: graph
+        node: F
+        color: $visited
+        duration: 0.8s
+      - action: highlight-edge
+        target: graph
+        edge: [C, F]
+        color: $visited
+        duration: 0.6s
+      - action: set-text
+        target: step-label
+        value: "Step 6: Visit F (via edge C→F)"
+
+  - action: pause
+    duration: 3s
+
+  - action: set-text
+    target: narration
+    value: "F is a leaf node."
+
+  - action: set-text
+    target: narration2
+    value: "The queue is now empty."
+
+  - action: set-text
+    target: narration3
+    value: ""
+
+  - action: pause
+    duration: 6s
+
+  # ═══════════════════════════════════════════
+  # SECTION 4: RECAP & SUMMARY (4:30 - 5:30+)
+  # ═══════════════════════════════════════════
+
+  - action: set-text
+    target: step-label
+    value: "BFS Traversal Complete!"
+
+  - action: pause
+    duration: 5s
+
+  - action: set-text
+    target: narration
+    value: "Traversal order: A → B → C → D → E → F"
+
+  - action: set-text
+    target: narration2
+    value: ""
+
+  - action: set-text
+    target: narration3
+    value: ""
+
+  - action: pause
+    duration: 8s
+
+  - action: set-text
+    target: narration
+    value: "Level 0: A"
+
+  - action: set-text
+    target: narration2
+    value: "Level 1: B, C"
+
+  - action: set-text
+    target: narration3
+    value: "Level 2: D, E, F"
+
+  - action: pause
+    duration: 8s
+
+  - action: set-text
+    target: narration
+    value: "Key takeaways:"
+
+  - action: set-text
+    target: narration2
+    value: ""
+
+  - action: set-text
+    target: narration3
+    value: ""
+
+  - action: pause
+    duration: 4s
+
+  - action: set-text
+    target: narration
+    value: "1. BFS uses a QUEUE (FIFO)"
+
+  - action: set-text
+    target: narration2
+    value: "   to decide visit order."
+
+  - action: set-text
+    target: narration3
+    value: ""
+
+  - action: pause
+    duration: 7s
+
+  - action: set-text
+    target: narration
+    value: "2. It visits ALL neighbors at"
+
+  - action: set-text
+    target: narration2
+    value: "   the current depth before"
+
+  - action: set-text
+    target: narration3
+    value: "   moving to the next level."
+
+  - action: pause
+    duration: 7s
+
+  - action: set-text
+    target: narration
+    value: "3. BFS finds the SHORTEST PATH"
+
+  - action: set-text
+    target: narration2
+    value: "   in unweighted graphs."
+
+  - action: set-text
+    target: narration3
+    value: ""
+
+  - action: pause
+    duration: 7s
+
+  - action: set-text
+    target: narration
+    value: "4. Compare with DFS, which goes"
+
+  - action: set-text
+    target: narration2
+    value: "   deep first using a STACK."
+
+  - action: set-text
+    target: narration3
+    value: "   (That's a story for next time!)"
+
+  - action: pause
+    duration: 7s
+
+  # Applications
+  - action: set-text
+    target: narration
+    value: "Common BFS applications:"
+
+  - action: set-text
+    target: narration2
+    value: ""
+
+  - action: set-text
+    target: narration3
+    value: ""
+
+  - action: pause
+    duration: 4s
+
+  - action: set-text
+    target: narration
+    value: "• Shortest path in unweighted graphs"
+
+  - action: set-text
+    target: narration2
+    value: "• Level-order tree traversal"
+
+  - action: set-text
+    target: narration3
+    value: "• Web crawlers, social network analysis"
+
+  - action: pause
+    duration: 8s
+
+  # Complexity reminder
+  - action: set-text
+    target: narration
+    value: "Time Complexity: O(V + E)"
+
+  - action: set-text
+    target: narration2
+    value: "Space Complexity: O(V)"
+
+  - action: set-text
+    target: narration3
+    value: "where V = vertices, E = edges"
+
+  - action: pause
+    duration: 8s
+
+  # Final
+  - action: set-text
+    target: narration
+    value: ""
+
+  - action: set-text
+    target: narration2
+    value: ""
+
+  - action: set-text
+    target: narration3
+    value: ""
+
+  - action: set-text
+    target: step-label
+    value: ""
+
+  - action: set-text
+    target: subtitle
+    value: ""
+
+  - action: set-text
+    target: complexity-label
+    value: ""
+
+  - action: pause
+    duration: 2s
+
+  - action: set-text
+    target: title-text
+    value: "Thank you for watching!"
+
+  - action: pause
+    duration: 7s
+
+  - action: set-text
+    target: subtitle
+    value: "Next up: Depth-First Search"
+
+  - action: fade-in
+    target: subtitle
+    duration: 1s
+
+  - action: pause
+    duration: 10s
