@@ -17,9 +17,11 @@ export function* executeHighlightNode(
   const easing = resolveEasing(step.easing, defaultEasing);
   const color = step.color || '#ff6b6b';
 
+  // Keep stroke slightly brighter than fill for definition
   yield* all(
     nodeRef().fill(color, dur, easing),
-    nodeRef().stroke(color, dur, easing),
+    nodeRef().stroke('#ffffff', dur, easing),
+    nodeRef().lineWidth(4, dur, easing),
   );
 }
 
@@ -41,6 +43,6 @@ export function* executeHighlightEdge(
 
   yield* all(
     edgeRef().stroke(color, dur, easing),
-    edgeRef().lineWidth(3, dur, easing),
+    edgeRef().lineWidth(5, dur, easing),
   );
 }

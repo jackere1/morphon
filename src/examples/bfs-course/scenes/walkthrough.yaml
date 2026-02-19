@@ -1,45 +1,47 @@
 # Scene 2: BFS Step-by-Step Walkthrough
+# Uses camera zoom+pan to focus on the graph, then resets to show queue
 
 meta:
   title: "BFS Walkthrough"
   canvas:
     width: 1920
     height: 1080
-    background: "#1a1a2e"
+    background: "#0f0f23"
   palette:
-    visited: "#ff6b6b"
-    queued: "#ffd93d"
-    current: "#6bff6b"
-    highlight: "#ff9f43"
+    visited: "#e74c3c"
+    queued: "#f1c40f"
+    current: "#2ecc71"
+    highlight: "#e67e22"
 
 objects:
   - id: heading
     type: text
     content: ""
-    position: { x: 960, y: 60 }
+    position: { x: 960, y: 55 }
     style:
-      font: "bold 36px sans-serif"
+      font: "bold 40px sans-serif"
       align: center
+      color: "#ffffff"
 
   - id: step-label
     type: text
     content: ""
-    position: { x: 960, y: 120 }
+    position: { x: 960, y: 115 }
     style:
-      font: "22px sans-serif"
+      font: "24px sans-serif"
       align: center
-      color: "#a0a0cc"
+      color: "#b0b0dd"
 
-  # Graph with 6 nodes
+  # Graph — centered at (960, 480) for symmetric zoom
   - id: graph
     type: graph
     nodes:
-      - { id: A, label: A, x: 960, y: 300 }
-      - { id: B, label: B, x: 760, y: 450 }
-      - { id: C, label: C, x: 1160, y: 450 }
-      - { id: D, label: D, x: 660, y: 620 }
-      - { id: E, label: E, x: 860, y: 620 }
-      - { id: F, label: F, x: 1060, y: 620 }
+      - { id: A, label: A, x: 960, y: 310 }
+      - { id: B, label: B, x: 720, y: 480 }
+      - { id: C, label: C, x: 1200, y: 480 }
+      - { id: D, label: D, x: 600, y: 660 }
+      - { id: E, label: E, x: 840, y: 660 }
+      - { id: F, label: F, x: 1080, y: 660 }
     edges:
       - { from: A, to: B }
       - { from: A, to: C }
@@ -47,50 +49,90 @@ objects:
       - { from: B, to: E }
       - { from: C, to: F }
 
-  # Queue visualization
+  # Queue visualization at bottom
   - id: queue
     type: data-structure
     variant: queue
-    position: { x: 960, y: 850 }
+    position: { x: 960, y: 870 }
 
   - id: queue-label
     type: text
     content: ""
-    position: { x: 960, y: 790 }
+    position: { x: 960, y: 810 }
     style:
-      font: "bold 20px monospace"
+      font: "bold 22px monospace"
       align: center
-      color: "#ffd93d"
+      color: "#f1c40f"
+
+  # Traversal order tracker
+  - id: order-label
+    type: text
+    content: ""
+    position: { x: 960, y: 950 }
+    style:
+      font: "18px monospace"
+      align: center
+      color: "#7a7aa0"
 
 timeline:
-  # Show heading
+  # ── Intro: Show the graph ──
   - action: set-text
     target: heading
     value: "BFS Step-by-Step"
   - action: fade-in
     target: heading
-    duration: 0.5s
+    duration: 0.6s
 
-  # Show queue label
-  - action: set-text
-    target: queue-label
-    value: "Queue"
-  - action: fade-in
-    target: queue-label
-    duration: 0.3s
-
-  # Fade in the graph
   - action: fade-in
     target: graph
-    duration: 0.8s
+    duration: 1s
+    easing: easeOutCubic
 
   - action: pause
     duration: 1s
 
-  # ── Step 1: Start at A ──
+  # Show queue area
+  - action: set-text
+    target: queue-label
+    value: "Queue [ ]"
+  - parallel:
+      - action: fade-in
+        target: queue-label
+        duration: 0.4s
+      - action: fade-in
+        target: queue
+        duration: 0.4s
+
+  - action: set-text
+    target: order-label
+    value: "Visited: "
+  - action: fade-in
+    target: order-label
+    duration: 0.3s
+
+  - action: pause
+    duration: 1s
+
+  # Zoom into the graph center (960, 490) for step 1
+  - parallel:
+      - action: camera-zoom
+        scale: 1.25
+        duration: 0.8s
+        easing: easeInOutCubic
+      - action: camera-pan
+        position: { x: 960, y: 490 }
+        duration: 0.8s
+        easing: easeInOutCubic
+
+  - action: pause
+    duration: 0.5s
+
+  # ═══════════════════════════════════════════
+  # STEP 1: Start at A
+  # ═══════════════════════════════════════════
   - action: set-text
     target: step-label
-    value: "Step 1: Start at node A — mark as visited, add to queue"
+    value: "Step 1: Start at node A"
   - action: fade-in
     target: step-label
     duration: 0.3s
@@ -99,20 +141,34 @@ timeline:
     target: graph
     node: A
     color: "$current"
+    duration: 0.6s
+    easing: easeOutBack
+
+  - action: pause
     duration: 0.5s
+
+  # Zoom back out to show queue
+  - action: camera-reset
+    duration: 0.6s
 
   - action: enqueue
     target: queue
     values: ["A"]
     duration: 0.4s
 
+  - action: set-text
+    target: queue-label
+    value: "Queue [ A ]"
+
   - action: pause
     duration: 2s
 
-  # ── Step 2: Dequeue A, visit neighbors B, C ──
+  # ═══════════════════════════════════════════
+  # STEP 2: Dequeue A → visit neighbors B, C
+  # ═══════════════════════════════════════════
   - action: set-text
     target: step-label
-    value: "Step 2: Dequeue A — visit neighbors B and C"
+    value: "Step 2: Dequeue A — explore neighbors B and C"
 
   - action: dequeue
     target: queue
@@ -122,49 +178,74 @@ timeline:
     target: graph
     node: A
     color: "$visited"
-    duration: 0.4s
-
-  - action: pause
     duration: 0.5s
 
-  # Highlight edges A→B and A→C
+  - action: set-text
+    target: order-label
+    value: "Visited: A"
+
+  - action: pause
+    duration: 0.8s
+
+  # Zoom to show edges from A — pan to A's area
+  - parallel:
+      - action: camera-zoom
+        scale: 1.2
+        duration: 0.5s
+      - action: camera-pan
+        position: { x: 960, y: 420 }
+        duration: 0.5s
+
+  # Highlight edges from A
   - parallel:
       - action: highlight-edge
         target: graph
         edge: [A, B]
         color: "$highlight"
-        duration: 0.5s
+        duration: 0.6s
       - action: highlight-edge
         target: graph
         edge: [A, C]
         color: "$highlight"
-        duration: 0.5s
+        duration: 0.6s
 
-  # Queue B and C
+  - action: pause
+    duration: 0.5s
+
+  # Mark B and C as queued
   - parallel:
       - action: highlight-node
         target: graph
         node: B
         color: "$queued"
-        duration: 0.4s
+        duration: 0.5s
       - action: highlight-node
         target: graph
         node: C
         color: "$queued"
-        duration: 0.4s
+        duration: 0.5s
+
+  - action: camera-reset
+    duration: 0.5s
 
   - action: enqueue
     target: queue
     values: ["B", "C"]
-    duration: 0.4s
+    duration: 0.5s
+
+  - action: set-text
+    target: queue-label
+    value: "Queue [ B, C ]"
 
   - action: pause
     duration: 2s
 
-  # ── Step 3: Dequeue B, visit neighbors D, E ──
+  # ═══════════════════════════════════════════
+  # STEP 3: Dequeue B → visit neighbors D, E
+  # ═══════════════════════════════════════════
   - action: set-text
     target: step-label
-    value: "Step 3: Dequeue B — visit neighbors D and E"
+    value: "Step 3: Dequeue B — explore neighbors D and E"
 
   - action: dequeue
     target: queue
@@ -174,47 +255,76 @@ timeline:
     target: graph
     node: B
     color: "$visited"
-    duration: 0.4s
+    duration: 0.5s
+
+  - action: set-text
+    target: order-label
+    value: "Visited: A → B"
+
+  - action: set-text
+    target: queue-label
+    value: "Queue [ C ]"
 
   - action: pause
-    duration: 0.5s
+    duration: 0.8s
+
+  # Zoom toward B's area (left side of graph)
+  - parallel:
+      - action: camera-zoom
+        scale: 1.2
+        duration: 0.5s
+      - action: camera-pan
+        position: { x: 760, y: 560 }
+        duration: 0.5s
 
   - parallel:
       - action: highlight-edge
         target: graph
         edge: [B, D]
         color: "$highlight"
-        duration: 0.5s
+        duration: 0.6s
       - action: highlight-edge
         target: graph
         edge: [B, E]
         color: "$highlight"
-        duration: 0.5s
+        duration: 0.6s
+
+  - action: pause
+    duration: 0.5s
 
   - parallel:
       - action: highlight-node
         target: graph
         node: D
         color: "$queued"
-        duration: 0.4s
+        duration: 0.5s
       - action: highlight-node
         target: graph
         node: E
         color: "$queued"
-        duration: 0.4s
+        duration: 0.5s
+
+  - action: camera-reset
+    duration: 0.5s
 
   - action: enqueue
     target: queue
     values: ["D", "E"]
-    duration: 0.4s
+    duration: 0.5s
+
+  - action: set-text
+    target: queue-label
+    value: "Queue [ C, D, E ]"
 
   - action: pause
     duration: 2s
 
-  # ── Step 4: Dequeue C, visit neighbor F ──
+  # ═══════════════════════════════════════════
+  # STEP 4: Dequeue C → visit neighbor F
+  # ═══════════════════════════════════════════
   - action: set-text
     target: step-label
-    value: "Step 4: Dequeue C — visit neighbor F"
+    value: "Step 4: Dequeue C — explore neighbor F"
 
   - action: dequeue
     target: queue
@@ -224,29 +334,61 @@ timeline:
     target: graph
     node: C
     color: "$visited"
-    duration: 0.4s
+    duration: 0.5s
+
+  - action: set-text
+    target: order-label
+    value: "Visited: A → B → C"
+
+  - action: set-text
+    target: queue-label
+    value: "Queue [ D, E ]"
+
+  - action: pause
+    duration: 0.8s
+
+  # Zoom toward C's area (right side of graph)
+  - parallel:
+      - action: camera-zoom
+        scale: 1.2
+        duration: 0.5s
+      - action: camera-pan
+        position: { x: 1140, y: 560 }
+        duration: 0.5s
 
   - action: highlight-edge
     target: graph
     edge: [C, F]
     color: "$highlight"
-    duration: 0.5s
+    duration: 0.6s
+
+  - action: pause
+    duration: 0.3s
 
   - action: highlight-node
     target: graph
     node: F
     color: "$queued"
-    duration: 0.4s
+    duration: 0.5s
+
+  - action: camera-reset
+    duration: 0.5s
 
   - action: enqueue
     target: queue
     values: ["F"]
     duration: 0.4s
 
+  - action: set-text
+    target: queue-label
+    value: "Queue [ D, E, F ]"
+
   - action: pause
     duration: 2s
 
-  # ── Step 5: Dequeue D (no unvisited neighbors) ──
+  # ═══════════════════════════════════════════
+  # STEP 5: Dequeue D — leaf node
+  # ═══════════════════════════════════════════
   - action: set-text
     target: step-label
     value: "Step 5: Dequeue D — no unvisited neighbors"
@@ -259,12 +401,22 @@ timeline:
     target: graph
     node: D
     color: "$visited"
-    duration: 0.4s
+    duration: 0.5s
+
+  - action: set-text
+    target: order-label
+    value: "Visited: A → B → C → D"
+
+  - action: set-text
+    target: queue-label
+    value: "Queue [ E, F ]"
 
   - action: pause
     duration: 1.5s
 
-  # ── Step 6: Dequeue E (no unvisited neighbors) ──
+  # ═══════════════════════════════════════════
+  # STEP 6: Dequeue E — leaf node
+  # ═══════════════════════════════════════════
   - action: set-text
     target: step-label
     value: "Step 6: Dequeue E — no unvisited neighbors"
@@ -277,15 +429,25 @@ timeline:
     target: graph
     node: E
     color: "$visited"
-    duration: 0.4s
+    duration: 0.5s
+
+  - action: set-text
+    target: order-label
+    value: "Visited: A → B → C → D → E"
+
+  - action: set-text
+    target: queue-label
+    value: "Queue [ F ]"
 
   - action: pause
     duration: 1.5s
 
-  # ── Step 7: Dequeue F (no unvisited neighbors) ──
+  # ═══════════════════════════════════════════
+  # STEP 7: Dequeue F — last node, BFS done
+  # ═══════════════════════════════════════════
   - action: set-text
     target: step-label
-    value: "Step 7: Dequeue F — queue is now empty. BFS complete!"
+    value: "Step 7: Dequeue F — queue empty, BFS complete!"
 
   - action: dequeue
     target: queue
@@ -295,15 +457,39 @@ timeline:
     target: graph
     node: F
     color: "$visited"
-    duration: 0.4s
+    duration: 0.5s
+
+  - action: set-text
+    target: order-label
+    value: "Visited: A → B → C → D → E → F"
+
+  - action: set-text
+    target: queue-label
+    value: "Queue [ ]  — empty!"
+
+  - action: pause
+    duration: 1s
+
+  # Final zoom to admire the fully traversed graph
+  - parallel:
+      - action: camera-zoom
+        scale: 1.15
+        duration: 0.8s
+        easing: easeInOutCubic
+      - action: camera-pan
+        position: { x: 960, y: 490 }
+        duration: 0.8s
+        easing: easeInOutCubic
 
   - action: pause
     duration: 2s
 
-  # Final message
+  - action: camera-reset
+    duration: 0.6s
+
   - action: set-text
     target: step-label
-    value: "All nodes visited! Traversal order: A → B → C → D → E → F"
+    value: "All nodes visited in level order — that's BFS!"
 
   - action: pause
     duration: 3s

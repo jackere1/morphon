@@ -1,5 +1,5 @@
 import {type ThreadGenerator} from '@revideo/core';
-import type {View2D} from '@revideo/2d';
+import type {Node} from '@revideo/2d';
 import type {ActionStep, ManifestMeta} from '../types';
 import type {SceneObjectEntry} from '../objects';
 import {executeFadeIn, executeFadeOut} from './fade';
@@ -13,12 +13,12 @@ import {executeSetStyle} from './style';
 
 /**
  * Dispatches a single action step to the appropriate executor.
- * Returns a generator that can be yielded from the scene.
+ * The `camera` param is a Node wrapper used for camera operations (zoom/pan/reset).
  */
 export function* executeAction(
   step: ActionStep,
   objects: Map<string, SceneObjectEntry>,
-  view: View2D,
+  camera: Node,
   meta: ManifestMeta,
 ): ThreadGenerator {
   const defaultEasing = meta.easing;
@@ -59,13 +59,13 @@ export function* executeAction(
       if (entry) yield* executeMoveNode(step, entry, meta, defaultEasing);
       break;
     case 'camera-zoom':
-      yield* executeCameraZoom(step, view, meta, defaultEasing);
+      yield* executeCameraZoom(step, camera, meta, defaultEasing);
       break;
     case 'camera-pan':
-      yield* executeCameraPan(step, view, meta, defaultEasing);
+      yield* executeCameraPan(step, camera, meta, defaultEasing);
       break;
     case 'camera-reset':
-      yield* executeCameraReset(step, view, defaultEasing);
+      yield* executeCameraReset(step, camera, defaultEasing);
       break;
     case 'set-style':
       if (entry) yield* executeSetStyle(step, entry, defaultEasing);

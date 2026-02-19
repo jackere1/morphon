@@ -5,7 +5,7 @@ meta:
   canvas:
     width: 1920
     height: 1080
-    background: "#1a1a2e"
+    background: "#0f0f23"
 
 objects:
   - id: title
@@ -13,68 +13,72 @@ objects:
     content: ""
     position: { x: 960, y: 150 }
     style:
-      font: "bold 44px sans-serif"
+      font: "bold 48px sans-serif"
       align: center
+      color: "#ffffff"
 
   - id: point1-title
     type: text
     content: ""
-    position: { x: 960, y: 300 }
+    position: { x: 960, y: 310 }
     style:
-      font: "bold 26px sans-serif"
+      font: "bold 28px sans-serif"
       align: center
-      color: "#6bff6b"
+      color: "#2ecc71"
 
   - id: point1-desc
     type: text
     content: ""
-    position: { x: 960, y: 350 }
+    position: { x: 960, y: 365 }
     style:
-      font: "20px sans-serif"
+      font: "22px sans-serif"
       align: center
+      color: "#c0c0e0"
 
   - id: point2-title
     type: text
     content: ""
-    position: { x: 960, y: 450 }
+    position: { x: 960, y: 470 }
     style:
-      font: "bold 26px sans-serif"
+      font: "bold 28px sans-serif"
       align: center
-      color: "#ffd93d"
+      color: "#3498db"
 
   - id: point2-desc
     type: text
     content: ""
-    position: { x: 960, y: 500 }
+    position: { x: 960, y: 525 }
     style:
-      font: "20px sans-serif"
+      font: "22px sans-serif"
       align: center
+      color: "#c0c0e0"
 
   - id: point3-title
     type: text
     content: ""
-    position: { x: 960, y: 600 }
+    position: { x: 960, y: 630 }
     style:
-      font: "bold 26px sans-serif"
+      font: "bold 28px sans-serif"
       align: center
-      color: "#ff6b6b"
+      color: "#e74c3c"
 
   - id: point3-desc
     type: text
     content: ""
-    position: { x: 960, y: 650 }
+    position: { x: 960, y: 685 }
     style:
-      font: "20px sans-serif"
+      font: "22px sans-serif"
       align: center
+      color: "#c0c0e0"
 
   - id: complexity
     type: text
     content: ""
-    position: { x: 960, y: 800 }
+    position: { x: 960, y: 830 }
     style:
-      font: "bold 28px monospace"
+      font: "bold 30px monospace"
       align: center
-      color: "#ff9f43"
+      color: "#e67e22"
 
 timeline:
   - action: set-text
@@ -82,25 +86,29 @@ timeline:
     value: "Key Takeaways"
   - action: fade-in
     target: title
-    duration: 0.6s
+    duration: 0.7s
+    easing: easeOutCubic
 
   - action: pause
-    duration: 1s
+    duration: 1.2s
 
-  # Point 1: Queue
+  # Point 1: Queue — staggered with desc
   - action: set-text
     target: point1-title
     value: "1. BFS uses a Queue"
+  - action: fade-in
+    target: point1-title
+    duration: 0.5s
+
+  - action: pause
+    duration: 0.4s
+
   - action: set-text
     target: point1-desc
     value: "FIFO ordering ensures level-by-level exploration"
-  - parallel:
-      - action: fade-in
-        target: point1-title
-        duration: 0.5s
-      - action: fade-in
-        target: point1-desc
-        duration: 0.5s
+  - action: fade-in
+    target: point1-desc
+    duration: 0.4s
 
   - action: pause
     duration: 2s
@@ -109,16 +117,19 @@ timeline:
   - action: set-text
     target: point2-title
     value: "2. Guarantees Shortest Path"
+  - action: fade-in
+    target: point2-title
+    duration: 0.5s
+
+  - action: pause
+    duration: 0.4s
+
   - action: set-text
     target: point2-desc
-    value: "In unweighted graphs, BFS always finds the minimum-hop path"
-  - parallel:
-      - action: fade-in
-        target: point2-title
-        duration: 0.5s
-      - action: fade-in
-        target: point2-desc
-        duration: 0.5s
+    value: "In unweighted graphs, BFS finds the minimum-hop path"
+  - action: fade-in
+    target: point2-desc
+    duration: 0.4s
 
   - action: pause
     duration: 2s
@@ -127,27 +138,31 @@ timeline:
   - action: set-text
     target: point3-title
     value: "3. Real-World Applications"
+  - action: fade-in
+    target: point3-title
+    duration: 0.5s
+
+  - action: pause
+    duration: 0.4s
+
   - action: set-text
     target: point3-desc
-    value: "Social networks, web crawlers, GPS navigation, puzzle solving"
-  - parallel:
-      - action: fade-in
-        target: point3-title
-        duration: 0.5s
-      - action: fade-in
-        target: point3-desc
-        duration: 0.5s
+    value: "Social networks, web crawlers, GPS, puzzle solving"
+  - action: fade-in
+    target: point3-desc
+    duration: 0.4s
 
   - action: pause
     duration: 2s
 
-  # Complexity
+  # Complexity — final emphasis
   - action: set-text
     target: complexity
     value: "Time: O(V + E)    Space: O(V)"
   - action: fade-in
     target: complexity
     duration: 0.6s
+    easing: easeOutBack
 
   - action: pause
     duration: 3s

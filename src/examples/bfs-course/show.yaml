@@ -7,30 +7,33 @@ meta:
   canvas:
     width: 1920
     height: 1080
-    background: "#1a1a2e"
+    background: "#0f0f23"
   defaults:
     graph:
-      nodeRadius: 30
-      nodeColor: "#4a4a6a"
-      nodeStroke: "#7c7caa"
-      edgeColor: "#3a3a5a"
+      nodeRadius: 40
+      nodeColor: "#2d4a7a"
+      nodeStroke: "#5b8fd9"
+      edgeColor: "#4a6a9a"
+      edgeWidth: 4
+      strokeWidth: 3
       labelColor: "#ffffff"
-      labelFont: "16px monospace"
+      labelFont: "24px monospace"
     data-structure:
-      cellWidth: 60
-      cellHeight: 40
-      fillColor: "#2a2a4a"
-      borderColor: "#5a5a8a"
+      cellWidth: 70
+      cellHeight: 45
+      fillColor: "#1a2a4a"
+      borderColor: "#5b8fd9"
       textColor: "#ffffff"
     text:
-      font: "20px sans-serif"
-      color: "#e0e0ff"
+      font: "22px sans-serif"
+      color: "#d0d0ee"
   palette:
-    visited: "#ff6b6b"
-    queued: "#ffd93d"
-    current: "#6bff6b"
-    highlight: "#ff9f43"
+    visited: "#e74c3c"
+    queued: "#f1c40f"
+    current: "#2ecc71"
+    highlight: "#e67e22"
     dim: "#3a3a5a"
+    accent: "#3498db"
   easing: easeInOutCubic
 
 scenes:

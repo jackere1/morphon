@@ -5,70 +5,76 @@ meta:
   canvas:
     width: 1920
     height: 1080
-    background: "#1a1a2e"
+    background: "#0f0f23"
 
 objects:
   - id: title
     type: text
     content: ""
-    position: { x: 960, y: 300 }
+    position: { x: 960, y: 320 }
     style:
-      font: "bold 56px sans-serif"
+      font: "bold 64px sans-serif"
       align: center
+      color: "#ffffff"
 
   - id: subtitle
     type: text
     content: ""
-    position: { x: 960, y: 400 }
+    position: { x: 960, y: 420 }
     style:
       font: "28px sans-serif"
       align: center
-      color: "#a0a0cc"
+      color: "#8a8abb"
 
   - id: description
     type: text
     content: ""
-    position: { x: 960, y: 550 }
+    position: { x: 960, y: 540 }
     style:
-      font: "22px sans-serif"
+      font: "24px sans-serif"
       align: center
       color: "#c0c0e0"
 
   - id: bullet1
     type: text
     content: ""
-    position: { x: 960, y: 650 }
+    position: { x: 960, y: 660 }
     style:
-      font: "20px sans-serif"
+      font: "22px sans-serif"
       align: center
+      color: "#2ecc71"
 
   - id: bullet2
     type: text
     content: ""
-    position: { x: 960, y: 700 }
+    position: { x: 960, y: 720 }
     style:
-      font: "20px sans-serif"
+      font: "22px sans-serif"
       align: center
+      color: "#3498db"
 
   - id: bullet3
     type: text
     content: ""
-    position: { x: 960, y: 750 }
+    position: { x: 960, y: 780 }
     style:
-      font: "20px sans-serif"
+      font: "22px monospace"
       align: center
+      color: "#e67e22"
 
 timeline:
-  # Title appears
+  # Title appears with zoom effect
   - action: set-text
     target: title
     value: "Breadth-First Search"
+
   - action: fade-in
     target: title
-    duration: 0.8s
+    duration: 1s
+    easing: easeOutCubic
 
   - action: pause
-    duration: 0.5s
+    duration: 0.8s
 
   # Subtitle
   - action: set-text
@@ -79,40 +85,46 @@ timeline:
     duration: 0.6s
 
   - action: pause
-    duration: 1.5s
+    duration: 2s
 
   # Description
   - action: set-text
     target: description
-    value: "BFS explores a graph level by level, visiting all neighbors before moving deeper."
+    value: "BFS explores a graph level by level, visiting all neighbors before going deeper."
   - action: fade-in
     target: description
-    duration: 0.5s
+    duration: 0.6s
 
   - action: pause
-    duration: 2s
+    duration: 2.5s
 
-  # Key properties
+  # Key properties — staggered reveal
   - action: set-text
     target: bullet1
     value: "Uses a Queue (FIFO) data structure"
+  - action: fade-in
+    target: bullet1
+    duration: 0.5s
+
+  - action: pause
+    duration: 0.8s
+
   - action: set-text
     target: bullet2
     value: "Finds shortest path in unweighted graphs"
+  - action: fade-in
+    target: bullet2
+    duration: 0.5s
+
+  - action: pause
+    duration: 0.8s
+
   - action: set-text
     target: bullet3
-    value: "Time complexity: O(V + E)"
-
-  - parallel:
-      - action: fade-in
-        target: bullet1
-        duration: 0.4s
-      - action: fade-in
-        target: bullet2
-        duration: 0.4s
-      - action: fade-in
-        target: bullet3
-        duration: 0.4s
+    value: "Time: O(V + E)   Space: O(V)"
+  - action: fade-in
+    target: bullet3
+    duration: 0.5s
 
   - action: pause
     duration: 3s
@@ -121,22 +133,22 @@ timeline:
   - parallel:
       - action: fade-out
         target: title
-        duration: 0.6s
+        duration: 0.8s
       - action: fade-out
         target: subtitle
-        duration: 0.6s
+        duration: 0.8s
       - action: fade-out
         target: description
-        duration: 0.6s
+        duration: 0.8s
       - action: fade-out
         target: bullet1
-        duration: 0.6s
+        duration: 0.8s
       - action: fade-out
         target: bullet2
-        duration: 0.6s
+        duration: 0.8s
       - action: fade-out
         target: bullet3
-        duration: 0.6s
+        duration: 0.8s
 
   - action: pause
     duration: 0.3s

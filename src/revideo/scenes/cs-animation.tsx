@@ -26,18 +26,18 @@ export default makeScene2D('cs-animation', function* (view) {
 function* executeTimeline(
   timeline: any[],
   objects: Map<string, any>,
-  view: any,
+  camera: Node,
   meta: any,
 ) {
   for (const entry of timeline) {
     if (isParallelBlock(entry)) {
       yield* all(
         ...entry.parallel.map((step: ActionStep) =>
-          executeAction(step, objects, view, meta),
+          executeAction(step, objects, camera, meta),
         ),
       );
     } else {
-      yield* executeAction(entry as ActionStep, objects, view, meta);
+      yield* executeAction(entry as ActionStep, objects, camera, meta);
     }
   }
 }
@@ -45,13 +45,22 @@ function* executeTimeline(
 /** Renders a single scene manifest. */
 function* renderSingleScene(view: any, manifest: Manifest) {
   view.fill(manifest.meta.canvas.background || '#1a1a2e');
-  const objects = createSceneObjects(view, manifest.objects, manifest.meta);
-  yield* executeTimeline(manifest.timeline, objects, view, manifest.meta);
+
+  // Camera node wraps all objects — zoom/pan applies here, not on view
+  const camera = createRef<Node>();
+  view.add(<Node ref={camera} />);
+
+  const objects = createSceneObjects(camera() as any, manifest.objects, manifest.meta);
+  yield* executeTimeline(manifest.timeline, objects, camera(), manifest.meta);
 }
 
 /** Renders a multi-scene show with transitions. */
 function* renderShow(view: any, show: ResolvedShow) {
   view.fill(show.meta.canvas.background || '#1a1a2e');
+
+  // Camera node wraps all scene containers
+  const camera = createRef<Node>();
+  view.add(<Node ref={camera} />);
 
   let previousContainer: Node | null = null;
 
@@ -59,9 +68,9 @@ function* renderShow(view: any, show: ResolvedShow) {
     const scene = show.scenes[i];
     const manifest = scene.manifest;
 
-    // Create a container for this scene
+    // Create a container for this scene inside the camera
     const container = createRef<Node>();
-    view.add(<Node ref={container} opacity={0} />);
+    camera().add(<Node ref={container} opacity={0} />);
 
     // Create scene objects inside the container
     const objects = createSceneObjects(
@@ -83,8 +92,12 @@ function* renderShow(view: any, show: ResolvedShow) {
       container().opacity(1);
     }
 
-    // Execute this scene's timeline
-    yield* executeTimeline(manifest.timeline, objects, view, manifest.meta);
+    // Reset camera before each scene (clean slate)
+    camera().scale(1);
+    camera().position([0, 0]);
+
+    // Execute this scene's timeline — camera ops target the camera node
+    yield* executeTimeline(manifest.timeline, objects, camera(), manifest.meta);
 
     previousContainer = container();
   }

@@ -24,6 +24,8 @@ export function buildGraph(
   const nodeColor = style.nodeColor || '#4a4a6a';
   const nodeStroke = style.nodeStroke || '#7c7caa';
   const edgeColor = style.edgeColor || '#3a3a5a';
+  const edgeWidth = style.edgeWidth || 3;
+  const strokeWidth = style.strokeWidth || 3;
   const labelColor = style.labelColor || '#ffffff';
   const labelFontSize = parseFontSize(style.labelFont);
 
@@ -63,7 +65,7 @@ export function buildGraph(
               [to.x, to.y],
             ]}
             stroke={edgeColor}
-            lineWidth={2}
+            lineWidth={edgeWidth}
           />
         );
       })}
@@ -72,28 +74,25 @@ export function buildGraph(
       {obj.nodes.map((n) => {
         const pos = nodePositions.get(n.id)!;
         return (
-          <>
+          <Node x={pos.x} y={pos.y}>
             <Circle
               ref={nodeRefs.get(n.id)!}
-              x={pos.x}
-              y={pos.y}
               width={nodeRadius * 2}
               height={nodeRadius * 2}
               fill={nodeColor}
               stroke={nodeStroke}
-              lineWidth={2}
+              lineWidth={strokeWidth}
             />
             <Txt
               ref={labelRefs.get(n.id)!}
-              x={pos.x}
-              y={pos.y}
               text={n.label || n.id}
               fill={labelColor}
               fontSize={labelFontSize}
+              fontWeight={700}
               fontFamily={'monospace'}
               textAlign={'center'}
             />
-          </>
+          </Node>
         );
       })}
     </Node>
@@ -111,7 +110,7 @@ export function buildGraph(
 }
 
 function parseFontSize(font?: string): number {
-  if (!font) return 16;
+  if (!font) return 20;
   const match = font.match(/(\d+)px/);
-  return match ? parseInt(match[1]) : 16;
+  return match ? parseInt(match[1]) : 20;
 }
