@@ -1,0 +1,873 @@
+# DFS Traversal — Depth-First Search with Stack Visualization
+# Shows the contrast with BFS: DFS goes deep before wide, using a stack instead of queue
+
+meta:
+  title: "Depth-First Search Traversal"
+  topic: "dfs-traversal"
+  canvas:
+    width: 1920
+    height: 1080
+    background: "#0f0f23"
+  defaults:
+    graph:
+      nodeRadius: 38
+      nodeColor: "#2a3a5a"
+      nodeStroke: "#4a7aaa"
+      edgeColor: "#2a3a5a"
+      edgeWidth: 3
+      strokeWidth: 3
+      labelColor: "#ffffff"
+      labelFont: "20px monospace"
+    data-structure:
+      cellWidth: 80
+      cellHeight: 50
+      fillColor: "#1a2a4a"
+      borderColor: "#4a8ad9"
+      textColor: "#ffffff"
+  palette:
+    visited: "#e74c3c"
+    current: "#2ecc71"
+    frontier: "#f39c12"
+    backtrack: "#9b59b6"
+  easing: easeInOutCubic
+
+objects:
+  # ── Title & Text ──
+  - id: title
+    type: text
+    content: ""
+    position: {x: 960, y: 80}
+    style: {font: "bold 46px sans-serif", align: center, color: "#ffffff"}
+
+  - id: subtitle
+    type: text
+    content: ""
+    position: {x: 960, y: 140}
+    style: {font: "22px sans-serif", align: center, color: "#7a7aaa"}
+
+  - id: narration
+    type: text
+    content: ""
+    position: {x: 1400, y: 320}
+    style: {font: "20px sans-serif", align: center, color: "#ccccee"}
+
+  - id: narration2
+    type: text
+    content: ""
+    position: {x: 1400, y: 365}
+    style: {font: "20px sans-serif", align: center, color: "#ccccee"}
+
+  - id: narration3
+    type: text
+    content: ""
+    position: {x: 1400, y: 410}
+    style: {font: "20px sans-serif", align: center, color: "#ccccee"}
+
+  - id: step-label
+    type: text
+    content: ""
+    position: {x: 960, y: 980}
+    style: {font: "22px sans-serif", align: center, color: "#aaaacc"}
+
+  - id: complexity
+    type: text
+    content: ""
+    position: {x: 1400, y: 500}
+    style: {font: "bold 18px monospace", align: center, color: "#f39c12"}
+
+  - id: order-label
+    type: text
+    content: ""
+    position: {x: 1400, y: 560}
+    style: {font: "18px monospace", align: center, color: "#2ecc71"}
+
+  # ── Graph (7 nodes, richer structure) ──
+  - id: graph
+    type: graph
+    nodes:
+      - {id: A, label: "A", x: 400, y: 280}
+      - {id: B, label: "B", x: 250, y: 440}
+      - {id: C, label: "C", x: 550, y: 440}
+      - {id: D, label: "D", x: 150, y: 620}
+      - {id: E, label: "E", x: 350, y: 620}
+      - {id: F, label: "F", x: 450, y: 620}
+      - {id: G, label: "G", x: 650, y: 620}
+    edges:
+      - {from: A, to: B}
+      - {from: A, to: C}
+      - {from: B, to: D}
+      - {from: B, to: E}
+      - {from: C, to: F}
+      - {from: C, to: G}
+
+  # ── Stack ──
+  - id: stack
+    type: data-structure
+    variant: stack
+    position: {x: 400, y: 860}
+
+  # ── Legend ──
+  - id: legend-current
+    type: text
+    content: ""
+    position: {x: 1400, y: 700}
+    style: {font: "16px sans-serif", align: center, color: "#2ecc71"}
+
+  - id: legend-visited
+    type: text
+    content: ""
+    position: {x: 1400, y: 730}
+    style: {font: "16px sans-serif", align: center, color: "#e74c3c"}
+
+  - id: legend-backtrack
+    type: text
+    content: ""
+    position: {x: 1400, y: 760}
+    style: {font: "16px sans-serif", align: center, color: "#9b59b6"}
+
+timeline:
+  # ═══════════════════════════════════════════
+  # SECTION 1: INTRO (~0:00 - 0:50)
+  # ═══════════════════════════════════════════
+
+  - action: fade-in
+    target: title
+    duration: 0.01s
+  - action: set-text
+    target: title
+    value: "Depth-First Search"
+  - action: fade-in
+    target: title
+    duration: 1.5s
+    easing: easeOutCubic
+  - action: pause
+    duration: 3s
+
+  - action: fade-in
+    target: subtitle
+    duration: 0.01s
+  - action: set-text
+    target: subtitle
+    value: "Exploring graphs by going as deep as possible first"
+  - action: fade-in
+    target: subtitle
+    duration: 1s
+  - action: pause
+    duration: 5s
+
+  - action: fade-in
+    target: narration
+    duration: 0.01s
+  - action: fade-in
+    target: narration2
+    duration: 0.01s
+  - action: fade-in
+    target: narration3
+    duration: 0.01s
+
+  - action: set-text
+    target: narration
+    value: "DFS is the counterpart to BFS."
+  - action: set-text
+    target: narration2
+    value: "Instead of exploring level by level,"
+  - action: set-text
+    target: narration3
+    value: "it dives deep down one path first."
+  - action: fade-in
+    target: narration
+    duration: 0.8s
+  - action: pause
+    duration: 6s
+
+  - action: set-text
+    target: narration
+    value: "DFS uses a STACK instead of a queue."
+  - action: set-text
+    target: narration2
+    value: "Last In, First Out (LIFO) means"
+  - action: set-text
+    target: narration3
+    value: "the most recently added node is visited next."
+  - action: pause
+    duration: 7s
+
+  - action: fade-in
+    target: complexity
+    duration: 0.01s
+  - action: set-text
+    target: complexity
+    value: "Time: O(V + E)  |  Space: O(V)"
+  - action: fade-in
+    target: complexity
+    duration: 0.8s
+  - action: pause
+    duration: 5s
+
+  # ═══════════════════════════════════════════
+  # SECTION 2: SHOW GRAPH & STACK (~0:50 - 1:30)
+  # ═══════════════════════════════════════════
+
+  - action: set-text
+    target: narration
+    value: "Here's our graph with 7 nodes"
+  - action: set-text
+    target: narration2
+    value: "arranged in a binary tree shape."
+  - action: set-text
+    target: narration3
+    value: ""
+  - action: pause
+    duration: 2s
+
+  - action: fade-in
+    target: graph
+    duration: 2s
+    easing: easeOutCubic
+  - action: pause
+    duration: 5s
+
+  - action: set-text
+    target: narration
+    value: "Below is our stack. Items are"
+  - action: set-text
+    target: narration2
+    value: "pushed on top and popped from top."
+  - action: set-text
+    target: narration3
+    value: ""
+
+  - action: fade-in
+    target: stack
+    duration: 1s
+  - action: pause
+    duration: 4s
+
+  # Legend
+  - action: fade-in
+    target: legend-current
+    duration: 0.01s
+  - action: fade-in
+    target: legend-visited
+    duration: 0.01s
+  - action: fade-in
+    target: legend-backtrack
+    duration: 0.01s
+
+  - parallel:
+      - action: set-text
+        target: legend-current
+        value: "● Currently visiting"
+      - action: set-text
+        target: legend-visited
+        value: "● Visited (done)"
+      - action: set-text
+        target: legend-backtrack
+        value: "● Backtracking"
+
+  - parallel:
+      - action: fade-in
+        target: legend-current
+        duration: 0.5s
+      - action: fade-in
+        target: legend-visited
+        duration: 0.5s
+      - action: fade-in
+        target: legend-backtrack
+        duration: 0.5s
+
+  - action: pause
+    duration: 3s
+
+  - action: fade-in
+    target: step-label
+    duration: 0.01s
+  - action: fade-in
+    target: order-label
+    duration: 0.01s
+
+  # ═══════════════════════════════════════════
+  # SECTION 3: DFS WALKTHROUGH (~1:30 - 4:30)
+  # ═══════════════════════════════════════════
+
+  # ── Step 1: Start at A ──
+  - action: set-text
+    target: narration
+    value: "Step 1: Start at node A."
+  - action: set-text
+    target: narration2
+    value: "Push A onto the stack."
+  - action: set-text
+    target: narration3
+    value: ""
+  - action: pause
+    duration: 3s
+
+  - action: set-text
+    target: step-label
+    value: "Step 1: Push A → visit A"
+
+  - action: push
+    target: stack
+    values: ["A"]
+    duration: 0.6s
+
+  - action: pause
+    duration: 1s
+
+  - parallel:
+      - action: highlight-node
+        target: graph
+        node: A
+        color: $current
+        duration: 0.8s
+      - action: set-text
+        target: order-label
+        value: "Visit order: A"
+  - action: pause
+    duration: 3s
+
+  # Pop A, push its neighbors (C first, then B — so B is on top)
+  - action: set-text
+    target: narration
+    value: "Pop A from the stack."
+  - action: set-text
+    target: narration2
+    value: "Push A's neighbors: C then B."
+  - action: set-text
+    target: narration3
+    value: "B is on top, so B is visited next."
+  - action: pause
+    duration: 2s
+
+  - action: pop
+    target: stack
+    duration: 0.4s
+  - action: pause
+    duration: 0.3s
+
+  - action: highlight-node
+    target: graph
+    node: A
+    color: $visited
+    duration: 0.5s
+
+  - action: push
+    target: stack
+    values: ["C", "B"]
+    duration: 0.8s
+
+  - action: set-text
+    target: step-label
+    value: "Stack: [C, B] — B is on top"
+  - action: pause
+    duration: 5s
+
+  # ── Step 2: Visit B ──
+  - action: set-text
+    target: narration
+    value: "Step 2: Pop B from the stack."
+  - action: set-text
+    target: narration2
+    value: "Visit B, then push B's neighbors."
+  - action: set-text
+    target: narration3
+    value: ""
+  - action: pause
+    duration: 3s
+
+  - action: set-text
+    target: step-label
+    value: "Step 2: Pop B → visit B"
+
+  - action: pop
+    target: stack
+    duration: 0.4s
+  - action: pause
+    duration: 0.5s
+
+  - parallel:
+      - action: highlight-node
+        target: graph
+        node: B
+        color: $current
+        duration: 0.8s
+      - action: highlight-edge
+        target: graph
+        edge: [A, B]
+        color: $visited
+        duration: 0.6s
+      - action: set-text
+        target: order-label
+        value: "Visit order: A → B"
+  - action: pause
+    duration: 3s
+
+  - action: set-text
+    target: narration
+    value: "Push B's neighbors: E then D."
+  - action: set-text
+    target: narration2
+    value: "D is on top → D is next."
+  - action: set-text
+    target: narration3
+    value: "Notice: we go DEEPER, not wider!"
+
+  - action: highlight-node
+    target: graph
+    node: B
+    color: $visited
+    duration: 0.5s
+
+  - action: push
+    target: stack
+    values: ["E", "D"]
+    duration: 0.8s
+
+  - action: set-text
+    target: step-label
+    value: "Stack: [C, E, D] — D is on top"
+  - action: pause
+    duration: 6s
+
+  # ── Step 3: Visit D ──
+  - action: set-text
+    target: narration
+    value: "Step 3: Pop D. Visit D."
+  - action: set-text
+    target: narration2
+    value: "D is a leaf — no neighbors to push."
+  - action: set-text
+    target: narration3
+    value: "We've reached the bottom of this path!"
+  - action: pause
+    duration: 3s
+
+  - action: set-text
+    target: step-label
+    value: "Step 3: Pop D → visit D (leaf)"
+
+  - action: pop
+    target: stack
+    duration: 0.4s
+  - action: pause
+    duration: 0.5s
+
+  - parallel:
+      - action: highlight-node
+        target: graph
+        node: D
+        color: $current
+        duration: 0.8s
+      - action: highlight-edge
+        target: graph
+        edge: [B, D]
+        color: $visited
+        duration: 0.6s
+      - action: set-text
+        target: order-label
+        value: "Visit order: A → B → D"
+  - action: pause
+    duration: 3s
+
+  - action: highlight-node
+    target: graph
+    node: D
+    color: $visited
+    duration: 0.5s
+
+  - action: set-text
+    target: narration
+    value: "D has no children."
+  - action: set-text
+    target: narration2
+    value: "The stack pops back to E —"
+  - action: set-text
+    target: narration3
+    value: "this is BACKTRACKING."
+
+  - action: set-text
+    target: step-label
+    value: "Stack: [C, E] — backtracking to E"
+  - action: pause
+    duration: 6s
+
+  # ── Step 4: Visit E (backtrack) ──
+  - action: set-text
+    target: narration
+    value: "Step 4: Pop E. Visit E."
+  - action: set-text
+    target: narration2
+    value: "E is also a leaf."
+  - action: set-text
+    target: narration3
+    value: "Both of B's children are done."
+  - action: pause
+    duration: 3s
+
+  - action: set-text
+    target: step-label
+    value: "Step 4: Pop E → visit E (leaf)"
+
+  - action: pop
+    target: stack
+    duration: 0.4s
+  - action: pause
+    duration: 0.5s
+
+  - parallel:
+      - action: highlight-node
+        target: graph
+        node: E
+        color: $current
+        duration: 0.8s
+      - action: highlight-edge
+        target: graph
+        edge: [B, E]
+        color: $visited
+        duration: 0.6s
+      - action: set-text
+        target: order-label
+        value: "Visit order: A → B → D → E"
+  - action: pause
+    duration: 3s
+
+  - action: highlight-node
+    target: graph
+    node: E
+    color: $visited
+    duration: 0.5s
+
+  - action: set-text
+    target: narration
+    value: "Now the stack has only C left."
+  - action: set-text
+    target: narration2
+    value: "We backtrack ALL the way to"
+  - action: set-text
+    target: narration3
+    value: "A's other child — the right subtree."
+
+  - action: set-text
+    target: step-label
+    value: "Stack: [C] — backtracking to right subtree"
+  - action: pause
+    duration: 7s
+
+  # ── Step 5: Visit C ──
+  - action: set-text
+    target: narration
+    value: "Step 5: Pop C. Visit C."
+  - action: set-text
+    target: narration2
+    value: "Now we explore A's right subtree."
+  - action: set-text
+    target: narration3
+    value: ""
+  - action: pause
+    duration: 3s
+
+  - action: set-text
+    target: step-label
+    value: "Step 5: Pop C → visit C"
+
+  - action: pop
+    target: stack
+    duration: 0.4s
+  - action: pause
+    duration: 0.5s
+
+  - parallel:
+      - action: highlight-node
+        target: graph
+        node: C
+        color: $current
+        duration: 0.8s
+      - action: highlight-edge
+        target: graph
+        edge: [A, C]
+        color: $visited
+        duration: 0.6s
+      - action: set-text
+        target: order-label
+        value: "Visit order: A → B → D → E → C"
+  - action: pause
+    duration: 3s
+
+  - action: set-text
+    target: narration
+    value: "Push C's neighbors: G then F."
+  - action: set-text
+    target: narration2
+    value: "F is on top → F goes next."
+  - action: set-text
+    target: narration3
+    value: ""
+
+  - action: highlight-node
+    target: graph
+    node: C
+    color: $visited
+    duration: 0.5s
+
+  - action: push
+    target: stack
+    values: ["G", "F"]
+    duration: 0.8s
+
+  - action: set-text
+    target: step-label
+    value: "Stack: [G, F] — F is on top"
+  - action: pause
+    duration: 5s
+
+  # ── Step 6: Visit F ──
+  - action: set-text
+    target: narration
+    value: "Step 6: Pop F. Visit F."
+  - action: set-text
+    target: narration2
+    value: "Leaf node — no children."
+  - action: set-text
+    target: narration3
+    value: ""
+  - action: pause
+    duration: 2s
+
+  - action: set-text
+    target: step-label
+    value: "Step 6: Pop F → visit F (leaf)"
+
+  - action: pop
+    target: stack
+    duration: 0.4s
+  - action: pause
+    duration: 0.5s
+
+  - parallel:
+      - action: highlight-node
+        target: graph
+        node: F
+        color: $current
+        duration: 0.8s
+      - action: highlight-edge
+        target: graph
+        edge: [C, F]
+        color: $visited
+        duration: 0.6s
+      - action: set-text
+        target: order-label
+        value: "Visit order: A → B → D → E → C → F"
+  - action: pause
+    duration: 3s
+
+  - action: highlight-node
+    target: graph
+    node: F
+    color: $visited
+    duration: 0.5s
+  - action: pause
+    duration: 2s
+
+  # ── Step 7: Visit G (final) ──
+  - action: set-text
+    target: narration
+    value: "Step 7: Pop G — the last node."
+  - action: set-text
+    target: narration2
+    value: "All nodes have been visited!"
+  - action: set-text
+    target: narration3
+    value: ""
+  - action: pause
+    duration: 3s
+
+  - action: set-text
+    target: step-label
+    value: "Step 7: Pop G → visit G (leaf, final)"
+
+  - action: pop
+    target: stack
+    duration: 0.4s
+  - action: pause
+    duration: 0.5s
+
+  - parallel:
+      - action: highlight-node
+        target: graph
+        node: G
+        color: $current
+        duration: 0.8s
+      - action: highlight-edge
+        target: graph
+        edge: [C, G]
+        color: $visited
+        duration: 0.6s
+      - action: set-text
+        target: order-label
+        value: "Visit order: A → B → D → E → C → F → G"
+  - action: pause
+    duration: 3s
+
+  - action: highlight-node
+    target: graph
+    node: G
+    color: $visited
+    duration: 0.5s
+  - action: pause
+    duration: 2s
+
+  # ═══════════════════════════════════════════
+  # SECTION 4: RECAP & BFS COMPARISON (~4:30 - 6:00)
+  # ═══════════════════════════════════════════
+
+  - action: set-text
+    target: step-label
+    value: "DFS Traversal Complete!"
+  - action: pause
+    duration: 3s
+
+  - action: set-text
+    target: narration
+    value: "DFS order: A → B → D → E → C → F → G"
+  - action: set-text
+    target: narration2
+    value: ""
+  - action: set-text
+    target: narration3
+    value: ""
+  - action: pause
+    duration: 6s
+
+  - action: set-text
+    target: narration
+    value: "Compare with BFS order:"
+  - action: set-text
+    target: narration2
+    value: "BFS: A → B → C → D → E → F → G"
+  - action: set-text
+    target: narration3
+    value: "DFS: A → B → D → E → C → F → G"
+  - action: pause
+    duration: 8s
+
+  - action: set-text
+    target: narration
+    value: "BFS visits B then C (same level)."
+  - action: set-text
+    target: narration2
+    value: "DFS visits B, then goes ALL the way"
+  - action: set-text
+    target: narration3
+    value: "down to D and E before touching C."
+  - action: pause
+    duration: 8s
+
+  - action: set-text
+    target: narration
+    value: "Key differences:"
+  - action: set-text
+    target: narration2
+    value: ""
+  - action: set-text
+    target: narration3
+    value: ""
+  - action: pause
+    duration: 3s
+
+  - action: set-text
+    target: narration
+    value: "BFS → Queue (FIFO) → Level by level"
+  - action: set-text
+    target: narration2
+    value: "DFS → Stack (LIFO) → Branch by branch"
+  - action: set-text
+    target: narration3
+    value: ""
+  - action: pause
+    duration: 7s
+
+  - action: set-text
+    target: narration
+    value: "DFS applications:"
+  - action: set-text
+    target: narration2
+    value: "• Cycle detection, topological sort"
+  - action: set-text
+    target: narration3
+    value: "• Maze solving, path finding"
+  - action: pause
+    duration: 7s
+
+  - action: set-text
+    target: narration
+    value: "• Strongly connected components"
+  - action: set-text
+    target: narration2
+    value: "• Backtracking algorithms (Sudoku, N-Queens)"
+  - action: set-text
+    target: narration3
+    value: "• Generating spanning trees"
+  - action: pause
+    duration: 7s
+
+  - action: set-text
+    target: narration
+    value: "DFS can also be implemented"
+  - action: set-text
+    target: narration2
+    value: "recursively — the call stack"
+  - action: set-text
+    target: narration3
+    value: "acts as the implicit stack!"
+  - action: pause
+    duration: 7s
+
+  # Final
+  - action: set-text
+    target: narration
+    value: ""
+  - action: set-text
+    target: narration2
+    value: ""
+  - action: set-text
+    target: narration3
+    value: ""
+  - action: set-text
+    target: step-label
+    value: ""
+  - action: set-text
+    target: complexity
+    value: ""
+  - action: set-text
+    target: order-label
+    value: ""
+  - action: set-text
+    target: legend-current
+    value: ""
+  - action: set-text
+    target: legend-visited
+    value: ""
+  - action: set-text
+    target: legend-backtrack
+    value: ""
+  - action: set-text
+    target: subtitle
+    value: ""
+  - action: pause
+    duration: 1s
+
+  - action: set-text
+    target: title
+    value: "Thank you for watching!"
+  - action: pause
+    duration: 5s
+
+  - action: set-text
+    target: subtitle
+    value: "Next up: Binary Search"
+  - action: fade-in
+    target: subtitle
+    duration: 1s
+  - action: pause
+    duration: 7s
