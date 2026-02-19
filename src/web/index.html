@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CS Animation Platform</title>
+  <link rel="stylesheet" href="style.css">
+  <!-- CodeMirror 6 from CDN -->
+  <script type="module" src="https://cdn.jsdelivr.net/npm/@aspect-bundled/codemirror-yaml@0.0.3/dist/index.js"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@codemirror/view@6/dist/index.css">
+</head>
+<body>
+  <header>
+    <h1>CS Animation Platform</h1>
+    <p class="subtitle">YAML manifest &rarr; animated CS education video</p>
+  </header>
+
+  <main>
+    <div class="panel editor-panel">
+      <div class="panel-header">
+        <span>Manifest Editor</span>
+        <div class="controls">
+          <select id="preset-select">
+            <option value="">Load example...</option>
+            <option value="bfs">BFS Walkthrough</option>
+            <option value="dfs">DFS Traversal</option>
+            <option value="stack">Stack Operations</option>
+          </select>
+          <button id="render-btn" class="btn-primary">Render</button>
+        </div>
+      </div>
+      <div id="editor"></div>
+    </div>
+
+    <div class="panel preview-panel">
+      <div class="panel-header">
+        <span>Preview</span>
+        <a id="download-link" class="btn-download" style="display:none" download>Download MP4</a>
+      </div>
+
+      <div id="preview-area">
+        <div id="status-message" class="status">
+          Write or load a manifest, then click Render.
+        </div>
+        <div id="progress-bar-container" style="display:none">
+          <div id="progress-bar"></div>
+          <span id="progress-text">0%</span>
+        </div>
+        <video id="video-player" controls style="display:none"></video>
+      </div>
+    </div>
+  </main>
+
+  <script type="module" src="app.js"></script>
+</body>
+</html>

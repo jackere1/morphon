@@ -1,0 +1,265 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+:root {
+  --bg: #0f0f23;
+  --bg-panel: #1a1a2e;
+  --bg-header: #16162a;
+  --border: #2a2a4a;
+  --text: #d0d0ee;
+  --text-dim: #7a7aa0;
+  --accent: #3498db;
+  --accent-hover: #2980b9;
+  --green: #2ecc71;
+  --red: #e74c3c;
+  --yellow: #f1c40f;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+header {
+  padding: 12px 24px;
+  background: var(--bg-header);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: baseline;
+  gap: 16px;
+}
+
+header h1 {
+  font-size: 18px;
+  font-weight: 600;
+  color: #fff;
+}
+
+header .subtitle {
+  font-size: 13px;
+  color: var(--text-dim);
+}
+
+main {
+  flex: 1;
+  display: flex;
+  overflow: hidden;
+}
+
+.panel {
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid var(--border);
+}
+
+.editor-panel {
+  flex: 1;
+  min-width: 0;
+}
+
+.preview-panel {
+  width: 520px;
+  min-width: 400px;
+  border-right: none;
+}
+
+.panel-header {
+  padding: 8px 16px;
+  background: var(--bg-header);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-dim);
+}
+
+.panel-header .controls {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+#editor {
+  flex: 1;
+  overflow: auto;
+  background: var(--bg-panel);
+}
+
+#editor .cm-editor {
+  height: 100%;
+  font-size: 14px;
+}
+
+#editor .cm-editor .cm-content {
+  font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
+}
+
+#editor .cm-editor .cm-gutters {
+  background: var(--bg-header);
+  border-right: 1px solid var(--border);
+  color: var(--text-dim);
+}
+
+#editor .cm-editor .cm-activeLineGutter {
+  background: var(--border);
+}
+
+#editor .cm-editor .cm-activeLine {
+  background: rgba(52, 152, 219, 0.08);
+}
+
+#editor .cm-editor.cm-focused {
+  outline: none;
+}
+
+/* Buttons */
+.btn-primary {
+  padding: 6px 18px;
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.btn-primary:hover {
+  background: var(--accent-hover);
+}
+
+.btn-primary:disabled {
+  background: var(--border);
+  color: var(--text-dim);
+  cursor: not-allowed;
+}
+
+.btn-download {
+  padding: 4px 12px;
+  background: var(--green);
+  color: #fff;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+  text-decoration: none;
+  transition: background 0.15s;
+}
+
+.btn-download:hover {
+  background: #27ae60;
+}
+
+/* Select */
+select {
+  padding: 5px 8px;
+  background: var(--bg-panel);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+select:focus {
+  outline: 1px solid var(--accent);
+}
+
+/* Preview area */
+#preview-area {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  gap: 16px;
+}
+
+.status {
+  text-align: center;
+  color: var(--text-dim);
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.status.error {
+  color: var(--red);
+}
+
+.status.rendering {
+  color: var(--yellow);
+}
+
+.status.done {
+  color: var(--green);
+}
+
+/* Progress bar */
+#progress-bar-container {
+  width: 100%;
+  max-width: 360px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+#progress-bar {
+  flex: 1;
+  height: 6px;
+  background: var(--border);
+  border-radius: 3px;
+  overflow: hidden;
+  position: relative;
+}
+
+#progress-bar::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  width: var(--progress, 0%);
+  background: var(--accent);
+  border-radius: 3px;
+  transition: width 0.3s ease;
+}
+
+#progress-text {
+  font-size: 12px;
+  color: var(--text-dim);
+  min-width: 36px;
+  text-align: right;
+}
+
+/* Video player */
+#video-player {
+  width: 100%;
+  max-width: 480px;
+  border-radius: 6px;
+  background: #000;
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+  main {
+    flex-direction: column;
+  }
+  .preview-panel {
+    width: 100%;
+    min-width: 0;
+    max-height: 50vh;
+  }
+  .editor-panel {
+    min-height: 40vh;
+  }
+}

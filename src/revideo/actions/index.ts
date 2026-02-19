@@ -44,13 +44,13 @@ export function* executeAction(
       if (entry) yield* executeEnqueue(step, entry, meta, defaultEasing);
       break;
     case 'dequeue':
-      if (entry) yield* executeDequeue(step, entry, defaultEasing);
+      if (entry) yield* executeDequeue(step, entry, meta, defaultEasing);
       break;
     case 'push':
       if (entry) yield* executePush(step, entry, meta, defaultEasing);
       break;
     case 'pop':
-      if (entry) yield* executePop(step, entry, defaultEasing);
+      if (entry) yield* executePop(step, entry, meta, defaultEasing);
       break;
     case 'move-to':
       if (entry) yield* executeMoveTo(step, entry, meta, defaultEasing);

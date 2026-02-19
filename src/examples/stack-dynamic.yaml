@@ -1,0 +1,123 @@
+# Dynamic Stack Demo — items are created/destroyed at runtime
+meta:
+  title: "Dynamic Stack"
+  topic: "stack-dynamic"
+  canvas: {width: 1920, height: 1080, background: "#0f0f23"}
+  defaults:
+    data-structure:
+      cellWidth: 90
+      cellHeight: 55
+      fillColor: "#1a2a4a"
+      borderColor: "#5b8fd9"
+      textColor: "#ffffff"
+  easing: easeInOutCubic
+
+objects:
+  - id: title
+    type: text
+    content: ""
+    position: {x: 960, y: 120}
+    style: {font: "bold 44px sans-serif", align: center, color: "#ffffff"}
+
+  - id: stack
+    type: data-structure
+    variant: stack
+    position: {x: 960, y: 500}
+
+  - id: narration
+    type: text
+    content: ""
+    position: {x: 960, y: 720}
+    style: {font: "26px sans-serif", align: center, color: "#b0b0dd"}
+
+timeline:
+  - action: set-text
+    target: title
+    value: "Dynamic Stack — push and pop"
+  - action: fade-in
+    target: title
+    duration: 0.5s
+  - action: fade-in
+    target: stack
+    duration: 0.3s
+  - action: fade-in
+    target: narration
+    duration: 0.2s
+  - action: pause
+    duration: 0.5s
+
+  # Push items one by one
+  - action: set-text
+    target: narration
+    value: "push(10)"
+  - action: push
+    target: stack
+    values: ["10"]
+    duration: 0.5s
+  - action: pause
+    duration: 0.8s
+
+  - action: set-text
+    target: narration
+    value: "push(20)"
+  - action: push
+    target: stack
+    values: ["20"]
+    duration: 0.5s
+  - action: pause
+    duration: 0.8s
+
+  - action: set-text
+    target: narration
+    value: "push(30)"
+  - action: push
+    target: stack
+    values: ["30"]
+    duration: 0.5s
+  - action: pause
+    duration: 0.8s
+
+  # Push two at once
+  - action: set-text
+    target: narration
+    value: "push(40), push(50)"
+  - action: push
+    target: stack
+    values: ["40", "50"]
+    duration: 0.8s
+  - action: pause
+    duration: 1s
+
+  # Pop items
+  - action: set-text
+    target: narration
+    value: "pop() -> 50  (last in, first out)"
+  - action: pop
+    target: stack
+    duration: 0.5s
+  - action: pause
+    duration: 1s
+
+  - action: set-text
+    target: narration
+    value: "pop() -> 40"
+  - action: pop
+    target: stack
+    duration: 0.5s
+  - action: pause
+    duration: 0.8s
+
+  - action: set-text
+    target: narration
+    value: "pop() -> 30"
+  - action: pop
+    target: stack
+    duration: 0.5s
+  - action: pause
+    duration: 0.8s
+
+  - action: set-text
+    target: narration
+    value: "Stack has 2 items remaining: [10, 20]"
+  - action: pause
+    duration: 2s

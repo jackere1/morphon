@@ -1,11 +1,11 @@
-import {Rect, Txt, Layout, Node} from '@revideo/2d';
+import {Rect, Txt, Node} from '@revideo/2d';
 import {createRef, type Reference} from '@revideo/core';
 import type {DataStructureObject, ManifestMeta} from '../types';
 import {resolveStyle} from '../utils/style-resolver';
 
 export interface DataStructureRefs {
   root: Reference<Node>;
-  container: Reference<Layout>;
+  container: Reference<Node>;
   label: Reference<Txt>;
 }
 
@@ -15,7 +15,7 @@ export function buildDataStructure(
 ): {node: JSX.Element; refs: DataStructureRefs} {
   const style = resolveStyle('data-structure', obj.style, meta);
   const root = createRef<Node>();
-  const container = createRef<Layout>();
+  const container = createRef<Node>();
   const label = createRef<Txt>();
 
   // Canvas center offset
@@ -36,11 +36,7 @@ export function buildDataStructure(
         y={-40}
         textAlign={'center'}
       />
-      <Layout
-        ref={container}
-        direction={'row'}
-        gap={2}
-      />
+      <Node ref={container} />
     </Node>
   );
 
@@ -48,11 +44,29 @@ export function buildDataStructure(
 }
 
 /**
- * Creates a queue/stack cell (Rect with Txt label) that can be added to the container.
+ * Calculate the x position for a cell at a given index in the container.
+ * Cells are centered around x=0 as a group.
+ */
+export function getCellX(
+  index: number,
+  totalCount: number,
+  style: Record<string, any>,
+): number {
+  const cellW = style.cellWidth || 60;
+  const gap = style.gap ?? 4;
+  const totalWidth = totalCount * cellW + (totalCount - 1) * gap;
+  // leftmost edge of the first cell (centered)
+  const startX = -totalWidth / 2 + cellW / 2;
+  return startX + index * (cellW + gap);
+}
+
+/**
+ * Creates a queue/stack cell (Rect with Txt label).
  */
 export function createCell(
   value: string,
   style: Record<string, any>,
+  x: number = 0,
 ): JSX.Element {
   const cellW = style.cellWidth || 60;
   const cellH = style.cellHeight || 40;
@@ -62,11 +76,13 @@ export function createCell(
 
   return (
     <Rect
+      x={x}
       width={cellW}
       height={cellH}
       fill={fill}
       stroke={border}
       lineWidth={2}
+      radius={6}
     >
       <Txt
         text={value}
