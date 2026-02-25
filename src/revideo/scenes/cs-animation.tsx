@@ -29,15 +29,21 @@ function* executeTimeline(
   camera: Node,
   meta: any,
 ) {
-  for (const entry of timeline) {
-    if (isParallelBlock(entry)) {
-      yield* all(
-        ...entry.parallel.map((step: ActionStep) =>
-          executeAction(step, objects, camera, meta),
-        ),
-      );
-    } else {
-      yield* executeAction(entry as ActionStep, objects, camera, meta);
+  for (let i = 0; i < timeline.length; i++) {
+    const entry = timeline[i];
+    try {
+      if (isParallelBlock(entry)) {
+        yield* all(
+          ...entry.parallel.map((step: ActionStep) =>
+            executeAction(step, objects, camera, meta),
+          ),
+        );
+      } else {
+        yield* executeAction(entry as ActionStep, objects, camera, meta);
+      }
+    } catch (err: any) {
+      console.error(`[Render] Action ${i} failed (${entry.action || 'parallel'}): ${err.message}`);
+      // Continue rendering remaining actions instead of stopping the video
     }
   }
 }

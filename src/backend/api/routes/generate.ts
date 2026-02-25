@@ -1,4 +1,6 @@
 import { Router } from 'express';
+import { writeFileSync, mkdirSync } from 'fs';
+import { resolve } from 'path';
 import { generateShow } from '../../services/ai/ai-service.js';
 import { validateGenerateRequest } from '../middleware/validation.js';
 import { asyncHandler, AppError } from '../middleware/errorHandler.js';
@@ -32,6 +34,19 @@ router.post(
 
     // Generate show using AI
     const result = await generateShow(prompt.trim());
+
+    // Save debug dump to filesystem for debugging
+    try {
+      const debugDir = resolve('output', 'debug-manifests');
+      mkdirSync(debugDir, { recursive: true });
+      const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+      const debugPath = resolve(debugDir, `${timestamp}.json`);
+      writeFileSync(debugPath, JSON.stringify({ prompt: prompt.trim(), show: result.show, warnings: result.warnings }, null, 2));
+      console.log(`[Debug] Manifest saved → ${debugPath}`);
+    } catch (e) {
+      // Don't fail the request if debug dump fails
+      console.warn(`[Debug] Failed to save manifest dump:`, e);
+    }
 
     res.json({
       show: result.show,
