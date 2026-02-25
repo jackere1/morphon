@@ -147,6 +147,12 @@
                   <span>RENDER VIDEO</span>
                 </button>
 
+                <label class="tts-toggle" for="tts-checkbox">
+                  <input type="checkbox" id="tts-checkbox" checked>
+                  <span class="tts-toggle-label">AI Narration (TTS)</span>
+                  <span class="tts-toggle-hint">Gemini generates spoken narration for each scene</span>
+                </label>
+
                 <div id="render-status-card" class="render-status-card" style="display:none">
                   <div class="status-header">
                     <span id="status-text">Rendering...</span>
@@ -269,189 +275,552 @@
     <div class="page-docs">
       <div class="container">
         <div class="page-header">
-          <h1>MANIFEST REFERENCE</h1>
-          <p class="page-subtitle">Everything you need to write animation manifests by hand</p>
+          <h1>MANIFEST DOCS</h1>
+          <p class="page-subtitle">Learn the manifest format from the ground up — concepts first, then reference</p>
         </div>
 
-        <div class="docs-grid">
-          <!-- Structure Overview -->
-          <div class="card docs-card">
-            <div class="card-header">
-              <h3 class="card-title">MANIFEST STRUCTURE</h3>
-            </div>
-            <div class="card-body">
-              <p>A manifest describes <strong>what to draw</strong> (objects) and <strong>what to animate</strong> (timeline). Same manifest always produces the same video.</p>
-              <pre class="docs-code"><code>meta:       # Canvas size, colors, defaults
-objects:    # Things on screen (graphs, text, queues)
-timeline:   # Sequence of animation steps</code></pre>
-            </div>
-          </div>
+        <!-- ═══ SECTION: CORE CONCEPTS ═══ -->
+        <div class="docs-section">
+          <h2 class="docs-section-title">CORE CONCEPTS</h2>
+          <p class="docs-section-desc">Understand these rules before writing any manifest. They prevent the most common bugs.</p>
 
-          <!-- Meta -->
-          <div class="card docs-card">
-            <div class="card-header">
-              <h3 class="card-title">META — GLOBAL SETTINGS</h3>
+          <div class="docs-grid">
+            <!-- Concept: How It Works -->
+            <div class="card docs-card">
+              <div class="card-header">
+                <h3 class="card-title">HOW IT WORKS</h3>
+              </div>
+              <div class="card-body">
+                <p>A manifest describes <strong>what to draw</strong> (objects) and <strong>what to animate</strong> (timeline). Same manifest always produces the same video.</p>
+                <pre class="docs-code"><code>meta:       # Canvas, colors, palette, defaults
+objects:    # Things on screen (graphs, text, queues)
+timeline:   # Ordered sequence of animation steps</code></pre>
+                <p>The renderer processes the timeline <strong>top to bottom</strong>. Each action completes before the next begins, unless wrapped in a <code>parallel</code> block.</p>
+              </div>
             </div>
-            <div class="card-body">
-              <pre class="docs-code"><code>meta:
-  title: "My Animation"
-  canvas:
-    width: 1920
-    height: 1080
-    background: "#1a1a2e"
+
+            <!-- Concept: Visibility -->
+            <div class="card docs-card docs-card-warning">
+              <div class="card-header">
+                <h3 class="card-title">OBJECTS START INVISIBLE</h3>
+              </div>
+              <div class="card-body">
+                <div class="docs-callout docs-callout-danger">
+                  <strong>#1 cause of broken videos.</strong> Every object is created with opacity 0. Nothing appears until you use a <code>fade-in</code> action.
+                </div>
+                <pre class="docs-code"><code># WRONG — highlighting an invisible graph
+timeline:
+  - action: highlight-node
+    target: graph
+    node: A
+    color: "#ff0000"
+    duration: 0.5s</code></pre>
+                <pre class="docs-code"><code># CORRECT — fade in first
+timeline:
+  - action: fade-in
+    target: graph
+    duration: 0.5s
+  - action: highlight-node
+    target: graph
+    node: A
+    color: "#ff0000"
+    duration: 0.5s</code></pre>
+                <p><strong>Also:</strong> <code>set-text</code> changes content but does NOT make text visible. You must <code>fade-in</code> the text object separately.</p>
+              </div>
+            </div>
+
+            <!-- Concept: Coordinate System -->
+            <div class="card docs-card">
+              <div class="card-header">
+                <h3 class="card-title">COORDINATE SYSTEM</h3>
+              </div>
+              <div class="card-body">
+                <p>All positions use <strong>absolute screen coordinates</strong>. Origin <code>(0, 0)</code> is the top-left corner.</p>
+                <pre class="docs-code"><code>(0,0) ──────────────────── (1920,0)
+│                                  │
+│          (960, 540)              │
+│           center                 │
+│                                  │
+(0,1080) ─────────────── (1920,1080)</code></pre>
+                <p><strong>Spacing tips:</strong></p>
+                <ul class="docs-list">
+                  <li>Graph nodes: at least <strong>150px</strong> apart</li>
+                  <li>Text lines: <strong>60-80px</strong> vertical spacing</li>
+                  <li>Data structures: near bottom (<strong>y: 800-950</strong>)</li>
+                </ul>
+              </div>
+            </div>
+
+            <!-- Concept: Style Inheritance -->
+            <div class="card docs-card">
+              <div class="card-header">
+                <h3 class="card-title">STYLE INHERITANCE</h3>
+              </div>
+              <div class="card-body">
+                <p>Styles resolve in three layers, lowest to highest priority:</p>
+                <pre class="docs-code"><code>meta.defaults   →   object.style   →   action fields
+ (global)          (per-object)       (per-action)</code></pre>
+                <pre class="docs-code"><code>meta:
   defaults:
     graph:
-      nodeRadius: 30
-      nodeColor: "#4a4a6a"
-      nodeStroke: "#7c7caa"
-      edgeColor: "#3a3a5a"
-      labelColor: "#ffffff"
-      labelFont: "16px monospace"
-    data-structure:
-      cellWidth: 60
-      cellHeight: 40
-      fillColor: "#2a2a4a"
-      borderColor: "#5a5a8a"
-      textColor: "#ffffff"
+      nodeRadius: 30       # All graphs
+
+objects:
+  - id: my-graph
+    type: graph
+    style:
+      nodeRadius: 40       # Overrides default
+
+timeline:
+  - action: highlight-node
+    color: "#ff0000"       # Runtime override</code></pre>
+              </div>
+            </div>
+
+            <!-- Concept: Palette -->
+            <div class="card docs-card">
+              <div class="card-header">
+                <h3 class="card-title">PALETTE SYSTEM</h3>
+              </div>
+              <div class="card-body">
+                <p>Define named colors once, reference with <code>$name</code> in actions:</p>
+                <pre class="docs-code"><code>meta:
   palette:
     visited: "#ff6b6b"
     queued: "#ffd93d"
-  easing: easeInOutCubic</code></pre>
-              <p><strong>Palette refs:</strong> Define colors in <code>meta.palette</code>, reference with <code>$name</code>. Example: <code>color: $visited</code> resolves to <code>#ff6b6b</code>.</p>
-              <p><strong>Coordinates:</strong> <code>(0,0)</code> is top-left. Center of 1920x1080 canvas is <code>(960, 540)</code>.</p>
-            </div>
-          </div>
 
-          <!-- Object: Graph -->
-          <div class="card docs-card">
-            <div class="card-header">
-              <h3 class="card-title">OBJECT: GRAPH</h3>
-            </div>
-            <div class="card-body">
-              <p>Nodes (circles) and edges (lines).</p>
-              <pre class="docs-code"><code>- id: my-graph
-  type: graph
-  nodes:
-    - { id: A, label: A, x: 960, y: 300 }
-    - { id: B, label: B, x: 760, y: 500 }
-    - { id: C, label: C, x: 1160, y: 500 }
-  edges:
-    - { from: A, to: B }
-    - { from: A, to: C }
-  style:
-    nodeRadius: 35</code></pre>
-            </div>
-          </div>
-
-          <!-- Object: Data Structure -->
-          <div class="card docs-card">
-            <div class="card-header">
-              <h3 class="card-title">OBJECT: DATA STRUCTURE</h3>
-            </div>
-            <div class="card-body">
-              <p>Queues, stacks, arrays, and linked lists.</p>
-              <pre class="docs-code"><code>- id: my-queue
-  type: data-structure
-  variant: queue    # queue | stack | array | linked-list
-  position: { x: 960, y: 800 }
-  style:
-    cellWidth: 70</code></pre>
-            </div>
-          </div>
-
-          <!-- Object: Text -->
-          <div class="card docs-card">
-            <div class="card-header">
-              <h3 class="card-title">OBJECT: TEXT</h3>
-            </div>
-            <div class="card-body">
-              <p>Labels, titles, descriptions.</p>
-              <pre class="docs-code"><code>- id: title
-  type: text
-  content: "Hello World"
-  position: { x: 960, y: 100 }
-  style:
-    font: "bold 42px sans-serif"
-    align: center
-    color: "#ffffff"</code></pre>
-            </div>
-          </div>
-
-          <!-- Action Reference -->
-          <div class="card docs-card docs-card-wide">
-            <div class="card-header">
-              <h3 class="card-title">ACTION REFERENCE (16 ACTIONS)</h3>
-            </div>
-            <div class="card-body">
-              <div class="docs-table-wrap">
-                <table class="docs-table">
-                  <thead>
-                    <tr><th>Action</th><th>Fields</th><th>Description</th></tr>
-                  </thead>
-                  <tbody>
-                    <tr><td><code>fade-in</code></td><td>target, duration</td><td>Fade object from transparent to visible</td></tr>
-                    <tr><td><code>fade-out</code></td><td>target, duration</td><td>Fade object from visible to transparent</td></tr>
-                    <tr><td><code>highlight-node</code></td><td>target, node, color, duration</td><td>Change a graph node's fill color</td></tr>
-                    <tr><td><code>highlight-edge</code></td><td>target, edge: [from, to], color, duration</td><td>Change an edge's color</td></tr>
-                    <tr><td><code>move-node</code></td><td>target, node, position: {x,y}, duration</td><td>Move a graph node</td></tr>
-                    <tr><td><code>enqueue</code></td><td>target, values: [...], duration</td><td>Add values to a queue</td></tr>
-                    <tr><td><code>dequeue</code></td><td>target, duration</td><td>Remove front value from queue</td></tr>
-                    <tr><td><code>push</code></td><td>target, values: [...], duration</td><td>Push values onto a stack</td></tr>
-                    <tr><td><code>pop</code></td><td>target, duration</td><td>Pop top value from stack</td></tr>
-                    <tr><td><code>set-text</code></td><td>target, value</td><td>Change text content (instant)</td></tr>
-                    <tr><td><code>move-to</code></td><td>target, position: {x,y}, duration</td><td>Move any object to a position</td></tr>
-                    <tr><td><code>camera-zoom</code></td><td>scale, duration</td><td>Zoom in/out (1.0 = normal)</td></tr>
-                    <tr><td><code>camera-pan</code></td><td>position: {x,y}, duration</td><td>Pan camera to a position</td></tr>
-                    <tr><td><code>camera-reset</code></td><td>duration</td><td>Reset zoom and pan</td></tr>
-                    <tr><td><code>set-style</code></td><td>target, style: {...}, duration</td><td>Animate style properties</td></tr>
-                    <tr><td><code>pause</code></td><td>duration</td><td>Wait without doing anything</td></tr>
-                  </tbody>
-                </table>
+timeline:
+  - action: highlight-node
+    target: graph
+    node: A
+    color: $visited   # → "#ff6b6b"</code></pre>
+                <div class="docs-callout docs-callout-info">
+                  <strong>Where $refs work:</strong> Only in the <code>color</code> field of <code>highlight-node</code> and <code>highlight-edge</code>. Use raw hex everywhere else.
+                </div>
               </div>
             </div>
-          </div>
 
-          <!-- Timeline -->
-          <div class="card docs-card">
-            <div class="card-header">
-              <h3 class="card-title">TIMELINE — SEQUENTIAL & PARALLEL</h3>
-            </div>
-            <div class="card-body">
-              <p>Actions run one after another. Use <code>parallel:</code> blocks for simultaneous actions.</p>
-              <pre class="docs-code"><code>timeline:
-  - action: fade-in
+            <!-- Concept: Timeline Model -->
+            <div class="card docs-card">
+              <div class="card-header">
+                <h3 class="card-title">TIMELINE MODEL</h3>
+              </div>
+              <div class="card-body">
+                <p><strong>Sequential:</strong> Each action completes before the next starts.</p>
+                <p><strong>Parallel:</strong> Wrap actions in a <code>parallel:</code> block to run them simultaneously. The block finishes when the longest action completes.</p>
+                <pre class="docs-code"><code>timeline:
+  - action: fade-in        # Runs first
     target: title
     duration: 0.8s
 
-  - action: pause
-    duration: 1s
-
-  - parallel:
+  - parallel:              # Run together
       - action: highlight-node
         target: graph
         node: A
         color: $visited
         duration: 0.5s
-      - action: highlight-node
-        target: graph
-        node: B
-        color: $queued
-        duration: 0.5s</code></pre>
-              <p><strong>Durations:</strong> <code>0.5s</code>, <code>500ms</code>, or <code>0.5</code> (number).</p>
-              <p><strong>Easing:</strong> Per-action override with <code>easing: easeOutCubic</code>. Available: linear, easeIn, easeOut, easeInOut, easeInCubic, easeOutCubic, easeInOutCubic, easeInBack, easeOutBack, easeOutBounce, and more.</p>
+      - action: enqueue
+        target: queue
+        values: ["A"]
+        duration: 0.5s
+
+  - action: pause          # After both finish
+    duration: 3s</code></pre>
+              </div>
+            </div>
+
+            <!-- Concept: Duration & Easing -->
+            <div class="card docs-card">
+              <div class="card-header">
+                <h3 class="card-title">DURATION & EASING</h3>
+              </div>
+              <div class="card-body">
+                <p><strong>Duration formats:</strong></p>
+                <ul class="docs-list">
+                  <li><code>"0.5s"</code> — seconds (string)</li>
+                  <li><code>"500ms"</code> — milliseconds (string)</li>
+                  <li><code>0.5</code> — seconds (number)</li>
+                </ul>
+                <p><strong>Easing</strong> controls animation acceleration. Set a global default in <code>meta.easing</code> or override per action:</p>
+                <pre class="docs-code"><code>meta:
+  easing: easeInOutCubic   # Global default
+
+timeline:
+  - action: fade-in
+    easing: easeOutBack    # Per-action override</code></pre>
+                <p><strong>Available:</strong> linear, easeIn/Out/InOut, easeInSine...OutSine...InOutSine, Quad, Cubic, Quart, Expo, Back, Bounce, Elastic (same pattern).</p>
+              </div>
+            </div>
+
+            <!-- Concept: Scene Isolation -->
+            <div class="card docs-card">
+              <div class="card-header">
+                <h3 class="card-title">SCENE ISOLATION</h3>
+              </div>
+              <div class="card-body">
+                <p>In multi-scene shows, each scene is <strong>completely independent</strong>:</p>
+                <ul class="docs-list">
+                  <li>Each scene has its own <code>objects</code> — nothing carries over</li>
+                  <li>Object IDs can repeat across scenes</li>
+                  <li>Each scene starts fresh: all objects invisible, camera reset</li>
+                  <li>Palette and defaults are <strong>inherited</strong> from the show <code>meta</code></li>
+                </ul>
+              </div>
             </div>
           </div>
+        </div>
 
-          <!-- Multi-Scene Shows -->
-          <div class="card docs-card">
-            <div class="card-header">
-              <h3 class="card-title">MULTI-SCENE SHOWS (INLINE)</h3>
+        <!-- ═══ SECTION: OBJECT REFERENCE ═══ -->
+        <div class="docs-section">
+          <h2 class="docs-section-title">OBJECT REFERENCE</h2>
+          <p class="docs-section-desc">Three object types. Each starts invisible and needs <code>fade-in</code> to appear.</p>
+
+          <div class="docs-grid">
+            <!-- Object: Graph -->
+            <div class="card docs-card">
+              <div class="card-header">
+                <h3 class="card-title">GRAPH</h3>
+              </div>
+              <div class="card-body">
+                <p>Nodes (circles with labels) and edges (lines between them).</p>
+                <pre class="docs-code"><code>- id: my-graph
+  type: graph
+  nodes:
+    - { id: A, label: A, x: 960, y: 300 }
+    - { id: B, label: B, x: 760, y: 500 }
+  edges:
+    - { from: A, to: B }
+  style:
+    nodeRadius: 35</code></pre>
+                <p><strong>Node fields:</strong> <code>id</code> (required), <code>label</code> (defaults to id), <code>x</code>, <code>y</code></p>
+                <p><strong>Edge fields:</strong> <code>from</code>, <code>to</code> — must reference valid node IDs. Lookup key is <code>"from-to"</code>.</p>
+                <div class="docs-table-wrap">
+                  <table class="docs-table docs-table-sm">
+                    <thead><tr><th>Style Property</th><th>Default</th></tr></thead>
+                    <tbody>
+                      <tr><td><code>nodeRadius</code></td><td>30</td></tr>
+                      <tr><td><code>nodeColor</code></td><td>#4a4a6a</td></tr>
+                      <tr><td><code>nodeStroke</code></td><td>#7c7caa</td></tr>
+                      <tr><td><code>edgeColor</code></td><td>#3a3a5a</td></tr>
+                      <tr><td><code>edgeWidth</code></td><td>3</td></tr>
+                      <tr><td><code>strokeWidth</code></td><td>3</td></tr>
+                      <tr><td><code>labelColor</code></td><td>#ffffff</td></tr>
+                      <tr><td><code>labelFont</code></td><td>16px monospace</td></tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
             </div>
-            <div class="card-body">
-              <p>Wrap multiple scenes in a show manifest with shared meta. Each scene has its own objects and timeline.</p>
-              <pre class="docs-code"><code>meta:
+
+            <!-- Object: Data Structure -->
+            <div class="card docs-card">
+              <div class="card-header">
+                <h3 class="card-title">DATA STRUCTURE</h3>
+              </div>
+              <div class="card-body">
+                <p>Queues, stacks, arrays, linked lists. Starts empty — use <code>enqueue</code>/<code>push</code> to fill.</p>
+                <pre class="docs-code"><code>- id: my-queue
+  type: data-structure
+  variant: queue
+  position: { x: 960, y: 800 }
+  style:
+    cellWidth: 70</code></pre>
+                <p><strong>Fields:</strong> <code>id</code>, <code>variant</code> (queue | stack | array | linked-list), <code>position: {x, y}</code></p>
+                <div class="docs-table-wrap">
+                  <table class="docs-table docs-table-sm">
+                    <thead><tr><th>Style Property</th><th>Default</th></tr></thead>
+                    <tbody>
+                      <tr><td><code>cellWidth</code></td><td>60</td></tr>
+                      <tr><td><code>cellHeight</code></td><td>40</td></tr>
+                      <tr><td><code>fillColor</code></td><td>#2a2a4a</td></tr>
+                      <tr><td><code>borderColor</code></td><td>#5a5a8a</td></tr>
+                      <tr><td><code>textColor</code></td><td>#ffffff</td></tr>
+                      <tr><td><code>gap</code></td><td>4</td></tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+
+            <!-- Object: Text -->
+            <div class="card docs-card">
+              <div class="card-header">
+                <h3 class="card-title">TEXT</h3>
+              </div>
+              <div class="card-body">
+                <p>Labels, titles, descriptions. Always start with <code>content: ""</code> and use <code>set-text</code> + <code>fade-in</code>.</p>
+                <pre class="docs-code"><code>- id: title
+  type: text
+  content: ""
+  position: { x: 960, y: 100 }
+  style:
+    font: "bold 42px sans-serif"
+    align: center
+    color: "#ffffff"</code></pre>
+                <p><strong>Fields:</strong> <code>id</code>, <code>content</code> (start with ""), <code>position: {x, y}</code></p>
+                <div class="docs-table-wrap">
+                  <table class="docs-table docs-table-sm">
+                    <thead><tr><th>Style Property</th><th>Default</th></tr></thead>
+                    <tbody>
+                      <tr><td><code>font</code></td><td>20px sans-serif</td></tr>
+                      <tr><td><code>color</code></td><td>#ffffff</td></tr>
+                      <tr><td><code>align</code></td><td>left</td></tr>
+                    </tbody>
+                  </table>
+                </div>
+                <p><strong>Font format:</strong> CSS shorthand — <code>"bold 36px sans-serif"</code>, <code>"24px monospace"</code></p>
+              </div>
+            </div>
+
+            <!-- Meta Reference -->
+            <div class="card docs-card">
+              <div class="card-header">
+                <h3 class="card-title">META — GLOBAL SETTINGS</h3>
+              </div>
+              <div class="card-body">
+                <pre class="docs-code"><code>meta:
+  title: "My Animation"
+  topic: "my-topic"
+  canvas:
+    width: 1920
+    height: 1080
+    background: "#1a1a2e"
+  defaults:
+    graph: { nodeRadius: 30, ... }
+    data-structure: { cellWidth: 60, ... }
+    text: { font: "20px sans-serif", ... }
+  palette:
+    visited: "#ff6b6b"
+    queued: "#ffd93d"
+  easing: easeInOutCubic</code></pre>
+                <p><code>title</code> and <code>canvas</code> are required. Everything else is optional. <code>topic</code> is used for the output filename.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ═══ SECTION: ACTION REFERENCE ═══ -->
+        <div class="docs-section">
+          <h2 class="docs-section-title">ACTION REFERENCE</h2>
+          <p class="docs-section-desc">All 16 supported actions. Unsupported types are silently skipped. All actions accept optional <code>easing</code>.</p>
+
+          <div class="docs-grid">
+            <div class="card docs-card docs-card-wide">
+              <div class="card-header">
+                <h3 class="card-title">VISIBILITY</h3>
+              </div>
+              <div class="card-body">
+                <div class="docs-table-wrap">
+                  <table class="docs-table">
+                    <thead><tr><th>Action</th><th>Required Fields</th><th>Description</th></tr></thead>
+                    <tbody>
+                      <tr><td><code>fade-in</code></td><td>target, duration</td><td>Opacity 0 → 1. <strong>Must be used before any other action on an object.</strong></td></tr>
+                      <tr><td><code>fade-out</code></td><td>target, duration</td><td>Opacity 1 → 0. Use at end of scenes for clean transitions.</td></tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+
+            <div class="card docs-card docs-card-wide">
+              <div class="card-header">
+                <h3 class="card-title">GRAPH ACTIONS</h3>
+              </div>
+              <div class="card-body">
+                <div class="docs-table-wrap">
+                  <table class="docs-table">
+                    <thead><tr><th>Action</th><th>Required Fields</th><th>Description</th></tr></thead>
+                    <tbody>
+                      <tr><td><code>highlight-node</code></td><td>target, node, color, duration</td><td>Change node fill + stroke. <code>target</code> = graph ID, <code>node</code> = node ID.</td></tr>
+                      <tr><td><code>highlight-edge</code></td><td>target, edge, color, duration</td><td>Change edge stroke. <code>edge: [from, to]</code> must match a defined edge.</td></tr>
+                      <tr><td><code>move-node</code></td><td>target, node, position, duration</td><td>Move a graph node to <code>{x, y}</code>.</td></tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+
+            <div class="card docs-card docs-card-wide">
+              <div class="card-header">
+                <h3 class="card-title">DATA STRUCTURE ACTIONS</h3>
+              </div>
+              <div class="card-body">
+                <div class="docs-table-wrap">
+                  <table class="docs-table">
+                    <thead><tr><th>Action</th><th>Required Fields</th><th>Description</th></tr></thead>
+                    <tbody>
+                      <tr><td><code>enqueue</code></td><td>target, values, duration</td><td>Add values to queue. <code>values</code> = string array <code>["A", "B"]</code></td></tr>
+                      <tr><td><code>dequeue</code></td><td>target, duration</td><td>Remove front value from queue.</td></tr>
+                      <tr><td><code>push</code></td><td>target, values, duration</td><td>Push values onto stack. <code>values</code> = string array.</td></tr>
+                      <tr><td><code>pop</code></td><td>target, duration</td><td>Pop top value from stack.</td></tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+
+            <div class="card docs-card docs-card-wide">
+              <div class="card-header">
+                <h3 class="card-title">TEXT, MOVEMENT, CAMERA, STYLE & TIMING</h3>
+              </div>
+              <div class="card-body">
+                <div class="docs-table-wrap">
+                  <table class="docs-table">
+                    <thead><tr><th>Action</th><th>Required Fields</th><th>Description</th></tr></thead>
+                    <tbody>
+                      <tr><td><code>set-text</code></td><td>target, value</td><td>Replace text content. <strong>Does NOT change visibility.</strong></td></tr>
+                      <tr><td><code>move-to</code></td><td>target, position, duration</td><td>Move any object to <code>{x, y}</code> screen coords.</td></tr>
+                      <tr><td><code>camera-zoom</code></td><td>scale, duration</td><td>Zoom all objects. <code>1.0</code> = normal, <code>2.0</code> = 2x.</td></tr>
+                      <tr><td><code>camera-pan</code></td><td>position, duration</td><td>Pan camera to <code>{x, y}</code>.</td></tr>
+                      <tr><td><code>camera-reset</code></td><td>duration</td><td>Reset zoom to 1.0 and position to center.</td></tr>
+                      <tr><td><code>set-style</code></td><td>target, style, duration</td><td>Animate style properties. Optional <code>node</code> for graph nodes.</td></tr>
+                      <tr><td><code>pause</code></td><td>duration</td><td>Wait without doing anything.</td></tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ═══ SECTION: COMMON PATTERNS ═══ -->
+        <div class="docs-section">
+          <h2 class="docs-section-title">COMMON PATTERNS</h2>
+          <p class="docs-section-desc">Copy these patterns to build correct scenes quickly.</p>
+
+          <div class="docs-grid">
+            <!-- Pattern: Scene Setup -->
+            <div class="card docs-card">
+              <div class="card-header">
+                <h3 class="card-title">SCENE SETUP</h3>
+              </div>
+              <div class="card-body">
+                <p>Every scene must start by fading in all objects:</p>
+                <pre class="docs-code"><code>timeline:
+  # Step 0: Make everything visible
+  - parallel:
+      - action: fade-in
+        target: graph
+        duration: 0.5s
+      - action: fade-in
+        target: step
+        duration: 0.5s
+      - action: fade-in
+        target: queue
+        duration: 0.5s
+  - action: pause
+    duration: 1s
+
+  # Now start animating...</code></pre>
+              </div>
+            </div>
+
+            <!-- Pattern: Text Reveal -->
+            <div class="card docs-card">
+              <div class="card-header">
+                <h3 class="card-title">TEXT REVEAL</h3>
+              </div>
+              <div class="card-body">
+                <p>For text scenes: set content, then fade in:</p>
+                <pre class="docs-code"><code>- action: set-text
+  target: title
+  value: "Breadth-First Search"
+- action: fade-in
+  target: title
+  duration: 0.8s
+  easing: easeOutCubic
+- action: pause
+  duration: 1s
+
+- action: set-text
+  target: subtitle
+  value: "A graph traversal algorithm"
+- action: fade-in
+  target: subtitle
+  duration: 0.6s
+- action: pause
+  duration: 2s</code></pre>
+              </div>
+            </div>
+
+            <!-- Pattern: Algorithm Step -->
+            <div class="card docs-card">
+              <div class="card-header">
+                <h3 class="card-title">ALGORITHM STEP</h3>
+              </div>
+              <div class="card-body">
+                <p>Each step: label → highlight → operate → pause:</p>
+                <pre class="docs-code"><code># 1. Label the step
+- action: set-text
+  target: step
+  value: "Dequeue C, visit neighbors"
+
+# 2. Highlight active element
+- action: highlight-node
+  target: graph
+  node: C
+  color: $active
+  duration: 0.5s
+- action: pause
+  duration: 1s
+
+# 3. Perform operation
+- parallel:
+    - action: dequeue
+      target: queue
+      duration: 0.5s
+    - action: highlight-edge
+      target: graph
+      edge: [C, D]
+      color: $visited
+      duration: 0.5s
+
+# 4. Pause for comprehension
+- action: pause
+  duration: 4s</code></pre>
+              </div>
+            </div>
+
+            <!-- Pattern: Scene Cleanup -->
+            <div class="card docs-card">
+              <div class="card-header">
+                <h3 class="card-title">SCENE CLEANUP</h3>
+              </div>
+              <div class="card-body">
+                <p>Fade out before transitions:</p>
+                <pre class="docs-code"><code>- parallel:
+    - action: fade-out
+      target: graph
+      duration: 0.8s
+    - action: fade-out
+      target: step
+      duration: 0.8s
+    - action: fade-out
+      target: queue
+      duration: 0.8s
+- action: pause
+  duration: 0.3s</code></pre>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ═══ SECTION: MULTI-SCENE SHOWS ═══ -->
+        <div class="docs-section">
+          <h2 class="docs-section-title">MULTI-SCENE SHOWS</h2>
+          <p class="docs-section-desc">Combine scenes into longer videos with transitions and shared settings.</p>
+
+          <div class="docs-grid">
+            <div class="card docs-card">
+              <div class="card-header">
+                <h3 class="card-title">SHOW MANIFEST</h3>
+              </div>
+              <div class="card-body">
+                <p>A show wraps multiple scenes with shared <code>meta</code>:</p>
+                <pre class="docs-code"><code>meta:
   title: "My Course"
-  canvas: { width: 1920, height: 1080, background: "#0f0f23" }
+  canvas: { width: 1920, height: 1080,
+            background: "#0f0f23" }
   palette:
     visited: "#e74c3c"
     current: "#2ecc71"
@@ -462,37 +831,72 @@ scenes:
   - name: intro
     transition: none
     manifest:
-      meta: { title: "Intro" }
+      meta: { title: "Intro", canvas: {...} }
       objects: [...]
       timeline: [...]
 
   - name: lesson
-    transition: { type: crossfade, duration: 1s }
+    transition:
+      type: crossfade
+      duration: 1s
     manifest:
-      meta: { title: "Lesson" }
+      meta: { title: "Lesson", canvas: {...} }
       objects: [...]
       timeline: [...]</code></pre>
-              <p><strong>Transitions:</strong> <code>none</code>, <code>fade</code>, <code>crossfade</code>, <code>slide-left</code>, <code>slide-right</code></p>
+              </div>
             </div>
-          </div>
 
-          <!-- Tips -->
-          <div class="card docs-card">
-            <div class="card-header">
-              <h3 class="card-title">TIPS</h3>
-            </div>
-            <div class="card-body">
-              <ul class="tip-list">
-                <li><strong>Start objects invisible:</strong> Set text <code>content: ""</code> and use <code>set-text</code> + <code>fade-in</code> to reveal</li>
-                <li><strong>Use parallel blocks</strong> for simultaneous highlights, fades, and movements</li>
-                <li><strong>Use pauses</strong> to give viewers time to absorb information</li>
-                <li><strong>Camera zoom</strong> works well for focusing on specific graph areas</li>
-                <li><strong>Palette refs</strong> (<code>$name</code>) keep colors consistent</li>
-                <li><strong>Style defaults</strong> in <code>meta.defaults</code> reduce repetition</li>
-              </ul>
+            <div class="card docs-card">
+              <div class="card-header">
+                <h3 class="card-title">TRANSITIONS & INHERITANCE</h3>
+              </div>
+              <div class="card-body">
+                <p><strong>Transitions</strong> between scenes:</p>
+                <div class="docs-table-wrap">
+                  <table class="docs-table docs-table-sm">
+                    <thead><tr><th>Type</th><th>Effect</th></tr></thead>
+                    <tbody>
+                      <tr><td><code>none</code></td><td>Instant cut</td></tr>
+                      <tr><td><code>fade</code></td><td>Fade out old, fade in new</td></tr>
+                      <tr><td><code>crossfade</code></td><td>Old + new fade simultaneously</td></tr>
+                      <tr><td><code>slide-left</code></td><td>New slides in from right</td></tr>
+                      <tr><td><code>slide-right</code></td><td>New slides in from left</td></tr>
+                    </tbody>
+                  </table>
+                </div>
+                <p>First scene must use <code>none</code>.</p>
+                <p><strong>Inheritance:</strong> Scenes inherit <code>palette</code>, <code>defaults</code>, and <code>easing</code> from the show <code>meta</code>. Scene values override show values.</p>
+              </div>
             </div>
           </div>
         </div>
+
+        <!-- ═══ SECTION: TROUBLESHOOTING ═══ -->
+        <div class="docs-section">
+          <h2 class="docs-section-title">TROUBLESHOOTING</h2>
+
+          <div class="docs-grid">
+            <div class="card docs-card docs-card-wide">
+              <div class="card-body" style="padding-top: var(--space-4);">
+                <div class="docs-table-wrap">
+                  <table class="docs-table">
+                    <thead><tr><th>Problem</th><th>Cause</th><th>Fix</th></tr></thead>
+                    <tbody>
+                      <tr><td>Black screen / nothing visible</td><td>Missing <code>fade-in</code></td><td>Add <code>fade-in</code> for every object before using it</td></tr>
+                      <tr><td>Text invisible after <code>set-text</code></td><td><code>set-text</code> doesn't change opacity</td><td>Add <code>fade-in</code> after <code>set-text</code></td></tr>
+                      <tr><td><code>$colorName</code> not resolving</td><td>Not in <code>meta.palette</code></td><td>Add to palette or use raw hex</td></tr>
+                      <tr><td>Node not highlighting</td><td>Wrong <code>target</code></td><td>Use <code>target: graph-id</code> + <code>node: node-id</code></td></tr>
+                      <tr><td>Edge not highlighting</td><td>Direction mismatch</td><td><code>edge: [from, to]</code> must match defined direction</td></tr>
+                      <tr><td>Previous scene objects visible</td><td>Objects don't carry over</td><td>Each scene defines its own objects</td></tr>
+                      <tr><td>Camera stuck zoomed</td><td>No reset</td><td>Add <code>camera-reset</code> or rely on auto-reset</td></tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
       </div>
     </div>
   </template>

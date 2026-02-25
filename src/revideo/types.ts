@@ -64,6 +64,7 @@ export interface InlineShowScene {
   name?: string;
   manifest: Manifest;
   transition?: TransitionConfig | 'none';
+  narration?: string;
 }
 
 // ── Timeline ───────────────────────────────────────────────────────

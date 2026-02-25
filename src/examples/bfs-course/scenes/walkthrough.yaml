@@ -89,7 +89,7 @@ timeline:
     easing: easeOutCubic
 
   - action: pause
-    duration: 1s
+    duration: 2s
 
   # Show queue area
   - action: set-text
@@ -111,7 +111,7 @@ timeline:
     duration: 0.3s
 
   - action: pause
-    duration: 1s
+    duration: 2s
 
   # Zoom into the graph center (960, 490) for step 1
   - parallel:
@@ -125,7 +125,7 @@ timeline:
         easing: easeInOutCubic
 
   - action: pause
-    duration: 0.5s
+    duration: 1.5s
 
   # ═══════════════════════════════════════════
   # STEP 1: Start at A
@@ -145,7 +145,7 @@ timeline:
     easing: easeOutBack
 
   - action: pause
-    duration: 0.5s
+    duration: 1.5s
 
   # Zoom back out to show queue
   - action: camera-reset
@@ -161,7 +161,7 @@ timeline:
     value: "Queue [ A ]"
 
   - action: pause
-    duration: 2s
+    duration: 4s
 
   # ═══════════════════════════════════════════
   # STEP 2: Dequeue A → visit neighbors B, C
@@ -185,7 +185,7 @@ timeline:
     value: "Visited: A"
 
   - action: pause
-    duration: 0.8s
+    duration: 1.5s
 
   # Zoom to show edges from A — pan to A's area
   - parallel:
@@ -210,7 +210,7 @@ timeline:
         duration: 0.6s
 
   - action: pause
-    duration: 0.5s
+    duration: 1.5s
 
   # Mark B and C as queued
   - parallel:
@@ -238,7 +238,7 @@ timeline:
     value: "Queue [ B, C ]"
 
   - action: pause
-    duration: 2s
+    duration: 4s
 
   # ═══════════════════════════════════════════
   # STEP 3: Dequeue B → visit neighbors D, E
@@ -266,7 +266,7 @@ timeline:
     value: "Queue [ C ]"
 
   - action: pause
-    duration: 0.8s
+    duration: 1.5s
 
   # Zoom toward B's area (left side of graph)
   - parallel:
@@ -290,7 +290,7 @@ timeline:
         duration: 0.6s
 
   - action: pause
-    duration: 0.5s
+    duration: 1.5s
 
   - parallel:
       - action: highlight-node
@@ -317,7 +317,7 @@ timeline:
     value: "Queue [ C, D, E ]"
 
   - action: pause
-    duration: 2s
+    duration: 4s
 
   # ═══════════════════════════════════════════
   # STEP 4: Dequeue C → visit neighbor F
@@ -345,7 +345,7 @@ timeline:
     value: "Queue [ D, E ]"
 
   - action: pause
-    duration: 0.8s
+    duration: 1.5s
 
   # Zoom toward C's area (right side of graph)
   - parallel:
@@ -363,7 +363,7 @@ timeline:
     duration: 0.6s
 
   - action: pause
-    duration: 0.3s
+    duration: 1.5s
 
   - action: highlight-node
     target: graph
@@ -384,7 +384,7 @@ timeline:
     value: "Queue [ D, E, F ]"
 
   - action: pause
-    duration: 2s
+    duration: 4s
 
   # ═══════════════════════════════════════════
   # STEP 5: Dequeue D — leaf node
@@ -412,7 +412,7 @@ timeline:
     value: "Queue [ E, F ]"
 
   - action: pause
-    duration: 1.5s
+    duration: 4s
 
   # ═══════════════════════════════════════════
   # STEP 6: Dequeue E — leaf node
@@ -440,7 +440,7 @@ timeline:
     value: "Queue [ F ]"
 
   - action: pause
-    duration: 1.5s
+    duration: 4s
 
   # ═══════════════════════════════════════════
   # STEP 7: Dequeue F — last node, BFS done
@@ -468,7 +468,7 @@ timeline:
     value: "Queue [ ]  — empty!"
 
   - action: pause
-    duration: 1s
+    duration: 3s
 
   # Final zoom to admire the fully traversed graph
   - parallel:
@@ -482,7 +482,7 @@ timeline:
         easing: easeInOutCubic
 
   - action: pause
-    duration: 2s
+    duration: 3s
 
   - action: camera-reset
     duration: 0.6s

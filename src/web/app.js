@@ -167,7 +167,7 @@ function initEditor() {
     document.getElementById('generate-btn').disabled = true;
 
     try {
-      const response = await fetch('/api/generate', {
+      const response = await fetch('/api/v1/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ prompt })
@@ -193,13 +193,16 @@ function initEditor() {
   document.getElementById('render-btn').addEventListener('click', async () => {
     if (!state.currentShow) return;
 
+    const ttsEnabled = document.getElementById('tts-checkbox')?.checked ?? false;
+
     try {
-      const response = await fetch('/api/render-show', {
+      const response = await fetch('/api/v1/render/show', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           show: state.currentShow,
-          topic: state.currentShow.meta?.topic || document.getElementById('prompt-input').value.trim()
+          topic: state.currentShow.meta?.topic || document.getElementById('prompt-input').value.trim(),
+          tts: ttsEnabled
         })
       });
 
@@ -325,7 +328,7 @@ async function pollRenderStatus(jobId) {
 
   const poll = async () => {
     try {
-      const response = await fetch(`/api/status/${jobId}`);
+      const response = await fetch(`/api/v1/jobs/${jobId}/status`);
       if (!response.ok) throw new Error('Failed to get status');
 
       const data = await response.json();
@@ -372,7 +375,7 @@ function showVideoPreview(jobId) {
   preview.style.display = 'block';
 
   downloadBtn.onclick = () => {
-    window.location.href = `/api/download/${jobId}`;
+    window.location.href = `/api/v1/download/${jobId}`;
   };
 }
 
@@ -382,7 +385,7 @@ function showVideoPreview(jobId) {
 
 async function loadJobHistory() {
   try {
-    const response = await fetch('/api/jobs?limit=20');
+    const response = await fetch('/api/v1/jobs?limit=20');
     if (!response.ok) throw new Error('Failed to load jobs');
 
     const data = await response.json();
@@ -426,7 +429,7 @@ function createJobCard(job) {
     </div>
     <div class="job-actions">
       ${job.status === 'done' ? `
-        <a href="/api/download/${job.id}" class="btn btn-success btn-sm">DOWNLOAD</a>
+        <a href="/api/v1/download/${job.id}" class="btn btn-success btn-sm">DOWNLOAD</a>
       ` : ''}
       <button class="btn btn-outline btn-sm delete-job" data-id="${job.id}">DELETE</button>
     </div>
@@ -436,7 +439,7 @@ function createJobCard(job) {
     if (!confirm('Delete this job?')) return;
 
     try {
-      await fetch(`/api/jobs/${job.id}`, { method: 'DELETE' });
+      await fetch(`/api/v1/jobs/${job.id}`, { method: 'DELETE' });
       card.remove();
     } catch (err) {
       alert('Failed to delete job');

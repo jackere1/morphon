@@ -509,7 +509,9 @@ function normalizeAction(
       break;
 
     case 'pause':
-      if (!action.duration) action.duration = '1s';
+      if (!action.duration) action.duration = '3s';
+      // Enforce minimum pause duration — AI consistently generates short pauses
+      action.duration = enforceMinPauseDuration(action.duration, 3);
       break;
 
     case 'camera-reset':
@@ -568,6 +570,23 @@ function collectPaletteRefs(timeline: any[], refs: Set<string>): void {
       }
     }
   }
+}
+
+// ── Pause enforcement ────────────────────────────────────────────
+
+/**
+ * Enforce a minimum duration on pause actions.
+ * The AI consistently generates 1-2s pauses despite being told 3-5s.
+ * This guarantees the video isn't rushed.
+ */
+function enforceMinPauseDuration(dur: string, minSeconds: number): string {
+  const match = dur.match(/^([\d.]+)\s*(s|ms)$/);
+  if (!match) return `${minSeconds}s`;
+  const value = parseFloat(match[1]);
+  const unit = match[2];
+  const seconds = unit === 'ms' ? value / 1000 : value;
+  if (seconds < minSeconds) return `${minSeconds}s`;
+  return dur;
 }
 
 // ── Duration helper ──────────────────────────────────────────────

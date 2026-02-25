@@ -28,6 +28,10 @@ function resolveActionPalette(
     const key = action.color.slice(1);
     if (palette[key]) {
       action.color = palette[key];
+    } else {
+      // Fallback: unresolved palette ref → default highlight color
+      console.warn(`[Palette] Unresolved ref "$${key}" — using fallback #e74c3c`);
+      action.color = '#e74c3c';
     }
   }
 }

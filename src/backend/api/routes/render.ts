@@ -1,7 +1,10 @@
 import { Router } from 'express';
 import { randomUUID } from 'crypto';
+import { resolve } from 'path';
+import { existsSync, renameSync, unlinkSync } from 'fs';
 import PQueue from 'p-queue';
 import { renderManifest, renderShow } from '../../services/render/render-service.js';
+import { generateNarration, mergeAudioWithVideo } from '../../services/ai/tts-service.js';
 import * as jobStorage from '../../services/storage/jobStorage.js';
 import { validateRenderShowRequest, validateRenderRequest } from '../middleware/validation.js';
 import { asyncHandler } from '../middleware/errorHandler.js';
@@ -16,7 +19,7 @@ const queue = new PQueue({ concurrency: 1 });
  * Render a multi-scene show to MP4
  *
  * Request body:
- *   { show: InlineShowManifest, topic?: string }
+ *   { show: InlineShowManifest, topic?: string, tts?: boolean }
  *
  * Response:
  *   { jobId: string, status: string, queueSize: number }
@@ -25,7 +28,7 @@ router.post(
   '/show',
   validateRenderShowRequest,
   asyncHandler(async (req, res) => {
-    const { show, topic } = req.body;
+    const { show, topic, tts } = req.body;
 
     const jobId = randomUUID();
     const now = Date.now();
@@ -46,9 +49,47 @@ router.post(
       jobStorage.updateJob(jobId, { status: 'rendering' });
 
       try {
+        // Step 1: Render video (silent)
         const result = await renderShow(show, jobId, (percent) => {
-          jobStorage.updateJob(jobId, { progress: Math.floor(percent) });
+          // If TTS is enabled, video render is 0-70%, TTS is 70-90%, merge is 90-100%
+          const scaled = tts ? Math.floor(percent * 0.7) : Math.floor(percent);
+          jobStorage.updateJob(jobId, { progress: scaled });
         });
+
+        // Step 2: Generate TTS narration if requested
+        if (tts) {
+          jobStorage.updateJob(jobId, { progress: 70, title: 'Generating narration...' });
+
+          const narrations = show.scenes.map((s: any) => s.narration || '');
+          const hasAnyNarration = narrations.some((n: string) => n.trim().length > 0);
+
+          if (hasAnyNarration) {
+            const ttsResult = await generateNarration(narrations, jobId, (scene, total) => {
+              const ttsProgress = 70 + Math.floor((scene / total) * 20);
+              jobStorage.updateJob(jobId, {
+                progress: ttsProgress,
+                title: `Narrating scene ${scene}/${total}...`,
+              });
+            });
+
+            if (ttsResult) {
+              // Step 3: Merge audio with video
+              jobStorage.updateJob(jobId, { progress: 90, title: 'Merging audio...' });
+
+              const silentVideo = resolve(result.outputPath);
+              const finalVideo = resolve(`output/${jobId}-final.mp4`);
+
+              mergeAudioWithVideo(silentVideo, ttsResult.audioPath, finalVideo);
+
+              // Replace silent video with merged version
+              unlinkSync(silentVideo);
+              renameSync(finalVideo, silentVideo);
+
+              // Clean up narration WAV
+              try { unlinkSync(ttsResult.audioPath); } catch {}
+            }
+          }
+        }
 
         jobStorage.updateJob(jobId, {
           status: 'done',
