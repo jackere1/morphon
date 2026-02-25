@@ -54,6 +54,18 @@ export function isShowManifest(obj: any): obj is ShowManifest {
   return 'scenes' in obj && Array.isArray(obj.scenes);
 }
 
+/** Inline show = scenes embedded as objects (no file references). Used by web UI + AI. */
+export interface InlineShowManifest {
+  meta: ManifestMeta;
+  scenes: InlineShowScene[];
+}
+
+export interface InlineShowScene {
+  name?: string;
+  manifest: Manifest;
+  transition?: TransitionConfig | 'none';
+}
+
 // ── Timeline ───────────────────────────────────────────────────────
 
 export type TimelineEntry = ActionStep | ParallelBlock;

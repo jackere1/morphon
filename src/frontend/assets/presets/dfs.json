@@ -1,0 +1,56 @@
+{
+  "meta": {
+    "title": "DFS Traversal",
+    "topic": "dfs-web",
+    "canvas": {"width": 1920, "height": 1080, "background": "#0f0f23"},
+    "defaults": {
+      "graph": {"nodeRadius": 40, "nodeColor": "#2d4a7a", "nodeStroke": "#5b8fd9", "edgeColor": "#4a6a9a", "edgeWidth": 4, "strokeWidth": 3, "labelColor": "#ffffff", "labelFont": "24px monospace"},
+      "data-structure": {"cellWidth": 70, "cellHeight": 45, "fillColor": "#1a2a4a", "borderColor": "#5b8fd9", "textColor": "#ffffff"}
+    },
+    "palette": {"visited": "#e74c3c", "stacked": "#9b59b6", "current": "#2ecc71", "highlight": "#e67e22"},
+    "easing": "easeInOutCubic"
+  },
+  "scenes": [{
+    "name": "walkthrough",
+    "transition": "none",
+    "manifest": {
+      "meta": {"title": "DFS Traversal", "canvas": {"width": 1920, "height": 1080, "background": "#0f0f23"}},
+      "objects": [
+        {"id": "title", "type": "text", "content": "", "position": {"x": 960, "y": 60}, "style": {"font": "bold 36px sans-serif", "align": "center", "color": "#ffffff"}},
+        {"id": "graph", "type": "graph", "nodes": [{"id": "A", "label": "A", "x": 960, "y": 300}, {"id": "B", "label": "B", "x": 720, "y": 480}, {"id": "C", "label": "C", "x": 1200, "y": 480}, {"id": "D", "label": "D", "x": 840, "y": 660}], "edges": [{"from": "A", "to": "B"}, {"from": "A", "to": "C"}, {"from": "B", "to": "D"}]},
+        {"id": "stack", "type": "data-structure", "variant": "stack", "position": {"x": 960, "y": 870}},
+        {"id": "step", "type": "text", "content": "", "position": {"x": 960, "y": 140}, "style": {"font": "22px sans-serif", "align": "center", "color": "#b0b0dd"}}
+      ],
+      "timeline": [
+        {"action": "set-text", "target": "title", "value": "Depth-First Search"},
+        {"action": "fade-in", "target": "title", "duration": "0.6s"},
+        {"action": "fade-in", "target": "graph", "duration": "0.8s"},
+        {"action": "fade-in", "target": "stack", "duration": "0.3s"},
+        {"action": "pause", "duration": "1s"},
+        {"action": "set-text", "target": "step", "value": "Push A onto stack"},
+        {"action": "fade-in", "target": "step", "duration": "0.3s"},
+        {"action": "highlight-node", "target": "graph", "node": "A", "color": "$current", "duration": "0.5s"},
+        {"action": "push", "target": "stack", "values": ["A"], "duration": "0.4s"},
+        {"action": "pause", "duration": "1.5s"},
+        {"action": "set-text", "target": "step", "value": "Pop A \u2014 push C, B"},
+        {"action": "pop", "target": "stack", "duration": "0.4s"},
+        {"action": "highlight-node", "target": "graph", "node": "A", "color": "$visited", "duration": "0.4s"},
+        {"action": "push", "target": "stack", "values": ["C", "B"], "duration": "0.5s"},
+        {"action": "pause", "duration": "1.5s"},
+        {"action": "set-text", "target": "step", "value": "Pop B \u2014 push D"},
+        {"action": "pop", "target": "stack", "duration": "0.4s"},
+        {"action": "highlight-node", "target": "graph", "node": "B", "color": "$visited", "duration": "0.4s"},
+        {"action": "push", "target": "stack", "values": ["D"], "duration": "0.4s"},
+        {"action": "pause", "duration": "1.5s"},
+        {"action": "set-text", "target": "step", "value": "Pop D \u2014 leaf node"},
+        {"action": "pop", "target": "stack", "duration": "0.4s"},
+        {"action": "highlight-node", "target": "graph", "node": "D", "color": "$visited", "duration": "0.4s"},
+        {"action": "pause", "duration": "1s"},
+        {"action": "set-text", "target": "step", "value": "Pop C \u2014 DFS complete!"},
+        {"action": "pop", "target": "stack", "duration": "0.4s"},
+        {"action": "highlight-node", "target": "graph", "node": "C", "color": "$visited", "duration": "0.4s"},
+        {"action": "pause", "duration": "2s"}
+      ]
+    }
+  }]
+}

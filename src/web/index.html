@@ -4,53 +4,524 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>CS Animation Platform</title>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;700;800&family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+
+  <!-- Styles - Neubrutalism Design System -->
+  <link rel="stylesheet" href="/frontend/styles/neubrutalism.css">
   <link rel="stylesheet" href="style.css">
-  <!-- CodeMirror 6 from CDN -->
-  <script type="module" src="https://cdn.jsdelivr.net/npm/@aspect-bundled/codemirror-yaml@0.0.3/dist/index.js"></script>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@codemirror/view@6/dist/index.css">
+
+  <!-- Dependencies -->
+  <script src="https://cdn.jsdelivr.net/npm/js-yaml@4.1.0/dist/js-yaml.min.js"></script>
 </head>
 <body>
-  <header>
-    <h1>CS Animation Platform</h1>
-    <p class="subtitle">YAML manifest &rarr; animated CS education video</p>
-  </header>
-
-  <main>
-    <div class="panel editor-panel">
-      <div class="panel-header">
-        <span>Manifest Editor</span>
-        <div class="controls">
-          <select id="preset-select">
-            <option value="">Load example...</option>
-            <option value="bfs">BFS Walkthrough</option>
-            <option value="dfs">DFS Traversal</option>
-            <option value="stack">Stack Operations</option>
-          </select>
-          <button id="render-btn" class="btn-primary">Render</button>
-        </div>
-      </div>
-      <div id="editor"></div>
+  <!-- NAVIGATION -->
+  <nav class="nav">
+    <div class="nav-container">
+      <a href="#/" class="nav-brand">
+        <span class="nav-brand-icon">CS</span>
+        <span>ANIMATIONS</span>
+      </a>
+      <ul class="nav-links">
+        <li><a href="#/" class="nav-link" data-route="/">EDITOR</a></li>
+        <li><a href="#/templates" class="nav-link" data-route="/templates">TEMPLATES</a></li>
+        <li><a href="#/docs" class="nav-link" data-route="/docs">DOCS</a></li>
+        <li><a href="#/history" class="nav-link" data-route="/history">HISTORY</a></li>
+      </ul>
     </div>
+  </nav>
 
-    <div class="panel preview-panel">
-      <div class="panel-header">
-        <span>Preview</span>
-        <a id="download-link" class="btn-download" style="display:none" download>Download MP4</a>
-      </div>
+  <!-- APP ROOT - Pages render here -->
+  <div id="app-root"></div>
 
-      <div id="preview-area">
-        <div id="status-message" class="status">
-          Write or load a manifest, then click Render.
+  <!-- EDITOR PAGE TEMPLATE -->
+  <template id="template-editor">
+    <div class="page-editor">
+      <div class="container">
+        <!-- Hero Banner -->
+        <div class="editor-hero">
+          <div class="editor-hero-content">
+            <h1 class="editor-hero-title">TEXT &rarr; AI &rarr; VIDEO</h1>
+            <p class="editor-hero-subtitle">Animated CS education videos from a single prompt — or write your own YAML manifest</p>
+          </div>
         </div>
-        <div id="progress-bar-container" style="display:none">
-          <div id="progress-bar"></div>
-          <span id="progress-text">0%</span>
+
+        <!-- Main Grid -->
+        <div class="editor-grid">
+          <!-- LEFT: Prompt & Editor -->
+          <div class="editor-left">
+            <!-- Prompt Card -->
+            <div class="card prompt-card">
+              <div class="card-header">
+                <h3 class="card-title">DESCRIBE YOUR ANIMATION</h3>
+                <select id="preset-select" class="preset-select">
+                  <option value="">Load preset...</option>
+                  <option value="bfs">BFS Walkthrough</option>
+                  <option value="dfs">DFS Traversal</option>
+                  <option value="stack">Stack Operations</option>
+                </select>
+              </div>
+              <div class="card-body">
+                <textarea
+                  id="prompt-input"
+                  placeholder="e.g. Explain binary search with a sorted array, showing comparisons and narrowing the range..."
+                  rows="4"
+                ></textarea>
+              </div>
+              <div class="card-footer">
+                <button id="generate-btn" class="btn btn-primary btn-lg">
+                  <span>GENERATE</span>
+                </button>
+                <div id="generate-status" class="generate-status"></div>
+              </div>
+            </div>
+
+            <!-- Paste Manifest (collapsible) -->
+            <div class="paste-manifest-section">
+              <button id="paste-manifest-toggle" class="paste-toggle">
+                or paste a full YAML manifest <span class="toggle-arrow">&#9660;</span>
+              </button>
+              <div id="paste-manifest-body" class="paste-manifest-body" style="display:none">
+                <div class="card">
+                  <div class="card-body">
+                    <textarea
+                      id="manual-yaml-input"
+                      spellcheck="false"
+                      rows="14"
+                      class="code-textarea"
+                      placeholder="Paste your show manifest YAML here..."
+                    ></textarea>
+                  </div>
+                  <div class="card-footer">
+                    <button id="load-yaml-btn" class="btn btn-primary">
+                      <span>LOAD MANIFEST</span>
+                    </button>
+                    <a href="#/docs" class="btn btn-outline">DOCS</a>
+                    <div id="manual-status" class="generate-status"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Scene Tabs -->
+            <div id="scenes-section" class="scenes-section" style="display:none">
+              <div class="card">
+                <div class="card-header">
+                  <h3 class="card-title">SCENES</h3>
+                  <div id="scene-tabs" class="scene-tabs"></div>
+                </div>
+                <div class="card-body">
+                  <textarea id="scene-editor" spellcheck="false" rows="20" class="code-textarea"></textarea>
+                </div>
+              </div>
+            </div>
+
+            <!-- Show Settings -->
+            <div id="meta-section" class="meta-section" style="display:none">
+              <div class="card">
+                <div class="card-header collapsible" id="meta-toggle">
+                  <h4 class="card-title">SHOW SETTINGS</h4>
+                  <span class="toggle-icon">&#9660;</span>
+                </div>
+                <div id="meta-editor-wrap" style="display:none">
+                  <div class="card-body">
+                    <textarea id="meta-editor" spellcheck="false" rows="12" class="code-textarea"></textarea>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- RIGHT: Preview & Status -->
+          <div class="editor-right">
+            <!-- Render Card -->
+            <div class="card render-card">
+              <div class="card-header">
+                <h3 class="card-title">RENDER</h3>
+              </div>
+              <div class="card-body">
+                <button id="render-btn" class="btn btn-accent btn-lg" style="width:100%" disabled>
+                  <span>RENDER VIDEO</span>
+                </button>
+
+                <div id="render-status-card" class="render-status-card" style="display:none">
+                  <div class="status-header">
+                    <span id="status-text">Rendering...</span>
+                    <span id="status-badge" class="badge badge-info">queued</span>
+                  </div>
+                  <div class="progress-bar">
+                    <div id="progress-fill" class="progress-fill" style="width:0%"></div>
+                  </div>
+                  <p id="status-detail" class="status-detail"></p>
+                </div>
+
+                <div id="video-preview" class="video-preview" style="display:none">
+                  <video id="video-player" controls style="width:100%"></video>
+                  <button id="download-btn" class="btn btn-success" style="width:100%; margin-top:12px">
+                    <span>DOWNLOAD MP4</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Info Card -->
+            <div class="card info-card">
+              <div class="card-header">
+                <h4 class="card-title">QUICK TIPS</h4>
+              </div>
+              <div class="card-body">
+                <ul class="tip-list">
+                  <li>Be specific about algorithms & data structures</li>
+                  <li>Mention key operations you want visualized</li>
+                  <li>Each scene = ~10 seconds of video</li>
+                  <li>Edit the YAML for fine-tuning</li>
+                  <li><a href="#/docs">Read the docs</a> for the full manifest reference</li>
+                </ul>
+              </div>
+            </div>
+          </div>
         </div>
-        <video id="video-player" controls style="display:none"></video>
       </div>
     </div>
-  </main>
+  </template>
 
+  <!-- TEMPLATES PAGE TEMPLATE -->
+  <template id="template-templates">
+    <div class="page-templates">
+      <div class="container">
+        <div class="page-header">
+          <h1>TEMPLATES</h1>
+          <p class="page-subtitle">Pre-built animations ready to customize</p>
+        </div>
+
+        <div class="templates-grid grid grid-3">
+          <div class="card template-card">
+            <div class="template-preview" style="background: linear-gradient(135deg, #FF006E 0%, #FB5607 100%);">
+              <div class="template-icon">BFS</div>
+            </div>
+            <div class="card-body">
+              <h3>BFS Walkthrough</h3>
+              <p>Breadth-first search with graph + queue visualization. 30 timeline actions.</p>
+              <div class="template-tags">
+                <span class="badge badge-info">Graph</span>
+                <span class="badge badge-neutral">1 scene</span>
+              </div>
+            </div>
+            <div class="card-footer">
+              <button class="btn btn-primary btn-sm load-template" data-preset="bfs">
+                LOAD
+              </button>
+            </div>
+          </div>
+
+          <div class="card template-card">
+            <div class="template-preview" style="background: linear-gradient(135deg, #00F5FF 0%, #06FFA5 100%);">
+              <div class="template-icon">DFS</div>
+            </div>
+            <div class="card-body">
+              <h3>DFS Traversal</h3>
+              <p>Depth-first search with graph + stack visualization. 28 timeline actions.</p>
+              <div class="template-tags">
+                <span class="badge badge-info">Graph</span>
+                <span class="badge badge-neutral">1 scene</span>
+              </div>
+            </div>
+            <div class="card-footer">
+              <button class="btn btn-primary btn-sm load-template" data-preset="dfs">
+                LOAD
+              </button>
+            </div>
+          </div>
+
+          <div class="card template-card">
+            <div class="template-preview" style="background: linear-gradient(135deg, #FFBE0B 0%, #06FFA5 100%);">
+              <div class="template-icon">STK</div>
+            </div>
+            <div class="card-body">
+              <h3>Stack Operations</h3>
+              <p>Push/pop demo showing LIFO order with 3 values. 22 timeline actions.</p>
+              <div class="template-tags">
+                <span class="badge badge-warning">Data Structure</span>
+                <span class="badge badge-neutral">1 scene</span>
+              </div>
+            </div>
+            <div class="card-footer">
+              <button class="btn btn-primary btn-sm load-template" data-preset="stack">
+                LOAD
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="empty-state" style="text-align:center; margin-top:64px;">
+          <h2>Custom templates coming soon!</h2>
+          <p>Save your own animations as reusable templates</p>
+        </div>
+      </div>
+    </div>
+  </template>
+
+  <!-- DOCS PAGE TEMPLATE -->
+  <template id="template-docs">
+    <div class="page-docs">
+      <div class="container">
+        <div class="page-header">
+          <h1>MANIFEST REFERENCE</h1>
+          <p class="page-subtitle">Everything you need to write animation manifests by hand</p>
+        </div>
+
+        <div class="docs-grid">
+          <!-- Structure Overview -->
+          <div class="card docs-card">
+            <div class="card-header">
+              <h3 class="card-title">MANIFEST STRUCTURE</h3>
+            </div>
+            <div class="card-body">
+              <p>A manifest describes <strong>what to draw</strong> (objects) and <strong>what to animate</strong> (timeline). Same manifest always produces the same video.</p>
+              <pre class="docs-code"><code>meta:       # Canvas size, colors, defaults
+objects:    # Things on screen (graphs, text, queues)
+timeline:   # Sequence of animation steps</code></pre>
+            </div>
+          </div>
+
+          <!-- Meta -->
+          <div class="card docs-card">
+            <div class="card-header">
+              <h3 class="card-title">META — GLOBAL SETTINGS</h3>
+            </div>
+            <div class="card-body">
+              <pre class="docs-code"><code>meta:
+  title: "My Animation"
+  canvas:
+    width: 1920
+    height: 1080
+    background: "#1a1a2e"
+  defaults:
+    graph:
+      nodeRadius: 30
+      nodeColor: "#4a4a6a"
+      nodeStroke: "#7c7caa"
+      edgeColor: "#3a3a5a"
+      labelColor: "#ffffff"
+      labelFont: "16px monospace"
+    data-structure:
+      cellWidth: 60
+      cellHeight: 40
+      fillColor: "#2a2a4a"
+      borderColor: "#5a5a8a"
+      textColor: "#ffffff"
+  palette:
+    visited: "#ff6b6b"
+    queued: "#ffd93d"
+  easing: easeInOutCubic</code></pre>
+              <p><strong>Palette refs:</strong> Define colors in <code>meta.palette</code>, reference with <code>$name</code>. Example: <code>color: $visited</code> resolves to <code>#ff6b6b</code>.</p>
+              <p><strong>Coordinates:</strong> <code>(0,0)</code> is top-left. Center of 1920x1080 canvas is <code>(960, 540)</code>.</p>
+            </div>
+          </div>
+
+          <!-- Object: Graph -->
+          <div class="card docs-card">
+            <div class="card-header">
+              <h3 class="card-title">OBJECT: GRAPH</h3>
+            </div>
+            <div class="card-body">
+              <p>Nodes (circles) and edges (lines).</p>
+              <pre class="docs-code"><code>- id: my-graph
+  type: graph
+  nodes:
+    - { id: A, label: A, x: 960, y: 300 }
+    - { id: B, label: B, x: 760, y: 500 }
+    - { id: C, label: C, x: 1160, y: 500 }
+  edges:
+    - { from: A, to: B }
+    - { from: A, to: C }
+  style:
+    nodeRadius: 35</code></pre>
+            </div>
+          </div>
+
+          <!-- Object: Data Structure -->
+          <div class="card docs-card">
+            <div class="card-header">
+              <h3 class="card-title">OBJECT: DATA STRUCTURE</h3>
+            </div>
+            <div class="card-body">
+              <p>Queues, stacks, arrays, and linked lists.</p>
+              <pre class="docs-code"><code>- id: my-queue
+  type: data-structure
+  variant: queue    # queue | stack | array | linked-list
+  position: { x: 960, y: 800 }
+  style:
+    cellWidth: 70</code></pre>
+            </div>
+          </div>
+
+          <!-- Object: Text -->
+          <div class="card docs-card">
+            <div class="card-header">
+              <h3 class="card-title">OBJECT: TEXT</h3>
+            </div>
+            <div class="card-body">
+              <p>Labels, titles, descriptions.</p>
+              <pre class="docs-code"><code>- id: title
+  type: text
+  content: "Hello World"
+  position: { x: 960, y: 100 }
+  style:
+    font: "bold 42px sans-serif"
+    align: center
+    color: "#ffffff"</code></pre>
+            </div>
+          </div>
+
+          <!-- Action Reference -->
+          <div class="card docs-card docs-card-wide">
+            <div class="card-header">
+              <h3 class="card-title">ACTION REFERENCE (16 ACTIONS)</h3>
+            </div>
+            <div class="card-body">
+              <div class="docs-table-wrap">
+                <table class="docs-table">
+                  <thead>
+                    <tr><th>Action</th><th>Fields</th><th>Description</th></tr>
+                  </thead>
+                  <tbody>
+                    <tr><td><code>fade-in</code></td><td>target, duration</td><td>Fade object from transparent to visible</td></tr>
+                    <tr><td><code>fade-out</code></td><td>target, duration</td><td>Fade object from visible to transparent</td></tr>
+                    <tr><td><code>highlight-node</code></td><td>target, node, color, duration</td><td>Change a graph node's fill color</td></tr>
+                    <tr><td><code>highlight-edge</code></td><td>target, edge: [from, to], color, duration</td><td>Change an edge's color</td></tr>
+                    <tr><td><code>move-node</code></td><td>target, node, position: {x,y}, duration</td><td>Move a graph node</td></tr>
+                    <tr><td><code>enqueue</code></td><td>target, values: [...], duration</td><td>Add values to a queue</td></tr>
+                    <tr><td><code>dequeue</code></td><td>target, duration</td><td>Remove front value from queue</td></tr>
+                    <tr><td><code>push</code></td><td>target, values: [...], duration</td><td>Push values onto a stack</td></tr>
+                    <tr><td><code>pop</code></td><td>target, duration</td><td>Pop top value from stack</td></tr>
+                    <tr><td><code>set-text</code></td><td>target, value</td><td>Change text content (instant)</td></tr>
+                    <tr><td><code>move-to</code></td><td>target, position: {x,y}, duration</td><td>Move any object to a position</td></tr>
+                    <tr><td><code>camera-zoom</code></td><td>scale, duration</td><td>Zoom in/out (1.0 = normal)</td></tr>
+                    <tr><td><code>camera-pan</code></td><td>position: {x,y}, duration</td><td>Pan camera to a position</td></tr>
+                    <tr><td><code>camera-reset</code></td><td>duration</td><td>Reset zoom and pan</td></tr>
+                    <tr><td><code>set-style</code></td><td>target, style: {...}, duration</td><td>Animate style properties</td></tr>
+                    <tr><td><code>pause</code></td><td>duration</td><td>Wait without doing anything</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- Timeline -->
+          <div class="card docs-card">
+            <div class="card-header">
+              <h3 class="card-title">TIMELINE — SEQUENTIAL & PARALLEL</h3>
+            </div>
+            <div class="card-body">
+              <p>Actions run one after another. Use <code>parallel:</code> blocks for simultaneous actions.</p>
+              <pre class="docs-code"><code>timeline:
+  - action: fade-in
+    target: title
+    duration: 0.8s
+
+  - action: pause
+    duration: 1s
+
+  - parallel:
+      - action: highlight-node
+        target: graph
+        node: A
+        color: $visited
+        duration: 0.5s
+      - action: highlight-node
+        target: graph
+        node: B
+        color: $queued
+        duration: 0.5s</code></pre>
+              <p><strong>Durations:</strong> <code>0.5s</code>, <code>500ms</code>, or <code>0.5</code> (number).</p>
+              <p><strong>Easing:</strong> Per-action override with <code>easing: easeOutCubic</code>. Available: linear, easeIn, easeOut, easeInOut, easeInCubic, easeOutCubic, easeInOutCubic, easeInBack, easeOutBack, easeOutBounce, and more.</p>
+            </div>
+          </div>
+
+          <!-- Multi-Scene Shows -->
+          <div class="card docs-card">
+            <div class="card-header">
+              <h3 class="card-title">MULTI-SCENE SHOWS (INLINE)</h3>
+            </div>
+            <div class="card-body">
+              <p>Wrap multiple scenes in a show manifest with shared meta. Each scene has its own objects and timeline.</p>
+              <pre class="docs-code"><code>meta:
+  title: "My Course"
+  canvas: { width: 1920, height: 1080, background: "#0f0f23" }
+  palette:
+    visited: "#e74c3c"
+    current: "#2ecc71"
+  defaults:
+    graph: { nodeRadius: 40 }
+
+scenes:
+  - name: intro
+    transition: none
+    manifest:
+      meta: { title: "Intro" }
+      objects: [...]
+      timeline: [...]
+
+  - name: lesson
+    transition: { type: crossfade, duration: 1s }
+    manifest:
+      meta: { title: "Lesson" }
+      objects: [...]
+      timeline: [...]</code></pre>
+              <p><strong>Transitions:</strong> <code>none</code>, <code>fade</code>, <code>crossfade</code>, <code>slide-left</code>, <code>slide-right</code></p>
+            </div>
+          </div>
+
+          <!-- Tips -->
+          <div class="card docs-card">
+            <div class="card-header">
+              <h3 class="card-title">TIPS</h3>
+            </div>
+            <div class="card-body">
+              <ul class="tip-list">
+                <li><strong>Start objects invisible:</strong> Set text <code>content: ""</code> and use <code>set-text</code> + <code>fade-in</code> to reveal</li>
+                <li><strong>Use parallel blocks</strong> for simultaneous highlights, fades, and movements</li>
+                <li><strong>Use pauses</strong> to give viewers time to absorb information</li>
+                <li><strong>Camera zoom</strong> works well for focusing on specific graph areas</li>
+                <li><strong>Palette refs</strong> (<code>$name</code>) keep colors consistent</li>
+                <li><strong>Style defaults</strong> in <code>meta.defaults</code> reduce repetition</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </template>
+
+  <!-- HISTORY PAGE TEMPLATE -->
+  <template id="template-history">
+    <div class="page-history">
+      <div class="container">
+        <div class="page-header">
+          <h1>RENDER HISTORY</h1>
+          <p class="page-subtitle">View and manage your past renders</p>
+        </div>
+
+        <div id="jobs-list" class="jobs-list">
+          <!-- Populated dynamically -->
+        </div>
+
+        <div id="empty-history" class="empty-state" style="text-align:center; padding:64px 0;">
+          <h2>No renders yet</h2>
+          <p>Your rendered videos will appear here</p>
+          <a href="#/" class="btn btn-primary" style="margin-top:24px">
+            CREATE YOUR FIRST VIDEO
+          </a>
+        </div>
+      </div>
+    </div>
+  </template>
+
+  <!-- Scripts -->
   <script type="module" src="app.js"></script>
 </body>
 </html>

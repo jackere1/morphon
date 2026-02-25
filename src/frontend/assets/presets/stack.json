@@ -1,0 +1,46 @@
+{
+  "meta": {
+    "title": "Stack: Push & Pop",
+    "topic": "stack-web",
+    "canvas": {"width": 1920, "height": 1080, "background": "#0f0f23"},
+    "defaults": {"data-structure": {"cellWidth": 80, "cellHeight": 50, "fillColor": "#1a2a4a", "borderColor": "#5b8fd9", "textColor": "#ffffff"}},
+    "easing": "easeInOutCubic"
+  },
+  "scenes": [{
+    "name": "demo",
+    "transition": "none",
+    "manifest": {
+      "meta": {"title": "Stack Operations", "canvas": {"width": 1920, "height": 1080, "background": "#0f0f23"}},
+      "objects": [
+        {"id": "title", "type": "text", "content": "", "position": {"x": 960, "y": 100}, "style": {"font": "bold 44px sans-serif", "align": "center", "color": "#ffffff"}},
+        {"id": "stack", "type": "data-structure", "variant": "stack", "position": {"x": 960, "y": 500}},
+        {"id": "narration", "type": "text", "content": "", "position": {"x": 960, "y": 700}, "style": {"font": "24px sans-serif", "align": "center", "color": "#b0b0dd"}}
+      ],
+      "timeline": [
+        {"action": "set-text", "target": "title", "value": "Stack \u2014 Last In, First Out"},
+        {"action": "fade-in", "target": "title", "duration": "0.8s"},
+        {"action": "fade-in", "target": "stack", "duration": "0.3s"},
+        {"action": "pause", "duration": "1s"},
+        {"action": "set-text", "target": "narration", "value": "push(10)"},
+        {"action": "fade-in", "target": "narration", "duration": "0.3s"},
+        {"action": "push", "target": "stack", "values": ["10"], "duration": "0.5s"},
+        {"action": "pause", "duration": "1s"},
+        {"action": "set-text", "target": "narration", "value": "push(20)"},
+        {"action": "push", "target": "stack", "values": ["20"], "duration": "0.5s"},
+        {"action": "pause", "duration": "1s"},
+        {"action": "set-text", "target": "narration", "value": "push(30)"},
+        {"action": "push", "target": "stack", "values": ["30"], "duration": "0.5s"},
+        {"action": "pause", "duration": "1s"},
+        {"action": "set-text", "target": "narration", "value": "pop() -> 30 (last in, first out!)"},
+        {"action": "pop", "target": "stack", "duration": "0.6s"},
+        {"action": "pause", "duration": "1.5s"},
+        {"action": "set-text", "target": "narration", "value": "pop() -> 20"},
+        {"action": "pop", "target": "stack", "duration": "0.6s"},
+        {"action": "pause", "duration": "1.5s"},
+        {"action": "set-text", "target": "narration", "value": "pop() -> 10 \u2014 stack empty!"},
+        {"action": "pop", "target": "stack", "duration": "0.6s"},
+        {"action": "pause", "duration": "2s"}
+      ]
+    }
+  }]
+}

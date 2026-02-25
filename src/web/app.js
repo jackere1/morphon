@@ -1,670 +1,464 @@
-// ── Elements ──
-const editorEl = document.getElementById('editor');
-const renderBtn = document.getElementById('render-btn');
-const presetSelect = document.getElementById('preset-select');
-const statusMsg = document.getElementById('status-message');
-const progressContainer = document.getElementById('progress-bar-container');
-const progressBar = document.getElementById('progress-bar');
-const progressText = document.getElementById('progress-text');
-const videoPlayer = document.getElementById('video-player');
-const downloadLink = document.getElementById('download-link');
+/**
+ * CS ANIMATION PLATFORM - NEUBRUTALISM UI
+ * Main app with client-side routing
+ */
 
-// ── Editor setup (textarea fallback — works everywhere) ──
-const textarea = document.createElement('textarea');
-textarea.id = 'yaml-editor';
-textarea.spellcheck = false;
-textarea.placeholder = '# Paste your YAML manifest here...';
-textarea.style.cssText = `
-  width: 100%; height: 100%; resize: none; border: none; outline: none;
-  background: #1a1a2e; color: #d0d0ee; padding: 16px;
-  font-family: 'JetBrains Mono', 'Fira Code', Consolas, monospace;
-  font-size: 14px; line-height: 1.6; tab-size: 2;
-`;
-editorEl.appendChild(textarea);
+import router from '/frontend/lib/router.js';
 
-// Handle tab key for indentation
-textarea.addEventListener('keydown', (e) => {
-  if (e.key === 'Tab') {
-    e.preventDefault();
-    const start = textarea.selectionStart;
-    const end = textarea.selectionEnd;
-    textarea.value = textarea.value.substring(0, start) + '  ' + textarea.value.substring(end);
-    textarea.selectionStart = textarea.selectionEnd = start + 2;
-  }
-});
+// ══════════════════════════════════════════════════════════════
+// STATE MANAGEMENT
+// ══════════════════════════════════════════════════════════════
 
-function getEditorValue() {
-  return textarea.value;
-}
-
-function setEditorValue(val) {
-  textarea.value = val;
-}
-
-// ── Presets ──
-const PRESETS = {
-  bfs: `# BFS Walkthrough — single scene
-meta:
-  title: "BFS Walkthrough"
-  topic: "bfs-web"
-  canvas:
-    width: 1920
-    height: 1080
-    background: "#0f0f23"
-  defaults:
-    graph:
-      nodeRadius: 40
-      nodeColor: "#2d4a7a"
-      nodeStroke: "#5b8fd9"
-      edgeColor: "#4a6a9a"
-      edgeWidth: 4
-      strokeWidth: 3
-      labelColor: "#ffffff"
-      labelFont: "24px monospace"
-    data-structure:
-      cellWidth: 70
-      cellHeight: 45
-      fillColor: "#1a2a4a"
-      borderColor: "#5b8fd9"
-      textColor: "#ffffff"
-  palette:
-    visited: "#e74c3c"
-    queued: "#f1c40f"
-    current: "#2ecc71"
-    highlight: "#e67e22"
-  easing: easeInOutCubic
-
-objects:
-  - id: title
-    type: text
-    content: ""
-    position: { x: 960, y: 60 }
-    style:
-      font: "bold 36px sans-serif"
-      align: center
-      color: "#ffffff"
-
-  - id: graph
-    type: graph
-    nodes:
-      - { id: A, label: A, x: 960, y: 300 }
-      - { id: B, label: B, x: 720, y: 480 }
-      - { id: C, label: C, x: 1200, y: 480 }
-      - { id: D, label: D, x: 840, y: 660 }
-    edges:
-      - { from: A, to: B }
-      - { from: A, to: C }
-      - { from: B, to: D }
-
-  - id: queue
-    type: data-structure
-    variant: queue
-    position: { x: 960, y: 870 }
-
-  - id: step
-    type: text
-    content: ""
-    position: { x: 960, y: 140 }
-    style:
-      font: "22px sans-serif"
-      align: center
-      color: "#b0b0dd"
-
-timeline:
-  - action: set-text
-    target: title
-    value: "Breadth-First Search"
-  - action: fade-in
-    target: title
-    duration: 0.6s
-
-  - action: fade-in
-    target: graph
-    duration: 0.8s
-  - action: fade-in
-    target: queue
-    duration: 0.3s
-
-  - action: pause
-    duration: 1s
-
-  # Visit A
-  - action: set-text
-    target: step
-    value: "Start at A"
-  - action: fade-in
-    target: step
-    duration: 0.3s
-  - action: highlight-node
-    target: graph
-    node: A
-    color: "$current"
-    duration: 0.5s
-  - action: enqueue
-    target: queue
-    values: ["A"]
-    duration: 0.4s
-  - action: pause
-    duration: 1.5s
-
-  # Dequeue A, visit B and C
-  - action: set-text
-    target: step
-    value: "Dequeue A — visit B, C"
-  - action: dequeue
-    target: queue
-    duration: 0.4s
-  - action: highlight-node
-    target: graph
-    node: A
-    color: "$visited"
-    duration: 0.4s
-  - parallel:
-      - action: highlight-edge
-        target: graph
-        edge: [A, B]
-        color: "$highlight"
-        duration: 0.5s
-      - action: highlight-edge
-        target: graph
-        edge: [A, C]
-        color: "$highlight"
-        duration: 0.5s
-  - parallel:
-      - action: highlight-node
-        target: graph
-        node: B
-        color: "$queued"
-        duration: 0.4s
-      - action: highlight-node
-        target: graph
-        node: C
-        color: "$queued"
-        duration: 0.4s
-  - action: enqueue
-    target: queue
-    values: ["B", "C"]
-    duration: 0.4s
-  - action: pause
-    duration: 1.5s
-
-  # Dequeue B, visit D
-  - action: set-text
-    target: step
-    value: "Dequeue B — visit D"
-  - action: dequeue
-    target: queue
-    duration: 0.4s
-  - action: highlight-node
-    target: graph
-    node: B
-    color: "$visited"
-    duration: 0.4s
-  - action: highlight-edge
-    target: graph
-    edge: [B, D]
-    color: "$highlight"
-    duration: 0.5s
-  - action: highlight-node
-    target: graph
-    node: D
-    color: "$queued"
-    duration: 0.4s
-  - action: enqueue
-    target: queue
-    values: ["D"]
-    duration: 0.4s
-  - action: pause
-    duration: 1.5s
-
-  # Dequeue C (no new neighbors)
-  - action: set-text
-    target: step
-    value: "Dequeue C — no unvisited neighbors"
-  - action: dequeue
-    target: queue
-    duration: 0.4s
-  - action: highlight-node
-    target: graph
-    node: C
-    color: "$visited"
-    duration: 0.4s
-  - action: pause
-    duration: 1s
-
-  # Dequeue D (no new neighbors)
-  - action: set-text
-    target: step
-    value: "Dequeue D — BFS complete!"
-  - action: dequeue
-    target: queue
-    duration: 0.4s
-  - action: highlight-node
-    target: graph
-    node: D
-    color: "$visited"
-    duration: 0.4s
-  - action: pause
-    duration: 2s
-`,
-
-  dfs: `# DFS Traversal using a Stack
-meta:
-  title: "DFS Traversal"
-  topic: "dfs-web"
-  canvas:
-    width: 1920
-    height: 1080
-    background: "#0f0f23"
-  defaults:
-    graph:
-      nodeRadius: 40
-      nodeColor: "#2d4a7a"
-      nodeStroke: "#5b8fd9"
-      edgeColor: "#4a6a9a"
-      edgeWidth: 4
-      strokeWidth: 3
-      labelColor: "#ffffff"
-      labelFont: "24px monospace"
-    data-structure:
-      cellWidth: 70
-      cellHeight: 45
-      fillColor: "#1a2a4a"
-      borderColor: "#5b8fd9"
-      textColor: "#ffffff"
-  palette:
-    visited: "#e74c3c"
-    stacked: "#9b59b6"
-    current: "#2ecc71"
-    highlight: "#e67e22"
-  easing: easeInOutCubic
-
-objects:
-  - id: title
-    type: text
-    content: ""
-    position: { x: 960, y: 60 }
-    style:
-      font: "bold 36px sans-serif"
-      align: center
-      color: "#ffffff"
-
-  - id: graph
-    type: graph
-    nodes:
-      - { id: A, label: A, x: 960, y: 300 }
-      - { id: B, label: B, x: 720, y: 480 }
-      - { id: C, label: C, x: 1200, y: 480 }
-      - { id: D, label: D, x: 840, y: 660 }
-    edges:
-      - { from: A, to: B }
-      - { from: A, to: C }
-      - { from: B, to: D }
-
-  - id: stack
-    type: data-structure
-    variant: stack
-    position: { x: 960, y: 870 }
-
-  - id: step
-    type: text
-    content: ""
-    position: { x: 960, y: 140 }
-    style:
-      font: "22px sans-serif"
-      align: center
-      color: "#b0b0dd"
-
-timeline:
-  - action: set-text
-    target: title
-    value: "Depth-First Search"
-  - action: fade-in
-    target: title
-    duration: 0.6s
-  - action: fade-in
-    target: graph
-    duration: 0.8s
-  - action: fade-in
-    target: stack
-    duration: 0.3s
-  - action: pause
-    duration: 1s
-
-  # Push A
-  - action: set-text
-    target: step
-    value: "Push A onto stack"
-  - action: fade-in
-    target: step
-    duration: 0.3s
-  - action: highlight-node
-    target: graph
-    node: A
-    color: "$current"
-    duration: 0.5s
-  - action: push
-    target: stack
-    values: ["A"]
-    duration: 0.4s
-  - action: pause
-    duration: 1.5s
-
-  # Pop A, push C then B (DFS goes B first)
-  - action: set-text
-    target: step
-    value: "Pop A — push neighbors C, B"
-  - action: pop
-    target: stack
-    duration: 0.4s
-  - action: highlight-node
-    target: graph
-    node: A
-    color: "$visited"
-    duration: 0.4s
-  - action: push
-    target: stack
-    values: ["C", "B"]
-    duration: 0.5s
-  - parallel:
-      - action: highlight-node
-        target: graph
-        node: B
-        color: "$stacked"
-        duration: 0.4s
-      - action: highlight-node
-        target: graph
-        node: C
-        color: "$stacked"
-        duration: 0.4s
-  - action: pause
-    duration: 1.5s
-
-  # Pop B, push D
-  - action: set-text
-    target: step
-    value: "Pop B — push neighbor D"
-  - action: pop
-    target: stack
-    duration: 0.4s
-  - action: highlight-node
-    target: graph
-    node: B
-    color: "$visited"
-    duration: 0.4s
-  - action: highlight-edge
-    target: graph
-    edge: [B, D]
-    color: "$highlight"
-    duration: 0.5s
-  - action: push
-    target: stack
-    values: ["D"]
-    duration: 0.4s
-  - action: highlight-node
-    target: graph
-    node: D
-    color: "$stacked"
-    duration: 0.4s
-  - action: pause
-    duration: 1.5s
-
-  # Pop D (leaf)
-  - action: set-text
-    target: step
-    value: "Pop D — no unvisited neighbors"
-  - action: pop
-    target: stack
-    duration: 0.4s
-  - action: highlight-node
-    target: graph
-    node: D
-    color: "$visited"
-    duration: 0.4s
-  - action: pause
-    duration: 1s
-
-  # Pop C (leaf)
-  - action: set-text
-    target: step
-    value: "Pop C — DFS complete!"
-  - action: pop
-    target: stack
-    duration: 0.4s
-  - action: highlight-node
-    target: graph
-    node: C
-    color: "$visited"
-    duration: 0.4s
-  - action: pause
-    duration: 2s
-`,
-
-  stack: `# Stack Operations — LIFO
-meta:
-  title: "Stack: Push & Pop"
-  topic: "stack-web"
-  canvas:
-    width: 1920
-    height: 1080
-    background: "#0f0f23"
-  defaults:
-    data-structure:
-      cellWidth: 80
-      cellHeight: 50
-      fillColor: "#1a2a4a"
-      borderColor: "#5b8fd9"
-      textColor: "#ffffff"
-  easing: easeInOutCubic
-
-objects:
-  - id: title
-    type: text
-    content: ""
-    position: { x: 960, y: 100 }
-    style:
-      font: "bold 44px sans-serif"
-      align: center
-      color: "#ffffff"
-
-  - id: stack
-    type: data-structure
-    variant: stack
-    position: { x: 960, y: 500 }
-
-  - id: narration
-    type: text
-    content: ""
-    position: { x: 960, y: 700 }
-    style:
-      font: "24px sans-serif"
-      align: center
-      color: "#b0b0dd"
-
-timeline:
-  - action: set-text
-    target: title
-    value: "Stack — Last In, First Out"
-  - action: fade-in
-    target: title
-    duration: 0.8s
-  - action: fade-in
-    target: stack
-    duration: 0.3s
-  - action: pause
-    duration: 1s
-
-  - action: set-text
-    target: narration
-    value: "push(10)"
-  - action: fade-in
-    target: narration
-    duration: 0.3s
-  - action: push
-    target: stack
-    values: ["10"]
-    duration: 0.5s
-  - action: pause
-    duration: 1s
-
-  - action: set-text
-    target: narration
-    value: "push(20)"
-  - action: push
-    target: stack
-    values: ["20"]
-    duration: 0.5s
-  - action: pause
-    duration: 1s
-
-  - action: set-text
-    target: narration
-    value: "push(30)"
-  - action: push
-    target: stack
-    values: ["30"]
-    duration: 0.5s
-  - action: pause
-    duration: 1s
-
-  - action: set-text
-    target: narration
-    value: "pop() → 30 (last in, first out!)"
-  - action: pop
-    target: stack
-    duration: 0.6s
-  - action: pause
-    duration: 1.5s
-
-  - action: set-text
-    target: narration
-    value: "pop() → 20"
-  - action: pop
-    target: stack
-    duration: 0.6s
-  - action: pause
-    duration: 1.5s
-
-  - action: set-text
-    target: narration
-    value: "pop() → 10 — stack empty!"
-  - action: pop
-    target: stack
-    duration: 0.6s
-  - action: pause
-    duration: 2s
-`,
+const state = {
+  currentShow: null,
+  currentJobId: null,
+  activeScene: 0,
 };
 
-presetSelect.addEventListener('change', () => {
-  const key = presetSelect.value;
-  if (key && PRESETS[key]) {
-    setEditorValue(PRESETS[key]);
-  }
-  presetSelect.value = '';
-});
+// No YAML skeleton needed — users paste their own or use AI/presets
 
-// ── Render flow ──
-let currentJobId = null;
-let pollInterval = null;
+// ══════════════════════════════════════════════════════════════
+// PAGE RENDERERS
+// ══════════════════════════════════════════════════════════════
 
-renderBtn.addEventListener('click', async () => {
-  const yaml = getEditorValue().trim();
-  if (!yaml) {
-    showStatus('Please enter a YAML manifest.', 'error');
-    return;
-  }
+function renderEditorPage() {
+  const template = document.getElementById('template-editor');
+  const content = template.content.cloneNode(true);
 
-  // Reset UI
-  renderBtn.disabled = true;
-  renderBtn.textContent = 'Rendering...';
-  videoPlayer.style.display = 'none';
-  downloadLink.style.display = 'none';
-  showStatus('Submitting render job...', 'rendering');
-  showProgress(0);
+  const appRoot = document.getElementById('app-root');
+  appRoot.innerHTML = '';
+  appRoot.appendChild(content);
 
-  try {
-    const res = await fetch('/api/render', {
-      method: 'POST',
-      headers: {'Content-Type': 'application/yaml'},
-      body: yaml,
+  initEditor();
+  updateActiveNav('/');
+}
+
+function renderTemplatesPage() {
+  const template = document.getElementById('template-templates');
+  const content = template.content.cloneNode(true);
+
+  const appRoot = document.getElementById('app-root');
+  appRoot.innerHTML = '';
+  appRoot.appendChild(content);
+
+  document.querySelectorAll('.load-template').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      const preset = e.target.dataset.preset;
+      router.navigate('/');
+      setTimeout(() => {
+        document.getElementById('preset-select').value = preset;
+        document.getElementById('preset-select').dispatchEvent(new Event('change'));
+      }, 100);
     });
+  });
 
-    const data = await res.json();
+  updateActiveNav('/templates');
+}
 
-    if (!res.ok) {
-      showStatus(`Error: ${data.error}`, 'error');
-      resetBtn();
+function renderDocsPage() {
+  const template = document.getElementById('template-docs');
+  const content = template.content.cloneNode(true);
+
+  const appRoot = document.getElementById('app-root');
+  appRoot.innerHTML = '';
+  appRoot.appendChild(content);
+
+  updateActiveNav('/docs');
+}
+
+async function renderHistoryPage() {
+  const template = document.getElementById('template-history');
+  const content = template.content.cloneNode(true);
+
+  const appRoot = document.getElementById('app-root');
+  appRoot.innerHTML = '';
+  appRoot.appendChild(content);
+
+  await loadJobHistory();
+  updateActiveNav('/history');
+}
+
+// ══════════════════════════════════════════════════════════════
+// NAVIGATION
+// ══════════════════════════════════════════════════════════════
+
+function updateActiveNav(path) {
+  document.querySelectorAll('.nav-link').forEach(link => {
+    if (link.dataset.route === path) {
+      link.classList.add('active');
+    } else {
+      link.classList.remove('active');
+    }
+  });
+}
+
+// ══════════════════════════════════════════════════════════════
+// EDITOR FUNCTIONALITY
+// ══════════════════════════════════════════════════════════════
+
+function initEditor() {
+  // Paste manifest toggle
+  document.getElementById('paste-manifest-toggle')?.addEventListener('click', () => {
+    const body = document.getElementById('paste-manifest-body');
+    const arrow = document.querySelector('#paste-manifest-toggle .toggle-arrow');
+    if (body.style.display === 'none') {
+      body.style.display = 'block';
+      arrow.classList.add('open');
+    } else {
+      body.style.display = 'none';
+      arrow.classList.remove('open');
+    }
+  });
+
+  // Manual YAML load button
+  document.getElementById('load-yaml-btn')?.addEventListener('click', () => {
+    const yamlText = document.getElementById('manual-yaml-input').value.trim();
+    if (!yamlText) {
+      showStatus('manual', 'Paste a YAML manifest first', 'error');
       return;
     }
 
-    currentJobId = data.jobId;
-    showStatus('Queued for rendering...', 'rendering');
+    try {
+      const show = jsyaml.load(yamlText);
 
-    // Start polling
-    pollInterval = setInterval(() => pollStatus(data.jobId), 1000);
+      if (!show || !show.scenes || !Array.isArray(show.scenes)) {
+        throw new Error('Invalid: must have a "scenes" array');
+      }
+      if (!show.meta) {
+        throw new Error('Invalid: must have a "meta" section');
+      }
+
+      loadShow(show);
+      showStatus('manual', `Loaded ${show.scenes.length} scene(s)!`, 'success');
+    } catch (err) {
+      showStatus('manual', `YAML error: ${err.message}`, 'error');
+    }
+  });
+
+  // Preset loading
+  document.getElementById('preset-select').addEventListener('change', async (e) => {
+    const preset = e.target.value;
+    if (!preset) return;
+
+    try {
+      const response = await fetch(`/frontend/assets/presets/${preset}.json`);
+      if (!response.ok) throw new Error('Preset not found');
+
+      const show = await response.json();
+      loadShow(show);
+
+      showStatus('generate', `Loaded ${preset.toUpperCase()} preset`, 'success');
+    } catch (err) {
+      showStatus('generate', `Failed to load preset: ${err.message}`, 'error');
+    }
+
+    e.target.value = '';
+  });
+
+  // Generate button
+  document.getElementById('generate-btn').addEventListener('click', async () => {
+    const prompt = document.getElementById('prompt-input').value.trim();
+    if (!prompt) {
+      showStatus('generate', 'Enter a prompt first', 'error');
+      return;
+    }
+
+    showStatus('generate', 'Generating with AI...', 'loading');
+    document.getElementById('generate-btn').disabled = true;
+
+    try {
+      const response = await fetch('/api/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ prompt })
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Generation failed');
+      }
+
+      const data = await response.json();
+      loadShow(data.show);
+
+      showStatus('generate', `Generated ${data.show.scenes.length} scenes!`, 'success');
+    } catch (err) {
+      showStatus('generate', err.message, 'error');
+    } finally {
+      document.getElementById('generate-btn').disabled = false;
+    }
+  });
+
+  // Render button
+  document.getElementById('render-btn').addEventListener('click', async () => {
+    if (!state.currentShow) return;
+
+    try {
+      const response = await fetch('/api/render-show', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          show: state.currentShow,
+          topic: state.currentShow.meta?.topic || document.getElementById('prompt-input').value.trim()
+        })
+      });
+
+      if (!response.ok) throw new Error('Render failed');
+
+      const data = await response.json();
+      state.currentJobId = data.jobId;
+
+      showRenderStatus();
+      pollRenderStatus(data.jobId);
+    } catch (err) {
+      alert(`Render failed: ${err.message}`);
+    }
+  });
+
+  // Meta toggle
+  document.getElementById('meta-toggle')?.addEventListener('click', () => {
+    const wrap = document.getElementById('meta-editor-wrap');
+    const icon = document.querySelector('#meta-toggle .toggle-icon');
+
+    if (wrap.style.display === 'none') {
+      wrap.style.display = 'block';
+      icon.classList.add('open');
+    } else {
+      wrap.style.display = 'none';
+      icon.classList.remove('open');
+    }
+  });
+
+  // Scene editor changes
+  document.getElementById('scene-editor')?.addEventListener('input', () => {
+    updateShowFromEditors();
+  });
+
+  document.getElementById('meta-editor')?.addEventListener('input', () => {
+    updateShowFromEditors();
+  });
+}
+
+function loadShow(show) {
+  state.currentShow = show;
+  state.activeScene = 0;
+
+  // Show sections
+  document.getElementById('scenes-section').style.display = 'block';
+  document.getElementById('meta-section').style.display = 'block';
+  document.getElementById('render-btn').disabled = false;
+
+  // Render scene tabs
+  const tabsContainer = document.getElementById('scene-tabs');
+  tabsContainer.innerHTML = '';
+
+  show.scenes.forEach((scene, i) => {
+    const tab = document.createElement('button');
+    tab.className = 'scene-tab';
+    tab.textContent = scene.name || `Scene ${i + 1}`;
+    tab.addEventListener('click', () => switchScene(i));
+    if (i === 0) tab.classList.add('active');
+    tabsContainer.appendChild(tab);
+  });
+
+  // Load first scene
+  switchScene(0);
+
+  // Load meta
+  const metaEditor = document.getElementById('meta-editor');
+  metaEditor.value = jsyaml.dump({
+    title: show.meta.title,
+    canvas: show.meta.canvas,
+    palette: show.meta.palette || {},
+    defaults: show.meta.defaults || {},
+    easing: show.meta.easing || 'easeInOut'
+  });
+}
+
+function switchScene(index) {
+  state.activeScene = index;
+
+  // Update tabs
+  document.querySelectorAll('.scene-tab').forEach((tab, i) => {
+    tab.classList.toggle('active', i === index);
+  });
+
+  // Load scene into editor
+  const scene = state.currentShow.scenes[index];
+  const sceneEditor = document.getElementById('scene-editor');
+  sceneEditor.value = jsyaml.dump(scene.manifest);
+}
+
+function updateShowFromEditors() {
+  try {
+    const sceneYaml = document.getElementById('scene-editor').value;
+    const sceneData = jsyaml.load(sceneYaml);
+    state.currentShow.scenes[state.activeScene].manifest = sceneData;
+
+    const metaYaml = document.getElementById('meta-editor').value;
+    const metaData = jsyaml.load(metaYaml);
+    state.currentShow.meta = { ...state.currentShow.meta, ...metaData };
   } catch (err) {
-    showStatus(`Network error: ${err.message}`, 'error');
-    resetBtn();
+    // Ignore YAML parse errors while typing
   }
+}
+
+function showStatus(type, message, status) {
+  const statusEl = document.getElementById(`${type}-status`);
+  if (!statusEl) return;
+  statusEl.textContent = message;
+  statusEl.className = `generate-status ${status}`;
+  statusEl.style.display = 'block';
+}
+
+function showRenderStatus() {
+  const card = document.getElementById('render-status-card');
+  card.style.display = 'block';
+  document.getElementById('video-preview').style.display = 'none';
+}
+
+async function pollRenderStatus(jobId) {
+  const statusText = document.getElementById('status-text');
+  const statusBadge = document.getElementById('status-badge');
+  const progressFill = document.getElementById('progress-fill');
+  const statusDetail = document.getElementById('status-detail');
+
+  const poll = async () => {
+    try {
+      const response = await fetch(`/api/status/${jobId}`);
+      if (!response.ok) throw new Error('Failed to get status');
+
+      const data = await response.json();
+
+      statusBadge.textContent = data.status;
+      statusBadge.className = `badge badge-${getStatusColor(data.status)}`;
+      progressFill.style.width = `${data.progress}%`;
+      statusDetail.textContent = data.title || 'Processing...';
+
+      if (data.status === 'done') {
+        statusText.textContent = 'Render complete!';
+        showVideoPreview(jobId);
+      } else if (data.status === 'error') {
+        statusText.textContent = 'Render failed';
+        statusDetail.textContent = data.error;
+      } else {
+        setTimeout(poll, 1000);
+      }
+    } catch (err) {
+      console.error('Poll error:', err);
+      setTimeout(poll, 2000);
+    }
+  };
+
+  poll();
+}
+
+function getStatusColor(status) {
+  const colors = {
+    queued: 'neutral',
+    rendering: 'info',
+    done: 'success',
+    error: 'error'
+  };
+  return colors[status] || 'neutral';
+}
+
+function showVideoPreview(jobId) {
+  const preview = document.getElementById('video-preview');
+  const video = document.getElementById('video-player');
+  const downloadBtn = document.getElementById('download-btn');
+
+  video.src = `/output/${jobId}.mp4`;
+  preview.style.display = 'block';
+
+  downloadBtn.onclick = () => {
+    window.location.href = `/api/download/${jobId}`;
+  };
+}
+
+// ══════════════════════════════════════════════════════════════
+// HISTORY FUNCTIONALITY
+// ══════════════════════════════════════════════════════════════
+
+async function loadJobHistory() {
+  try {
+    const response = await fetch('/api/jobs?limit=20');
+    if (!response.ok) throw new Error('Failed to load jobs');
+
+    const data = await response.json();
+
+    const jobsList = document.getElementById('jobs-list');
+    const emptyState = document.getElementById('empty-history');
+
+    if (data.jobs.length === 0) {
+      jobsList.style.display = 'none';
+      emptyState.style.display = 'block';
+      return;
+    }
+
+    jobsList.style.display = 'block';
+    emptyState.style.display = 'none';
+    jobsList.innerHTML = '';
+
+    data.jobs.forEach(job => {
+      const card = createJobCard(job);
+      jobsList.appendChild(card);
+    });
+  } catch (err) {
+    console.error('Failed to load history:', err);
+  }
+}
+
+function createJobCard(job) {
+  const card = document.createElement('div');
+  card.className = 'card job-card';
+
+  const date = new Date(job.createdAt).toLocaleString();
+
+  card.innerHTML = `
+    <div class="job-info">
+      <h4>${job.title || 'Untitled Animation'}</h4>
+      <div class="job-meta">
+        <span>${date}</span>
+        <span class="badge badge-${getStatusColor(job.status)}">${job.status}</span>
+        ${job.topic ? `<span>${job.topic.substring(0, 50)}...</span>` : ''}
+      </div>
+    </div>
+    <div class="job-actions">
+      ${job.status === 'done' ? `
+        <a href="/api/download/${job.id}" class="btn btn-success btn-sm">DOWNLOAD</a>
+      ` : ''}
+      <button class="btn btn-outline btn-sm delete-job" data-id="${job.id}">DELETE</button>
+    </div>
+  `;
+
+  card.querySelector('.delete-job')?.addEventListener('click', async (e) => {
+    if (!confirm('Delete this job?')) return;
+
+    try {
+      await fetch(`/api/jobs/${job.id}`, { method: 'DELETE' });
+      card.remove();
+    } catch (err) {
+      alert('Failed to delete job');
+    }
+  });
+
+  return card;
+}
+
+// ══════════════════════════════════════════════════════════════
+// ROUTER SETUP
+// ══════════════════════════════════════════════════════════════
+
+router.addRoute('/', renderEditorPage);
+router.addRoute('/templates', renderTemplatesPage);
+router.addRoute('/docs', renderDocsPage);
+router.addRoute('/history', renderHistoryPage);
+
+router.setNotFound((path) => {
+  console.log('404:', path);
+  router.navigate('/');
 });
 
-async function pollStatus(jobId) {
-  try {
-    const res = await fetch(`/api/status/${jobId}`);
-    const data = await res.json();
-
-    if (data.status === 'queued') {
-      showStatus(`Queued (position: ${data.queuePosition || '?'})...`, 'rendering');
-    } else if (data.status === 'rendering') {
-      showStatus('Rendering video...', 'rendering');
-      showProgress(data.progress || 0);
-    } else if (data.status === 'done') {
-      clearInterval(pollInterval);
-      showProgress(100);
-      showStatus(`Rendered: ${data.title}`, 'done');
-
-      // Show video player
-      const videoUrl = `/api/download/${jobId}`;
-      videoPlayer.src = videoUrl;
-      videoPlayer.style.display = 'block';
-
-      // Show download link
-      downloadLink.href = videoUrl;
-      downloadLink.style.display = 'inline-block';
-
-      resetBtn();
-    } else if (data.status === 'error') {
-      clearInterval(pollInterval);
-      showStatus(`Render failed: ${data.error}`, 'error');
-      hideProgress();
-      resetBtn();
-    }
-  } catch (err) {
-    // Silently retry on network errors
-  }
-}
-
-function showStatus(msg, type = '') {
-  statusMsg.textContent = msg;
-  statusMsg.className = `status ${type}`;
-  statusMsg.style.display = 'block';
-}
-
-function showProgress(percent) {
-  progressContainer.style.display = 'flex';
-  progressBar.style.setProperty('--progress', `${percent}%`);
-  progressText.textContent = `${Math.round(percent)}%`;
-}
-
-function hideProgress() {
-  progressContainer.style.display = 'none';
-}
-
-function resetBtn() {
-  renderBtn.disabled = false;
-  renderBtn.textContent = 'Render';
-}
-
-// Load BFS preset by default
-setEditorValue(PRESETS.bfs);
+// Initialize
+console.log('CS Animation Platform initialized');
