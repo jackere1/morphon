@@ -8,6 +8,10 @@ const VALID_ACTIONS = new Set([
   'fade-in', 'fade-out', 'highlight-node', 'highlight-edge',
   'enqueue', 'dequeue', 'push', 'pop', 'set-text', 'pause',
   'move-to', 'move-node', 'camera-zoom', 'camera-pan', 'camera-reset', 'set-style',
+  // Tree actions
+  'insert-node', 'delete-node',
+  // Array actions
+  'init-cells', 'set-cell', 'highlight-cell', 'swap-cells',
 ]);
 
 const VALID_EASINGS = new Set([
@@ -47,6 +51,14 @@ const ACTION_PROPERTIES: Record<string, Set<string>> = {
   'camera-pan': new Set(['action', 'position', 'duration', 'easing']),
   'camera-reset': new Set(['action', 'duration', 'easing']),
   'set-style': new Set(['action', 'target', 'node', 'style', 'duration', 'easing']),
+  // Tree actions
+  'insert-node': new Set(['action', 'target', 'node', 'parent', 'side', 'label', 'duration', 'easing']),
+  'delete-node': new Set(['action', 'target', 'node', 'duration', 'easing']),
+  // Array actions
+  'init-cells': new Set(['action', 'target', 'values', 'duration', 'easing']),
+  'set-cell': new Set(['action', 'target', 'index', 'value', 'duration', 'easing']),
+  'highlight-cell': new Set(['action', 'target', 'index', 'color', 'duration', 'easing']),
+  'swap-cells': new Set(['action', 'target', 'indices', 'duration', 'easing']),
 };
 
 // Fallback colors for undeclared palette refs
@@ -235,6 +247,9 @@ function normalizeObjects(manifest: any, sceneLabel: string, warnings: string[])
       case 'text':
         normalizeText(obj, sceneLabel, warnings);
         break;
+      case 'tree':
+        normalizeTree(obj, sceneLabel, warnings);
+        break;
       default:
         warnings.push(`${sceneLabel}: object "${obj.id}" has unknown type "${obj.type}".`);
         break;
@@ -317,6 +332,67 @@ function normalizeText(obj: any, sceneLabel: string, warnings: string[]): void {
 
   // Ensure position
   normalizePosition(obj, sceneLabel, `text "${obj.id}"`, warnings);
+}
+
+const VALID_TREE_VARIANTS = new Set(['binary', 'nary', 'heap']);
+
+function normalizeTree(obj: any, sceneLabel: string, warnings: string[]): void {
+  // Validate variant
+  if (obj.variant && !VALID_TREE_VARIANTS.has(obj.variant)) {
+    warnings.push(`${sceneLabel}: tree "${obj.id}" has invalid variant "${obj.variant}" — defaulting to "binary".`);
+    obj.variant = 'binary';
+  }
+
+  // Ensure root
+  if (!obj.root || typeof obj.root !== 'string') {
+    if (Array.isArray(obj.nodes) && obj.nodes.length > 0 && obj.nodes[0].id) {
+      obj.root = obj.nodes[0].id;
+      warnings.push(`${sceneLabel}: tree "${obj.id}" missing "root" — set to first node "${obj.root}".`);
+    } else {
+      obj.root = 'root';
+      warnings.push(`${sceneLabel}: tree "${obj.id}" missing "root" — set to "root".`);
+    }
+  }
+
+  // Ensure nodes array
+  if (!Array.isArray(obj.nodes)) {
+    obj.nodes = [];
+    warnings.push(`${sceneLabel}: tree "${obj.id}" was missing "nodes" — set to [].`);
+  }
+
+  // Validate each node
+  const validNodes: any[] = [];
+  const nodeIds = new Set<string>();
+  for (const node of obj.nodes) {
+    if (!node.id) {
+      warnings.push(`${sceneLabel}: tree "${obj.id}" has a node without id — dropped.`);
+      continue;
+    }
+    // Default label to id
+    if (node.label === undefined) node.label = String(node.id);
+    // Validate side
+    if (node.side && node.side !== 'left' && node.side !== 'right') {
+      warnings.push(`${sceneLabel}: tree "${obj.id}" node "${node.id}" has invalid side "${node.side}" — removed.`);
+      delete node.side;
+    }
+    // Validate parent exists (will be checked after all nodes processed)
+    nodeIds.add(node.id);
+    validNodes.push(node);
+  }
+
+  // Prune nodes with invalid parent refs
+  for (const node of validNodes) {
+    if (node.parent && !nodeIds.has(node.parent)) {
+      warnings.push(`${sceneLabel}: tree "${obj.id}" node "${node.id}" references unknown parent "${node.parent}" — removed parent ref.`);
+      delete node.parent;
+      delete node.side;
+    }
+  }
+
+  obj.nodes = validNodes;
+
+  // Ensure position
+  normalizePosition(obj, sceneLabel, `tree "${obj.id}"`, warnings);
 }
 
 function normalizePosition(obj: any, sceneLabel: string, desc: string, warnings: string[]): void {
@@ -515,6 +591,85 @@ function normalizeAction(
       break;
 
     case 'camera-reset':
+      if (!action.duration) action.duration = '1s';
+      break;
+
+    // Tree actions
+    case 'insert-node':
+      if (!action.node) {
+        warnings.push(`${label}: insert-node missing "node" — dropped.`);
+        return false;
+      }
+      if (!action.parent) {
+        warnings.push(`${label}: insert-node missing "parent" — dropped.`);
+        return false;
+      }
+      if (!action.side || (action.side !== 'left' && action.side !== 'right')) {
+        warnings.push(`${label}: insert-node missing or invalid "side" — dropped.`);
+        return false;
+      }
+      if (!action.label) action.label = String(action.node);
+      if (!action.duration) action.duration = '0.8s';
+      break;
+
+    case 'delete-node':
+      if (!action.node) {
+        warnings.push(`${label}: delete-node missing "node" — dropped.`);
+        return false;
+      }
+      if (!action.duration) action.duration = '0.8s';
+      break;
+
+    // Array actions
+    case 'init-cells':
+      if (!action.values) {
+        warnings.push(`${label}: init-cells missing "values" — dropped.`);
+        return false;
+      }
+      if (!Array.isArray(action.values)) {
+        action.values = [String(action.values)];
+      } else {
+        action.values = action.values.map((v: any) => String(v));
+      }
+      if (!action.duration) action.duration = '1s';
+      break;
+
+    case 'set-cell':
+      if (action.index === undefined || typeof action.index !== 'number') {
+        warnings.push(`${label}: set-cell missing or invalid "index" — dropped.`);
+        return false;
+      }
+      if (action.value === undefined || action.value === null) {
+        action.value = '';
+      } else if (typeof action.value !== 'string') {
+        action.value = String(action.value);
+      }
+      if (!action.duration) action.duration = '0.5s';
+      break;
+
+    case 'highlight-cell':
+      if (action.index === undefined || typeof action.index !== 'number') {
+        warnings.push(`${label}: highlight-cell missing or invalid "index" — dropped.`);
+        return false;
+      }
+      if (!action.color) {
+        warnings.push(`${label}: highlight-cell missing "color" — dropped.`);
+        return false;
+      }
+      if (!action.duration) action.duration = '0.5s';
+      break;
+
+    case 'swap-cells':
+      if (!action.indices || !Array.isArray(action.indices) || action.indices.length < 2) {
+        warnings.push(`${label}: swap-cells missing valid "indices" array — dropped.`);
+        return false;
+      }
+      // Coerce to numbers
+      action.indices = action.indices.map((v: any) => Number(v));
+      if (action.indices.some((v: number) => isNaN(v))) {
+        warnings.push(`${label}: swap-cells has non-numeric indices — dropped.`);
+        return false;
+      }
       if (!action.duration) action.duration = '1s';
       break;
   }

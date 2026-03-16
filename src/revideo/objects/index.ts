@@ -5,8 +5,9 @@ import type {SceneObject, ManifestMeta} from '../types';
 import {buildGraph, type GraphRefs} from './graph-builder';
 import {buildDataStructure, type DataStructureRefs} from './data-structure-builder';
 import {buildText, type TextRefs} from './text-builder';
+import {buildTree, type TreeRefs} from './tree-builder';
 
-export type ObjectRefs = GraphRefs | DataStructureRefs | TextRefs;
+export type ObjectRefs = GraphRefs | DataStructureRefs | TextRefs | TreeRefs;
 
 export interface SceneObjectEntry {
   obj: SceneObject;
@@ -33,6 +34,9 @@ export function createSceneObjects(
       case 'text':
         result = buildText(obj as any, meta);
         break;
+      case 'tree':
+        result = buildTree(obj as any, meta);
+        break;
       default:
         console.warn(`Unknown object type: ${(obj as any).type}`);
         continue;
@@ -48,3 +52,4 @@ export function createSceneObjects(
 export {type GraphRefs} from './graph-builder';
 export {type DataStructureRefs} from './data-structure-builder';
 export {type TextRefs} from './text-builder';
+export {type TreeRefs} from './tree-builder';

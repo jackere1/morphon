@@ -17,6 +17,12 @@ export const OBJECT_TYPES = {
     required: ['id', 'type', 'content', 'position'],
     optional: ['style'],
   },
+  tree: {
+    required: ['id', 'type', 'root', 'nodes', 'position'],
+    optional: ['variant', 'style'],
+    variants: ['binary', 'nary', 'heap'],
+    nodeFields: ['id', 'label', 'parent', 'side'],
+  },
 };
 
 export const ACTION_TYPES = {
@@ -84,6 +90,32 @@ export const ACTION_TYPES = {
   'set-style': {
     required: ['target', 'style', 'duration'],
     optional: ['node', 'easing'],
+  },
+  // Tree actions
+  'insert-node': {
+    required: ['target', 'node', 'parent', 'side', 'duration'],
+    optional: ['label', 'easing'],
+  },
+  'delete-node': {
+    required: ['target', 'node', 'duration'],
+    optional: ['easing'],
+  },
+  // Array actions
+  'init-cells': {
+    required: ['target', 'values', 'duration'],
+    optional: ['easing'],
+  },
+  'set-cell': {
+    required: ['target', 'index', 'value', 'duration'],
+    optional: ['easing'],
+  },
+  'highlight-cell': {
+    required: ['target', 'index', 'color', 'duration'],
+    optional: ['easing'],
+  },
+  'swap-cells': {
+    required: ['target', 'indices', 'duration'],
+    optional: ['easing'],
   },
 };
 

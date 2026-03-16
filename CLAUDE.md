@@ -31,11 +31,16 @@ Backend restructured with SQLite persistence. Building multi-page frontend with 
 - [x] BFS course example (4 scenes with transitions)
 - [x] MANUAL.md user documentation
 
-### Phase 2: More CS Concepts
-- [ ] Binary tree insertion manifest
-- [ ] Sorting algorithm manifest (bubble/merge)
+### Phase 2: More CS Concepts (Phase A COMPLETE)
+- [x] Tree object type with auto-layout (binary, nary, heap)
+- [x] Tree actions: insert-node, delete-node
+- [x] Array indexed operations: init-cells, set-cell, highlight-cell, swap-cells
+- [x] Array index labels for variant: array
+- [x] Binary tree insertion manifest (bst-test.yaml)
+- [x] Sorting algorithm manifest (bubble-sort-test.yaml)
 - [ ] Stack/Queue operations manifest
-- [ ] Expand manifest vocabulary based on learnings
+- [ ] Phase B: Code block object, arrow/pointer object
+- [ ] Phase C: Table/grid object, dynamic object creation
 
 ### Phase 3: AI Extraction Layer (COMPLETE)
 - [x] Gemini Flash 2.0 integration
@@ -124,15 +129,20 @@ src/
       graph-builder.tsx
       data-structure-builder.tsx
       text-builder.tsx
+      tree-builder.tsx          # NEW: auto-layout binary tree
       index.ts
     actions/          # Timeline actions → Revideo animations
       fade.ts, highlight.ts, data-ops.tsx
       text-ops.ts, movement.ts, camera.ts
       timing.ts, style.ts, transition.ts, index.ts
+      tree-ops.tsx              # NEW: insert-node, delete-node
+      array-ops.tsx             # NEW: init-cells, set-cell, highlight-cell, swap-cells
     utils/
       easing.ts, palette.ts, style-resolver.ts, duration.ts
   examples/           # Sample manifests
     bfs-traversal-v2.yaml             # Single-scene BFS video
+    bst-test.yaml                     # BST insertion/deletion test
+    bubble-sort-test.yaml             # Bubble sort with array ops
     bfs-course/                       # Multi-scene course example
       show.yaml                       # Master show manifest
       scenes/intro.yaml

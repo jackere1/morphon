@@ -10,6 +10,8 @@ import {executeMoveTo, executeMoveNode} from './movement';
 import {executeCameraZoom, executeCameraPan, executeCameraReset} from './camera';
 import {executePause} from './timing';
 import {executeSetStyle} from './style';
+import {executeInsertNode, executeDeleteNode} from './tree-ops';
+import {executeInitCells, executeSetCell, executeHighlightCell, executeSwapCells} from './array-ops';
 
 /**
  * Dispatches a single action step to the appropriate executor.
@@ -72,6 +74,26 @@ export function* executeAction(
       break;
     case 'pause':
       yield* executePause(step);
+      break;
+    // Tree actions
+    case 'insert-node':
+      if (entry) yield* executeInsertNode(step, entry, meta, defaultEasing);
+      break;
+    case 'delete-node':
+      if (entry) yield* executeDeleteNode(step, entry, meta, defaultEasing);
+      break;
+    // Array actions
+    case 'init-cells':
+      if (entry) yield* executeInitCells(step, entry, meta, defaultEasing);
+      break;
+    case 'set-cell':
+      if (entry) yield* executeSetCell(step, entry, meta, defaultEasing);
+      break;
+    case 'highlight-cell':
+      if (entry) yield* executeHighlightCell(step, entry, meta, defaultEasing);
+      break;
+    case 'swap-cells':
+      if (entry) yield* executeSwapCells(step, entry, meta, defaultEasing);
       break;
     default:
       console.warn(`Unknown action: ${step.action}`);

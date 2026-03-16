@@ -90,6 +90,12 @@ export interface ActionStep {
   scale?: number;
   style?: Record<string, any>;
   indices?: number[];
+  // Tree actions
+  parent?: string;
+  side?: string;
+  label?: string;
+  // Array actions
+  index?: number;
 }
 
 // ── Scene Objects ──────────────────────────────────────────────────
@@ -131,7 +137,24 @@ export interface TextObject {
   style?: Record<string, any>;
 }
 
-export type SceneObject = GraphObject | DataStructureObject | TextObject;
+export interface TreeNodeSpec {
+  id: string;
+  label?: string;
+  parent?: string;
+  side?: 'left' | 'right';
+}
+
+export interface TreeObject {
+  id: string;
+  type: 'tree';
+  variant?: 'binary' | 'nary' | 'heap';
+  root: string;
+  nodes: TreeNodeSpec[];
+  position: { x: number; y: number };
+  style?: Record<string, any>;
+}
+
+export type SceneObject = GraphObject | DataStructureObject | TextObject | TreeObject;
 
 export function isParallelBlock(entry: TimelineEntry): entry is ParallelBlock {
   return 'parallel' in entry;

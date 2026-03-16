@@ -97,24 +97,106 @@ Each scene has an optional "narration" field — a plain text script that will b
 
 ${manual}
 
+## AVAILABLE OBJECT TYPES
+
+### graph
+Node-and-edge graph. Nodes are circles with labels; edges are lines.
+Required: id, type, nodes, edges. Optional: layout, style.
+
+### data-structure
+Queue, stack, array, or linked-list visualization. Starts empty.
+Required: id, type, variant (queue/stack/array/linked-list), position {x, y}. Optional: style.
+For **array variant**: index labels [0], [1], [2]... are shown below cells automatically.
+
+### text
+Labels, titles, descriptions.
+Required: id, type, content (use ""), position {x, y}. Optional: style.
+
+### tree (NEW)
+Binary tree with **auto-layout** — you only specify the structure (parent + side), NOT pixel coordinates.
+The tree builder automatically computes node positions based on the tree structure.
+
+Required: id, type, root (id of root node), nodes, position {x, y} (position of root on canvas).
+Optional: variant (binary/nary/heap), style.
+
+**Tree node fields**: id, label, parent (id of parent node), side ("left" or "right").
+The root node has NO parent or side.
+
+**Tree style properties**: nodeRadius (default 30), levelSpacing (default 100, vertical gap between levels), siblingSpacing (default 60, minimum horizontal gap), nodeColor, nodeStroke, edgeColor, edgeWidth, strokeWidth, labelColor, labelFont.
+
+**Tree object example:**
+\`\`\`json
+{
+  "id": "bst",
+  "type": "tree",
+  "variant": "binary",
+  "root": "50",
+  "position": { "x": 960, "y": 200 },
+  "nodes": [
+    { "id": "50", "label": "50" },
+    { "id": "30", "label": "30", "parent": "50", "side": "left" },
+    { "id": "70", "label": "70", "parent": "50", "side": "right" },
+    { "id": "20", "label": "20", "parent": "30", "side": "left" },
+    { "id": "40", "label": "40", "parent": "30", "side": "right" },
+    { "id": "60", "label": "60", "parent": "70", "side": "left" },
+    { "id": "80", "label": "80", "parent": "70", "side": "right" }
+  ],
+  "style": {
+    "nodeRadius": 30,
+    "levelSpacing": 100,
+    "siblingSpacing": 80,
+    "nodeColor": "#2d4a7a",
+    "edgeColor": "#4a6a9a"
+  }
+}
+\`\`\`
+
+**IMPORTANT**: Tree objects use the same highlight-node, highlight-edge, and set-style actions as graphs.
+Edge keys for trees are "parentId-childId" (e.g., edge: ["50", "30"]).
+
 ## AVAILABLE ACTIONS (with required fields)
 
+**Visibility:**
 - fade-in: target, duration (optional: easing)
 - fade-out: target, duration (optional: easing)
-- highlight-node: target, node, color, duration (optional: easing)
-- highlight-edge: target, edge (array [from, to]), color, duration (optional: easing)
+
+**Graph & Tree highlighting:**
+- highlight-node: target, node, color, duration (optional: easing) — works on both graph AND tree objects
+- highlight-edge: target, edge (array [from, to]), color, duration (optional: easing) — works on both graph AND tree objects
+
+**Data structure operations:**
 - enqueue: target, values (array), duration (optional: easing)
 - dequeue: target, duration (optional: easing)
 - push: target, values (array), duration (optional: easing)
 - pop: target, duration (optional: easing)
+
+**Array operations (NEW) — for data-structure with variant: array:**
+- init-cells: target, values (string array), duration (optional: easing) — populate array with all values at once
+- set-cell: target, index (number), value (string), duration (optional: easing) — set value of specific cell
+- highlight-cell: target, index (number), color, duration (optional: easing) — highlight specific cell by index
+- swap-cells: target, indices (two-element number array [i, j]), duration (optional: easing) — swap two cells with arc animation
+
+**Tree operations (NEW):**
+- insert-node: target, node (new id), parent (parent id), side ("left"/"right"), duration (optional: label, easing) — animate new node sliding in
+- delete-node: target, node (id to remove), duration (optional: easing) — fade out and remove node + subtree
+
+**Text:**
 - set-text: target, value (optional: duration, easing)
-- pause: duration
+
+**Movement:**
 - move-to: target, position {x, y}, duration (optional: easing)
 - move-node: target, node, position {x, y}, duration (optional: easing)
+
+**Camera:**
 - camera-zoom: scale, duration (optional: easing)
 - camera-pan: position {x, y}, duration (optional: easing)
 - camera-reset: duration (optional: easing)
+
+**Style:**
 - set-style: target, style {}, duration (optional: node, easing)
+
+**Timing:**
+- pause: duration
 
 ## AVAILABLE EASINGS
 
@@ -158,7 +240,7 @@ ${outroYaml}
 
 **THIS IS THE #1 CAUSE OF BROKEN VIDEOS. READ CAREFULLY.**
 
-ALL objects (graphs, text, data-structures) start with **opacity: 0** (completely invisible).
+ALL objects (graphs, trees, text, data-structures) start with **opacity: 0** (completely invisible).
 An object will NOT appear on screen until you explicitly use a **fade-in** action on it.
 
 **If you skip fade-in, the viewer sees a BLACK SCREEN with nothing on it.**
@@ -255,8 +337,8 @@ Then proceed with highlights, set-text, enqueue, etc.
 25. highlight-node and highlight-edge require the "target" to be the graph ID, and "node"/"edge" to specify which node/edge
 26. For parallel blocks, use { "parallel": [action1, action2, ...] } format
 27. Values in push/enqueue must be string arrays, e.g. ["A", "B"]
-28. **ACTION WHITELIST**: ONLY use these 16 action types: fade-in, fade-out, highlight-node, highlight-edge, enqueue, dequeue, push, pop, set-text, pause, move-to, move-node, camera-zoom, camera-pan, camera-reset, set-style. NO other action types exist.
-29. **PROPERTY WHITELIST**: Each action ONLY has the fields listed in the AVAILABLE ACTIONS section above. Do NOT add extra properties like "animated", "weight", "direction", "description", "label", "style" (unless it's set-style), "text", "name", or any other invented field. Unknown properties will be stripped.
+28. **ACTION WHITELIST**: ONLY use these 22 action types: fade-in, fade-out, highlight-node, highlight-edge, enqueue, dequeue, push, pop, set-text, pause, move-to, move-node, camera-zoom, camera-pan, camera-reset, set-style, insert-node, delete-node, init-cells, set-cell, highlight-cell, swap-cells. NO other action types exist.
+29. **PROPERTY WHITELIST**: Each action ONLY has the fields listed in the AVAILABLE ACTIONS section above. Do NOT add extra properties like "animated", "weight", "direction", "description", "style" (unless it's set-style), "text", "name", or any other invented field. Unknown properties will be stripped.
 30. **SHOW, DON'T TELL**: The visuals teach. Nodes lighting up, data flowing through structures, edges activating — these are the lesson. Text is just short captions. Avoid walls of text.
 31. The ONLY place colors with $ prefix are used is in the "color" field of highlight-node and highlight-edge actions. Do NOT use $ references in object styles — use raw hex colors there.
 32. Define your palette upfront before writing scenes. Common pattern: define 4-6 semantic colors like "active", "done", "queued", "highlight" in show.meta.palette, then only use those in timelines.
@@ -264,6 +346,10 @@ Then proceed with highlights, set-text, enqueue, etc.
 34. **NO SHORTCUTS**: Do NOT skip steps in an algorithm. If BFS visits 6 nodes, show ALL 6 visits with full highlight + queue + pause cycles. If sorting swaps 10 pairs, show ALL 10 swaps. Thoroughness creates video length.
 35. **PAUSE DURATION**: Default pause is "4s". Use "3s" minimum after visual changes. NEVER use "1s" or "2s" for the main pause after a step completes. Only use "1s" between sub-actions within a single step.
 36. **USE LARGE GRAPHS/STRUCTURES**: For graph algorithms, use 6-10 nodes with 8-15 edges. For data structure topics, demonstrate with 6-10 elements. Larger inputs = more steps = longer video.
+37. **TREE VS GRAPH**: Use "tree" type for binary trees, BSTs, heaps, expression trees, recursion trees — any hierarchical structure with parent-child relationships. Use "graph" type for graphs with arbitrary connections (BFS, DFS, Dijkstra). Trees have AUTO-LAYOUT — do NOT specify x/y coordinates for tree nodes, only specify parent and side.
+38. **SORTING ALGORITHMS**: Use data-structure with variant: "array". Use init-cells to populate the initial array, highlight-cell to show comparisons, swap-cells for swaps, and set-cell for value updates. Show EVERY comparison and swap — do not skip steps.
+39. **BST OPERATIONS**: Use "tree" type. Start with initial nodes in the objects array. Use insert-node action to animate insertions and delete-node for deletions. Use highlight-node to show the traversal path during search/insert.
+40. **highlight-cell vs highlight-node**: highlight-cell targets a data-structure by index number. highlight-node targets a graph or tree by node ID string. Do NOT confuse them.
 
 ## FINAL REMINDER — VIDEO LENGTH IS NON-NEGOTIABLE
 

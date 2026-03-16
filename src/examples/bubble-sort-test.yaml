@@ -1,0 +1,198 @@
+meta:
+  title: "Bubble Sort Test"
+  topic: "bubble-sort-test"
+  canvas:
+    width: 1920
+    height: 1080
+    background: "#0f0f23"
+  palette:
+    comparing: "#f39c12"
+    swapped: "#e74c3c"
+    sorted: "#2ecc71"
+  defaults:
+    data-structure:
+      cellWidth: 80
+      cellHeight: 50
+      fillColor: "#2d4a7a"
+      borderColor: "#5b8fd9"
+      textColor: "#ffffff"
+      gap: 6
+    text:
+      font: "22px sans-serif"
+      color: "#d0d0ee"
+  easing: easeInOutCubic
+
+objects:
+  - id: title
+    type: text
+    content: ""
+    position: { x: 960, y: 100 }
+    style:
+      font: "bold 36px sans-serif"
+      color: "#ffffff"
+      align: center
+
+  - id: step
+    type: text
+    content: ""
+    position: { x: 960, y: 160 }
+    style:
+      font: "20px sans-serif"
+      color: "#aaaacc"
+      align: center
+
+  - id: arr
+    type: data-structure
+    variant: array
+    position: { x: 960, y: 500 }
+
+timeline:
+  # Setup
+  - parallel:
+    - action: set-text
+      target: title
+      value: "Bubble Sort"
+    - action: set-text
+      target: step
+      value: "Initial array: [5, 3, 8, 1, 7]"
+  - parallel:
+    - action: fade-in
+      target: title
+      duration: "0.5s"
+    - action: fade-in
+      target: step
+      duration: "0.5s"
+    - action: fade-in
+      target: arr
+      duration: "0.5s"
+
+  # Initialize array
+  - action: init-cells
+    target: arr
+    values: ["5", "3", "8", "1", "7"]
+    duration: "1.5s"
+  - action: pause
+    duration: "3s"
+
+  # Pass 1: Compare [0] and [1] → swap
+  - action: set-text
+    target: step
+    value: "Pass 1: Compare 5 and 3"
+  - parallel:
+    - action: highlight-cell
+      target: arr
+      index: 0
+      color: $comparing
+      duration: "0.5s"
+    - action: highlight-cell
+      target: arr
+      index: 1
+      color: $comparing
+      duration: "0.5s"
+  - action: pause
+    duration: "2s"
+
+  - action: set-text
+    target: step
+    value: "5 > 3 → Swap!"
+  - action: swap-cells
+    target: arr
+    indices: [0, 1]
+    duration: "1s"
+  - action: pause
+    duration: "3s"
+
+  # Compare [1] and [2] → no swap
+  - action: set-text
+    target: step
+    value: "Compare 5 and 8 → no swap"
+  - parallel:
+    - action: highlight-cell
+      target: arr
+      index: 1
+      color: $comparing
+      duration: "0.5s"
+    - action: highlight-cell
+      target: arr
+      index: 2
+      color: $comparing
+      duration: "0.5s"
+  - action: pause
+    duration: "3s"
+
+  # Compare [2] and [3] → swap
+  - action: set-text
+    target: step
+    value: "Compare 8 and 1 → Swap!"
+  - parallel:
+    - action: highlight-cell
+      target: arr
+      index: 2
+      color: $comparing
+      duration: "0.5s"
+    - action: highlight-cell
+      target: arr
+      index: 3
+      color: $comparing
+      duration: "0.5s"
+  - action: pause
+    duration: "2s"
+
+  - action: swap-cells
+    target: arr
+    indices: [2, 3]
+    duration: "1s"
+  - action: pause
+    duration: "3s"
+
+  # Compare [3] and [4] → swap
+  - action: set-text
+    target: step
+    value: "Compare 8 and 7 → Swap!"
+  - parallel:
+    - action: highlight-cell
+      target: arr
+      index: 3
+      color: $comparing
+      duration: "0.5s"
+    - action: highlight-cell
+      target: arr
+      index: 4
+      color: $comparing
+      duration: "0.5s"
+  - action: pause
+    duration: "2s"
+
+  - action: swap-cells
+    target: arr
+    indices: [3, 4]
+    duration: "1s"
+
+  # Mark last element as sorted
+  - action: highlight-cell
+    target: arr
+    index: 4
+    color: $sorted
+    duration: "0.5s"
+  - action: set-text
+    target: step
+    value: "Pass 1 complete! 8 is in its final position."
+  - action: pause
+    duration: "3s"
+
+  # End
+  - action: set-text
+    target: step
+    value: "Continue for remaining passes..."
+  - action: pause
+    duration: "3s"
+  - parallel:
+    - action: fade-out
+      target: arr
+      duration: "0.5s"
+    - action: fade-out
+      target: title
+      duration: "0.5s"
+    - action: fade-out
+      target: step
+      duration: "0.5s"

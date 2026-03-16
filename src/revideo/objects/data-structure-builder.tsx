@@ -7,6 +7,8 @@ export interface DataStructureRefs {
   root: Reference<Node>;
   container: Reference<Node>;
   label: Reference<Txt>;
+  indexLabels: Reference<Node>;
+  variant: string;
 }
 
 export function buildDataStructure(
@@ -17,6 +19,7 @@ export function buildDataStructure(
   const root = createRef<Node>();
   const container = createRef<Node>();
   const label = createRef<Txt>();
+  const indexLabels = createRef<Node>();
 
   // Canvas center offset
   const x = obj.position.x - meta.canvas.width / 2;
@@ -24,6 +27,8 @@ export function buildDataStructure(
 
   const variantLabel =
     obj.variant.charAt(0).toUpperCase() + obj.variant.slice(1);
+
+  const cellH = style.cellHeight || 40;
 
   const node = (
     <Node ref={root} x={x} y={y} opacity={0}>
@@ -37,10 +42,11 @@ export function buildDataStructure(
         textAlign={'center'}
       />
       <Node ref={container} />
+      <Node ref={indexLabels} y={cellH / 2 + 16} />
     </Node>
   );
 
-  return {node, refs: {root, container, label}};
+  return {node, refs: {root, container, label, indexLabels, variant: obj.variant}};
 }
 
 /**

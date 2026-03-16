@@ -373,11 +373,71 @@ The `font` property uses CSS shorthand format: `[weight] <size>px <family>`. Exa
 - `"bold 36px sans-serif"` — bold, 36px, sans-serif
 - `"24px monospace"` — normal weight, 24px, monospace
 
+### 3.4 Tree
+
+Binary tree with **auto-layout**. You specify the tree structure (parent + side), NOT pixel coordinates. The renderer automatically computes node positions.
+
+```yaml
+- id: bst
+  type: tree
+  variant: binary
+  root: "50"
+  position: { x: 960, y: 200 }
+  nodes:
+    - { id: "50", label: "50" }
+    - { id: "30", label: "30", parent: "50", side: left }
+    - { id: "70", label: "70", parent: "50", side: right }
+    - { id: "20", label: "20", parent: "30", side: left }
+    - { id: "40", label: "40", parent: "30", side: right }
+  style:
+    nodeRadius: 30
+    levelSpacing: 100
+    siblingSpacing: 80
+```
+
+**Fields:**
+
+| Field | Required | Description |
+|-------|----------|-------------|
+| `id` | Yes | Unique identifier |
+| `type` | Yes | Must be `"tree"` |
+| `root` | Yes | ID of the root node |
+| `nodes` | Yes | Array of tree nodes (see below) |
+| `position` | Yes | `{ x, y }` screen coordinates of the root node |
+| `variant` | No | `binary` (default), `nary`, or `heap` |
+| `style` | No | Style overrides |
+
+**Tree node fields:**
+
+| Field | Required | Description |
+|-------|----------|-------------|
+| `id` | Yes | Unique node identifier |
+| `label` | No | Display text (defaults to `id`) |
+| `parent` | No | Parent node ID (root node has no parent) |
+| `side` | No | `"left"` or `"right"` (required if parent is specified) |
+
+**Style properties** (via `meta.defaults.tree` or `object.style`):
+
+| Property | Default | Description |
+|----------|---------|-------------|
+| `nodeRadius` | `30` | Circle radius in pixels |
+| `levelSpacing` | `100` | Vertical gap between tree levels |
+| `siblingSpacing` | `60` | Minimum horizontal gap between siblings |
+| `nodeColor` | `"#2d4a7a"` | Circle fill color |
+| `nodeStroke` | `"#5b8fd9"` | Circle border color |
+| `edgeColor` | `"#4a6a9a"` | Line color for parent-child edges |
+| `edgeWidth` | `3` | Line width for edges |
+| `strokeWidth` | `3` | Circle border width |
+| `labelColor` | `"#ffffff"` | Node label text color |
+| `labelFont` | `"20px monospace"` | Node label font |
+
+**Important:** Tree objects use the same `highlight-node`, `highlight-edge`, `move-node`, and `set-style` actions as graphs. Edge keys are `"parentId-childId"` (e.g., `edge: ["50", "30"]`).
+
 ---
 
 ## 4. Action Reference
 
-All 16 supported action types are listed below. Using an unsupported action type will produce a warning and be skipped.
+All 22 supported action types are listed below. Using an unsupported action type will produce a warning and be skipped.
 
 ### 4.1 Visibility
 
@@ -386,7 +446,7 @@ All 16 supported action types are listed below. Using an unsupported action type
 | `fade-in` | `target`, `duration` | `easing` | Animate object from opacity 0 → 1 |
 | `fade-out` | `target`, `duration` | `easing` | Animate object from opacity 1 → 0 |
 
-### 4.2 Graph Actions
+### 4.2 Graph & Tree Actions
 
 | Action | Required Fields | Optional Fields | Description |
 |--------|----------------|-----------------|-------------|
@@ -394,9 +454,38 @@ All 16 supported action types are listed below. Using an unsupported action type
 | `highlight-edge` | `target`, `edge`, `color`, `duration` | `easing` | Change an edge's stroke color |
 | `move-node` | `target`, `node`, `position`, `duration` | `easing` | Move a graph node to `{x, y}` |
 
-- `target` = the graph object's `id`
-- `node` = the specific node's `id` within that graph
-- `edge` = array `[from, to]` matching a defined edge direction
+These actions work on **both graph and tree** objects.
+
+- `target` = the graph or tree object's `id`
+- `node` = the specific node's `id` within that object
+- `edge` = array `[from, to]` matching a defined edge direction (for trees: `[parentId, childId]`)
+
+### 4.2b Tree-Specific Actions
+
+| Action | Required Fields | Optional Fields | Description |
+|--------|----------------|-----------------|-------------|
+| `insert-node` | `target`, `node`, `parent`, `side`, `duration` | `label`, `easing` | Animate inserting a new node into the tree |
+| `delete-node` | `target`, `node`, `duration` | `easing` | Fade out and remove a node (and its subtree) |
+
+- `insert-node`: Slides a new node down from the parent with a growing edge. The tree auto-relayouts.
+- `delete-node`: Fades out the node, its edge, and all descendants. Remaining nodes reposition.
+
+```yaml
+# Insert node 25 as left child of node 30
+- action: insert-node
+  target: bst
+  node: "25"
+  parent: "30"
+  side: left
+  label: "25"
+  duration: "0.8s"
+
+# Delete node 70 and its entire subtree
+- action: delete-node
+  target: bst
+  node: "70"
+  duration: "0.8s"
+```
 
 ### 4.3 Data Structure Actions
 
@@ -408,6 +497,51 @@ All 16 supported action types are listed below. Using an unsupported action type
 | `pop` | `target`, `duration` | `easing` | Pop top value from stack |
 
 - `values` must be a **string array**: `["A", "B"]`
+
+### 4.3b Array Actions
+
+These actions target data-structure objects (especially `variant: array`) and operate on cells by index.
+
+| Action | Required Fields | Optional Fields | Description |
+|--------|----------------|-----------------|-------------|
+| `init-cells` | `target`, `values`, `duration` | `easing` | Populate array with all values at once (staggered animation) |
+| `set-cell` | `target`, `index`, `value`, `duration` | `easing` | Set the value of a specific cell by index |
+| `highlight-cell` | `target`, `index`, `color`, `duration` | `easing` | Highlight a specific cell by index (change fill color) |
+| `swap-cells` | `target`, `indices`, `duration` | `easing` | Swap two cells with an arc animation |
+
+- `values` = string array: `["5", "3", "8", "1"]`
+- `index` = zero-based integer
+- `indices` = two-element integer array: `[2, 5]`
+
+```yaml
+# Initialize array with values
+- action: init-cells
+  target: arr
+  values: ["5", "3", "8", "1", "7"]
+  duration: "1.5s"
+
+# Highlight cell at index 2
+- action: highlight-cell
+  target: arr
+  index: 2
+  color: "#e74c3c"
+  duration: "0.5s"
+
+# Swap cells at indices 1 and 3
+- action: swap-cells
+  target: arr
+  indices: [1, 3]
+  duration: "1s"
+
+# Set cell at index 0 to new value
+- action: set-cell
+  target: arr
+  index: 0
+  value: "99"
+  duration: "0.5s"
+```
+
+When `variant` is `"array"`, index labels `[0]`, `[1]`, `[2]`... appear below each cell automatically.
 
 ### 4.4 Text Actions
 
@@ -490,7 +624,7 @@ meta:
 | `title` | Yes | Human-readable title |
 | `topic` | No | Used for output filename (`output/<topic>.mp4`) |
 | `canvas` | Yes | `width`, `height`, `background` |
-| `defaults` | No | Default styles per object type (`graph`, `data-structure`, `text`) |
+| `defaults` | No | Default styles per object type (`graph`, `data-structure`, `text`, `tree`) |
 | `palette` | No | Named colors for use in timeline actions with `$` prefix |
 | `easing` | No | Default easing for all animations (default: `linear`) |
 

@@ -1,0 +1,188 @@
+meta:
+  title: "BST Insertion Test"
+  topic: "bst-test"
+  canvas:
+    width: 1920
+    height: 1080
+    background: "#0f0f23"
+  palette:
+    active: "#2ecc71"
+    visited: "#e74c3c"
+    inserting: "#f39c12"
+  defaults:
+    tree:
+      nodeRadius: 30
+      levelSpacing: 120
+      siblingSpacing: 80
+      nodeColor: "#2d4a7a"
+      nodeStroke: "#5b8fd9"
+      edgeColor: "#4a6a9a"
+      edgeWidth: 3
+      labelColor: "#ffffff"
+    text:
+      font: "22px sans-serif"
+      color: "#d0d0ee"
+  easing: easeInOutCubic
+
+objects:
+  - id: title
+    type: text
+    content: ""
+    position: { x: 960, y: 60 }
+    style:
+      font: "bold 36px sans-serif"
+      color: "#ffffff"
+      align: center
+
+  - id: step
+    type: text
+    content: ""
+    position: { x: 960, y: 120 }
+    style:
+      font: "20px sans-serif"
+      color: "#aaaacc"
+      align: center
+
+  - id: bst
+    type: tree
+    variant: binary
+    root: "50"
+    position: { x: 960, y: 280 }
+    nodes:
+      - { id: "50", label: "50" }
+      - { id: "30", label: "30", parent: "50", side: left }
+      - { id: "70", label: "70", parent: "50", side: right }
+      - { id: "20", label: "20", parent: "30", side: left }
+      - { id: "40", label: "40", parent: "30", side: right }
+
+timeline:
+  # Fade in everything
+  - parallel:
+    - action: set-text
+      target: title
+      value: "Binary Search Tree"
+    - action: set-text
+      target: step
+      value: "Initial tree with 5 nodes"
+  - parallel:
+    - action: fade-in
+      target: title
+      duration: "0.5s"
+    - action: fade-in
+      target: step
+      duration: "0.5s"
+    - action: fade-in
+      target: bst
+      duration: "0.8s"
+  - action: pause
+    duration: "3s"
+
+  # Highlight root
+  - action: set-text
+    target: step
+    value: "Root node: 50"
+  - action: highlight-node
+    target: bst
+    node: "50"
+    color: $active
+    duration: "0.5s"
+  - action: pause
+    duration: "3s"
+
+  # Highlight left subtree
+  - action: set-text
+    target: step
+    value: "Left subtree: 30, 20, 40"
+  - parallel:
+    - action: highlight-node
+      target: bst
+      node: "30"
+      color: $visited
+      duration: "0.5s"
+    - action: highlight-edge
+      target: bst
+      edge: ["50", "30"]
+      color: $visited
+      duration: "0.5s"
+  - action: pause
+    duration: "2s"
+
+  - parallel:
+    - action: highlight-node
+      target: bst
+      node: "20"
+      color: $visited
+      duration: "0.5s"
+    - action: highlight-node
+      target: bst
+      node: "40"
+      color: $visited
+      duration: "0.5s"
+  - action: pause
+    duration: "3s"
+
+  # Insert node 25
+  - action: set-text
+    target: step
+    value: "Inserting node 25 → left child of 30"
+  - action: insert-node
+    target: bst
+    node: "25"
+    parent: "30"
+    side: left
+    label: "25"
+    duration: "1s"
+  - action: highlight-node
+    target: bst
+    node: "25"
+    color: $inserting
+    duration: "0.5s"
+  - action: pause
+    duration: "3s"
+
+  # Insert node 60
+  - action: set-text
+    target: step
+    value: "Inserting node 60 → left child of 70"
+  - action: insert-node
+    target: bst
+    node: "60"
+    parent: "70"
+    side: left
+    label: "60"
+    duration: "1s"
+  - action: highlight-node
+    target: bst
+    node: "60"
+    color: $inserting
+    duration: "0.5s"
+  - action: pause
+    duration: "3s"
+
+  # Delete node 20
+  - action: set-text
+    target: step
+    value: "Deleting leaf node 20"
+  - action: delete-node
+    target: bst
+    node: "20"
+    duration: "0.8s"
+  - action: pause
+    duration: "3s"
+
+  # Fade out
+  - action: set-text
+    target: step
+    value: "Done! BST operations complete."
+  - action: pause
+    duration: "3s"
+  - parallel:
+    - action: fade-out
+      target: bst
+      duration: "0.5s"
+    - action: fade-out
+      target: title
+      duration: "0.5s"
+    - action: fade-out
+      target: step
+      duration: "0.5s"
