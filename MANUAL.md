@@ -1,4 +1,4 @@
-# CS Animation Platform — User Manual
+# Morphon — User Manual
 
 ## Quick Start
 

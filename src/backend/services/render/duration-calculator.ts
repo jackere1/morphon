@@ -73,7 +73,7 @@ export function computeShowDurations(show: InlineShowManifest): {
     total += transitionDur;
   }
 
-  // Account for the trailing 0.5s waitFor in cs-animation.tsx
+  // Account for the trailing 0.5s waitFor in morphon-animation.tsx
   total += 0.5;
 
   return {sceneDurations, transitionDurations, totalDuration: total};
@@ -212,7 +212,7 @@ export function injectSubtitles(show: InlineShowManifest): number {
     } as any);
 
     // Store chunks in manifest metadata — the renderer picks these up
-    // and runs them as a parallel track via all() in cs-animation.tsx
+    // and runs them as a parallel track via all() in morphon-animation.tsx
     (manifest.meta as any).__subtitleChunks = chunks;
 
     injectedCount++;

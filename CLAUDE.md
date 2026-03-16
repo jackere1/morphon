@@ -1,4 +1,4 @@
-# CS Animation Platform
+# Morphon
 
 ## Vision
 Text-to-animation platform for CS education. Markdown in → animated video out.
@@ -124,7 +124,7 @@ src/
     render.ts         # CLI: YAML → renderVideo() → MP4 (single + show)
     types.ts          # TypeScript interfaces (Manifest, ShowManifest, etc.)
     scenes/
-      cs-animation.tsx  # Core scene generator (single + multi-scene)
+      morphon-animation.tsx  # Core scene generator (single + multi-scene)
     objects/          # Manifest objects → Revideo nodes
       graph-builder.tsx
       data-structure-builder.tsx
@@ -185,7 +185,7 @@ See [MANUAL.md](MANUAL.md) for full documentation.
 ## Neubrutalism Design System
 
 ### Visual Language
-The CS Animation Platform uses **Neubrutalism** — a bold, playful, high-contrast design system that makes CS education feel energetic and accessible.
+The Morphon uses **Neubrutalism** — a bold, playful, high-contrast design system that makes CS education feel energetic and accessible.
 
 ### Color Palette
 ```css

@@ -1,4 +1,4 @@
--- CS Animation Platform Database Schema
+-- Morphon Database Schema
 
 -- Jobs table: stores all render jobs (past, current, failed)
 CREATE TABLE IF NOT EXISTS jobs (

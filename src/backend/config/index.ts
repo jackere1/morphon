@@ -9,7 +9,7 @@ export const CONFIG = {
   PORT: parseInt(process.env.PORT || '3000', 10),
 
   // Database
-  DATABASE_PATH: process.env.DATABASE_PATH || './data/cs-animations.db',
+  DATABASE_PATH: process.env.DATABASE_PATH || './data/morphon.db',
 
   // Video retention
   VIDEO_RETENTION_DAYS: parseInt(process.env.VIDEO_RETENTION_DAYS || '7', 10),

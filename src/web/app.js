@@ -1,5 +1,5 @@
 /**
- * CS ANIMATION PLATFORM - NEUBRUTALISM UI
+ * MORPHON - NEUBRUTALISM UI
  * Main app with client-side routing
  */
 
@@ -466,4 +466,4 @@ router.setNotFound((path) => {
 });
 
 // Initialize
-console.log('CS Animation Platform initialized');
+console.log('Morphon initialized');

@@ -15,7 +15,7 @@ let db: Database.Database | null = null;
  * Runs schema migrations
  */
 export function initDatabase(dbPath?: string): Database.Database {
-  const path = dbPath || process.env.DATABASE_PATH || './data/cs-animations.db';
+  const path = dbPath || process.env.DATABASE_PATH || './data/morphon.db';
 
   // Ensure data directory exists
   const dbDir = dirname(path);

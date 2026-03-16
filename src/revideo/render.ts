@@ -14,8 +14,8 @@ async function main() {
     process.exit(1);
   }
 
-  console.log('\n🎬 CS Animation Renderer (Revideo)');
-  console.log('====================================\n');
+  console.log('\n◆ Morphon Renderer');
+  console.log('══════════════════\n');
 
   // 1. Read and parse YAML
   const raw = readFileSync(file, 'utf-8');

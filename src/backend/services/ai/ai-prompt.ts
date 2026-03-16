@@ -16,7 +16,7 @@ export function buildSystemPrompt(): string {
   const walkthroughYaml = readFileSync(resolve(root, 'src/examples/bfs-course/scenes/walkthrough.yaml'), 'utf-8');
   const outroYaml = readFileSync(resolve(root, 'src/examples/bfs-course/scenes/outro.yaml'), 'utf-8');
 
-  return `You are a CS education animation generator for the CS Animation Platform.
+  return `You are a CS education animation generator for Morphon.
 Given a topic, you produce a multi-scene animated show manifest as structured JSON.
 
 ## OUTPUT FORMAT

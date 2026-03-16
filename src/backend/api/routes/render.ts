@@ -4,7 +4,7 @@ import { resolve } from 'path';
 import { existsSync, renameSync, unlinkSync } from 'fs';
 import PQueue from 'p-queue';
 import { renderManifest, renderShow } from '../../services/render/render-service.js';
-import { generatePerSceneNarration, mergeAudioWithVideo } from '../../services/ai/tts-service.js';
+import { generatePerSceneNarration, buildAlignedAudio, mergeAudioWithVideo } from '../../services/ai/tts-service.js';
 import { computeShowDurations, padSceneTimelines, injectSubtitles } from '../../services/render/duration-calculator.js';
 import * as jobStorage from '../../services/storage/jobStorage.js';
 import { validateRenderShowRequest, validateRenderRequest } from '../middleware/validation.js';
@@ -81,13 +81,25 @@ router.post(
               });
             });
 
-            // Step 3: Pad scene timelines where audio exceeds video
+            // Step 3: Store audio durations in manifest + pad timelines
             if (ttsResult) {
               console.log(`[Sync] Audio durations: [${ttsResult.sceneAudioDurations.map(d => d.toFixed(1) + 's').join(', ')}]`);
+
+              // Store per-scene audio duration so renderer can sync subtitles to audio pace
+              for (let si = 0; si < show.scenes.length; si++) {
+                (show.scenes[si].manifest.meta as any).__audioDuration = ttsResult.sceneAudioDurations[si] || 0;
+              }
+
               const paddedCount = padSceneTimelines(show, sceneDurations, ttsResult.sceneAudioDurations);
               if (paddedCount > 0) {
                 console.log(`[Sync] Padded ${paddedCount} scene(s) to match audio`);
               }
+
+              // Step 3b: Build scene-aligned audio — pad each scene's audio with
+              // silence to match its video duration so scene boundaries align
+              const recomputedDurations = computeShowDurations(show).sceneDurations;
+              const alignedAudioPath = resolve('output', `${jobId}-narration.wav`);
+              buildAlignedAudio(ttsResult, recomputedDurations, alignedAudioPath);
             }
           }
         }

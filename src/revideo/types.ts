@@ -49,6 +49,7 @@ export interface ResolvedScene {
   manifest: Manifest;
   transition?: TransitionConfig;
   subtitleChunks?: string[];
+  audioDuration?: number;
 }
 
 export function isShowManifest(obj: any): obj is ShowManifest {

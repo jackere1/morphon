@@ -9,7 +9,7 @@ import {executeTransition} from '../actions/transition';
 const SUBTITLE_ID = '__subtitle';
 const WORDS_PER_SECOND = 2.5;
 
-export default makeScene2D('cs-animation', function* (view) {
+export default makeScene2D('morphon-animation', function* (view) {
   const dataJson = useScene().variables.get('manifest', '{}')();
   const data = JSON.parse(dataJson as string);
 
@@ -53,7 +53,8 @@ function* executeTimeline(
 
 /**
  * Run subtitles as an independent parallel track.
- * Cycles through chunks, distributing them evenly across the total scene duration.
+ * Distributes chunks proportionally to word count across the total duration,
+ * so longer sentences get more screen time — matching speech pacing.
  * Each chunk: fade-in → hold → fade-out → brief gap.
  */
 function* runSubtitleTrack(
@@ -63,21 +64,25 @@ function* runSubtitleTrack(
 ): ThreadGenerator {
   if (chunks.length === 0 || totalDuration <= 0) return;
 
-  // Distribute chunks evenly across the scene duration
-  const timePerChunk = totalDuration / chunks.length;
-  const fadeTime = 0.3;
-  const gapTime = 0.3;
+  const fadeTime = 0.25;
+  const gapTime = 0.2;
+  const overheadPerChunk = fadeTime * 2 + gapTime;
+  const totalOverhead = overheadPerChunk * chunks.length;
+  const availableHoldTime = Math.max(totalDuration - totalOverhead, chunks.length);
+
+  // Weight each chunk by word count for proportional timing
+  const wordCounts = chunks.map(c => c.split(/\s+/).filter(w => w).length);
+  const totalWords = wordCounts.reduce((a, b) => a + b, 0);
 
   for (let i = 0; i < chunks.length; i++) {
-    const holdTime = Math.max(timePerChunk - fadeTime * 2 - gapTime, 1.0);
+    const weight = totalWords > 0 ? wordCounts[i] / totalWords : 1 / chunks.length;
+    const holdTime = Math.max(availableHoldTime * weight, 1.0);
 
-    // Set text, fade in, hold, fade out
     subtitleRef().text(chunks[i]);
     yield* subtitleRef().opacity(1, fadeTime);
     yield* waitFor(holdTime);
     yield* subtitleRef().opacity(0, fadeTime);
 
-    // Brief gap between chunks (except after last)
     if (i < chunks.length - 1) {
       yield* waitFor(gapTime);
     }
@@ -176,10 +181,14 @@ function* renderShow(view: any, show: ResolvedShow) {
 
     if (subtitleEntry && subtitleChunks) {
       // Run timeline + subtitles IN PARALLEL — subtitles are an independent track
+      // Use audio duration for subtitle pacing so subtitles match speech speed
+      const audioDur = scene.audioDuration || (manifest.meta as any).__audioDuration;
       const sceneDuration = computeTimelineDuration(manifest.timeline);
+      const subtitleDuration = audioDur > 0 ? audioDur : sceneDuration;
+
       yield* all(
         executeTimeline(manifest.timeline, objects, camera(), manifest.meta),
-        runSubtitleTrack(subtitleEntry.refs.root, subtitleChunks, sceneDuration),
+        runSubtitleTrack(subtitleEntry.refs.root, subtitleChunks, subtitleDuration),
       );
     } else {
       // No subtitles — run timeline normally

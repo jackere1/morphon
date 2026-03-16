@@ -1,6 +1,6 @@
 /**
  * NEUBRUTALISM DESIGN SYSTEM
- * Bold, playful, brutalist aesthetics for CS Animation Platform
+ * Bold, playful, brutalist aesthetics for Morphon
  */
 
 :root {
@@ -345,7 +345,9 @@ textarea {
 }
 
 .nav-brand-icon {
-  font-size: 2rem;
+  font-size: 1.6rem;
+  color: var(--secondary);
+  text-shadow: 2px 2px 0 var(--primary);
 }
 
 .nav-links {

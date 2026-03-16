@@ -47,8 +47,8 @@ app.use(errorHandler);
 
 app.listen(CONFIG.PORT, () => {
   const hasGemini = !!CONFIG.GEMINI_API_KEY;
-  console.log(`\n🎬 CS Animation Platform v2.0`);
-  console.log(`==============================`);
+  console.log(`\n◆ Morphon v1.0`);
+  console.log(`══════════════`);
   console.log(`Server running at http://localhost:${CONFIG.PORT}`);
   console.log(`AI generation: ${hasGemini ? 'enabled' : 'DISABLED (set GEMINI_API_KEY)'}`);
   console.log(`Database: ${CONFIG.DATABASE_PATH}`);

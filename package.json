@@ -1,7 +1,7 @@
 {
-  "name": "cs-animations",
-  "version": "0.2.0",
-  "description": "Text-to-animation platform for CS education",
+  "name": "morphon",
+  "version": "1.0.0",
+  "description": "Morphon — text-to-animation platform for CS education",
   "type": "module",
   "scripts": {
     "validate": "node src/manifest/validate.js",

@@ -114,9 +114,10 @@ export async function renderShow(
         ? undefined
         : (scene.transition as TransitionConfig);
 
-    // Pass subtitle chunks if present (computed by injectSubtitles)
+    // Pass subtitle chunks and audio duration if present
     const subtitleChunks = (m.meta as any).__subtitleChunks as string[] | undefined;
-    resolved.scenes.push({manifest: m, transition, subtitleChunks});
+    const audioDuration = (m.meta as any).__audioDuration as number | undefined;
+    resolved.scenes.push({manifest: m, transition, subtitleChunks, audioDuration});
   }
 
   const variableData = JSON.stringify({type: 'show', show: resolved});

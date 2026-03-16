@@ -36,7 +36,8 @@ export interface TtsResult {
 }
 
 export interface PerSceneTtsResult {
-  sceneAudioDurations: number[]; // Duration per scene in seconds
+  sceneAudioDurations: number[]; // Duration per scene in seconds (speech only, before silence padding)
+  sceneWavPaths: string[];       // Per-scene WAV files (kept for scene-aligned concatenation)
   combinedAudioPath: string;
   totalDurationSecs: number;
 }
@@ -159,21 +160,19 @@ export async function generatePerSceneNarration(
     }
   }
 
-  // Concatenate all scene WAVs into combined file
-  const combinedPath = resolve('output', `${jobId}-narration.wav`);
-  concatenateWavFiles(wavPaths, combinedPath);
-  const totalDuration = getAudioDuration(combinedPath);
-
-  // Clean up temp files
-  for (const p of wavPaths) {
-    try { unlinkSync(p); } catch {}
-  }
-  try { execSync(`rm -rf "${tmpDir}"`); } catch {}
+  // Don't concatenate yet — the render pipeline will call buildAlignedAudio()
+  // after padding so scene audio boundaries match scene video boundaries
+  const totalSpeechDuration = sceneAudioDurations.reduce((a, b) => a + b, 0);
 
   console.log(`[TTS] Per-scene durations: [${sceneAudioDurations.map(d => d.toFixed(1) + 's').join(', ')}]`);
-  console.log(`[TTS] Combined narration: ${totalDuration.toFixed(1)}s -> ${combinedPath}`);
+  console.log(`[TTS] Total speech: ${totalSpeechDuration.toFixed(1)}s`);
 
-  return {sceneAudioDurations, combinedAudioPath: combinedPath, totalDurationSecs: totalDuration};
+  return {
+    sceneAudioDurations,
+    sceneWavPaths: wavPaths,
+    combinedAudioPath: '', // filled by buildAlignedAudio
+    totalDurationSecs: totalSpeechDuration,
+  };
 }
 
 /**
@@ -312,6 +311,59 @@ async function generatePerScene(
 
   console.log(`[TTS] Final narration: ${durationSecs.toFixed(1)}s → ${outputPath}`);
   return {audioPath: outputPath, durationSecs};
+}
+
+/**
+ * Build a scene-aligned audio file by padding each scene's audio WAV
+ * with silence to match the scene's video duration, then concatenating.
+ * This ensures scene 2's audio starts exactly when scene 2's video starts.
+ */
+export function buildAlignedAudio(
+  ttsResult: PerSceneTtsResult,
+  sceneDurations: number[],
+  outputPath: string,
+): void {
+  const paddedPaths: string[] = [];
+  const tmpDir = resolve('output', 'tts-aligned');
+  mkdirSync(tmpDir, {recursive: true});
+
+  for (let i = 0; i < ttsResult.sceneWavPaths.length; i++) {
+    const wavPath = ttsResult.sceneWavPaths[i];
+    const audioDur = ttsResult.sceneAudioDurations[i];
+    const videoDur = sceneDurations[i] || audioDur;
+
+    if (videoDur > audioDur + 0.1) {
+      // Pad with silence to match video duration
+      const paddedPath = resolve(tmpDir, `scene-${i}-padded.wav`);
+      const silenceDur = videoDur - audioDur;
+      const silencePath = resolve(tmpDir, `scene-${i}-gap.wav`);
+      generateSilenceWav(silencePath, silenceDur);
+
+      // Concatenate speech + silence
+      concatenateWavFiles([wavPath, silencePath], paddedPath);
+      paddedPaths.push(paddedPath);
+
+      console.log(`[Sync] Scene ${i + 1} audio: ${audioDur.toFixed(1)}s speech + ${silenceDur.toFixed(1)}s silence = ${videoDur.toFixed(1)}s (matches video)`);
+    } else {
+      paddedPaths.push(wavPath);
+      console.log(`[Sync] Scene ${i + 1} audio: ${audioDur.toFixed(1)}s (already matches video ${videoDur.toFixed(1)}s)`);
+    }
+  }
+
+  // Concatenate all padded scene WAVs into final aligned audio
+  concatenateWavFiles(paddedPaths, outputPath);
+  const totalDur = getAudioDuration(outputPath);
+  console.log(`[Sync] Aligned audio: ${totalDur.toFixed(1)}s -> ${outputPath}`);
+
+  // Clean up temp files
+  for (const p of [...ttsResult.sceneWavPaths, ...paddedPaths]) {
+    try { unlinkSync(p); } catch {}
+  }
+  try { execSync(`rm -rf "${tmpDir}"`); } catch {}
+
+  // Update the result
+  ttsResult.combinedAudioPath = outputPath;
+  ttsResult.totalDurationSecs = totalDur;
 }
 
 /**
