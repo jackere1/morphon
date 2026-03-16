@@ -10,49 +10,157 @@
     "palette": {"visited": "#e74c3c", "queued": "#f1c40f", "current": "#2ecc71", "highlight": "#e67e22"},
     "easing": "easeInOutCubic"
   },
-  "scenes": [{
-    "name": "walkthrough",
-    "transition": "none",
-    "manifest": {
-      "meta": {"title": "BFS Walkthrough", "canvas": {"width": 1920, "height": 1080, "background": "#0f0f23"}},
-      "objects": [
-        {"id": "title", "type": "text", "content": "", "position": {"x": 960, "y": 60}, "style": {"font": "bold 36px sans-serif", "align": "center", "color": "#ffffff"}},
-        {"id": "graph", "type": "graph", "nodes": [{"id": "A", "label": "A", "x": 960, "y": 300}, {"id": "B", "label": "B", "x": 720, "y": 480}, {"id": "C", "label": "C", "x": 1200, "y": 480}, {"id": "D", "label": "D", "x": 840, "y": 660}], "edges": [{"from": "A", "to": "B"}, {"from": "A", "to": "C"}, {"from": "B", "to": "D"}]},
-        {"id": "queue", "type": "data-structure", "variant": "queue", "position": {"x": 960, "y": 870}},
-        {"id": "step", "type": "text", "content": "", "position": {"x": 960, "y": 140}, "style": {"font": "22px sans-serif", "align": "center", "color": "#b0b0dd"}}
-      ],
-      "timeline": [
-        {"action": "set-text", "target": "title", "value": "Breadth-First Search"},
-        {"action": "fade-in", "target": "title", "duration": "0.6s"},
-        {"action": "fade-in", "target": "graph", "duration": "0.8s"},
-        {"action": "fade-in", "target": "queue", "duration": "0.3s"},
-        {"action": "pause", "duration": "1s"},
-        {"action": "set-text", "target": "step", "value": "Start at A"},
-        {"action": "fade-in", "target": "step", "duration": "0.3s"},
-        {"action": "highlight-node", "target": "graph", "node": "A", "color": "$current", "duration": "0.5s"},
-        {"action": "enqueue", "target": "queue", "values": ["A"], "duration": "0.4s"},
-        {"action": "pause", "duration": "1.5s"},
-        {"action": "set-text", "target": "step", "value": "Dequeue A \u2014 visit B, C"},
-        {"action": "dequeue", "target": "queue", "duration": "0.4s"},
-        {"action": "highlight-node", "target": "graph", "node": "A", "color": "$visited", "duration": "0.4s"},
-        {"parallel": [{"action": "highlight-node", "target": "graph", "node": "B", "color": "$queued", "duration": "0.4s"}, {"action": "highlight-node", "target": "graph", "node": "C", "color": "$queued", "duration": "0.4s"}]},
-        {"action": "enqueue", "target": "queue", "values": ["B", "C"], "duration": "0.4s"},
-        {"action": "pause", "duration": "1.5s"},
-        {"action": "set-text", "target": "step", "value": "Dequeue B \u2014 visit D"},
-        {"action": "dequeue", "target": "queue", "duration": "0.4s"},
-        {"action": "highlight-node", "target": "graph", "node": "B", "color": "$visited", "duration": "0.4s"},
-        {"action": "highlight-node", "target": "graph", "node": "D", "color": "$queued", "duration": "0.4s"},
-        {"action": "enqueue", "target": "queue", "values": ["D"], "duration": "0.4s"},
-        {"action": "pause", "duration": "1.5s"},
-        {"action": "set-text", "target": "step", "value": "Dequeue C \u2014 no unvisited neighbors"},
-        {"action": "dequeue", "target": "queue", "duration": "0.4s"},
-        {"action": "highlight-node", "target": "graph", "node": "C", "color": "$visited", "duration": "0.4s"},
-        {"action": "pause", "duration": "1s"},
-        {"action": "set-text", "target": "step", "value": "Dequeue D \u2014 BFS complete!"},
-        {"action": "dequeue", "target": "queue", "duration": "0.4s"},
-        {"action": "highlight-node", "target": "graph", "node": "D", "color": "$visited", "duration": "0.4s"},
-        {"action": "pause", "duration": "2s"}
-      ]
+  "scenes": [
+    {
+      "name": "intro",
+      "transition": "none",
+      "narration": "Welcome! Today we'll explore Breadth-First Search, or BFS. It's a graph traversal algorithm that visits nodes level by level, using a queue to track which nodes to visit next.",
+      "manifest": {
+        "meta": {"title": "Intro", "canvas": {"width": 1920, "height": 1080, "background": "#0f0f23"}},
+        "objects": [
+          {"id": "title", "type": "text", "content": "", "position": {"x": 960, "y": 120}, "style": {"font": "bold 48px sans-serif", "align": "center", "color": "#ffffff"}},
+          {"id": "subtitle", "type": "text", "content": "", "position": {"x": 960, "y": 200}, "style": {"font": "24px sans-serif", "align": "center", "color": "#aaaacc"}},
+          {"id": "graph", "type": "graph", "nodes": [{"id": "A", "label": "A", "x": 960, "y": 400}, {"id": "B", "label": "B", "x": 720, "y": 560}, {"id": "C", "label": "C", "x": 1200, "y": 560}, {"id": "D", "label": "D", "x": 600, "y": 720}, {"id": "E", "label": "E", "x": 840, "y": 720}, {"id": "F", "label": "F", "x": 1080, "y": 720}], "edges": [{"from": "A", "to": "B"}, {"from": "A", "to": "C"}, {"from": "B", "to": "D"}, {"from": "B", "to": "E"}, {"from": "C", "to": "F"}]},
+          {"id": "desc", "type": "text", "content": "", "position": {"x": 960, "y": 900}, "style": {"font": "20px sans-serif", "align": "center", "color": "#88aacc"}}
+        ],
+        "timeline": [
+          {"action": "set-text", "target": "title", "value": "Breadth-First Search"},
+          {"action": "fade-in", "target": "title", "duration": "0.8s", "easing": "easeOutCubic"},
+          {"action": "pause", "duration": "1s"},
+          {"action": "set-text", "target": "subtitle", "value": "Explore a graph level by level using a queue"},
+          {"action": "fade-in", "target": "subtitle", "duration": "0.6s"},
+          {"action": "pause", "duration": "2s"},
+          {"action": "fade-in", "target": "graph", "duration": "1s"},
+          {"action": "pause", "duration": "2s"},
+          {"action": "set-text", "target": "desc", "value": "6 nodes, 5 edges — we'll visit every node"},
+          {"action": "fade-in", "target": "desc", "duration": "0.4s"},
+          {"action": "pause", "duration": "4s"},
+          {"parallel": [
+            {"action": "fade-out", "target": "title", "duration": "0.5s"},
+            {"action": "fade-out", "target": "subtitle", "duration": "0.5s"},
+            {"action": "fade-out", "target": "graph", "duration": "0.5s"},
+            {"action": "fade-out", "target": "desc", "duration": "0.5s"}
+          ]}
+        ]
+      }
+    },
+    {
+      "name": "walkthrough",
+      "transition": {"type": "crossfade", "duration": "0.8s"},
+      "narration": "Starting at node A. We add A to the queue. Dequeue A and visit its neighbors B and C, adding them to the queue. Dequeue B, visit its neighbors D and E. Dequeue C, visit F. Then dequeue D, E, and F — they have no unvisited neighbors. BFS is complete!",
+      "manifest": {
+        "meta": {"title": "BFS Walkthrough", "canvas": {"width": 1920, "height": 1080, "background": "#0f0f23"}},
+        "objects": [
+          {"id": "title", "type": "text", "content": "", "position": {"x": 960, "y": 50}, "style": {"font": "bold 36px sans-serif", "align": "center", "color": "#ffffff"}},
+          {"id": "step", "type": "text", "content": "", "position": {"x": 960, "y": 120}, "style": {"font": "22px sans-serif", "align": "center", "color": "#b0b0dd"}},
+          {"id": "graph", "type": "graph", "nodes": [{"id": "A", "label": "A", "x": 960, "y": 300}, {"id": "B", "label": "B", "x": 720, "y": 460}, {"id": "C", "label": "C", "x": 1200, "y": 460}, {"id": "D", "label": "D", "x": 600, "y": 620}, {"id": "E", "label": "E", "x": 840, "y": 620}, {"id": "F", "label": "F", "x": 1080, "y": 620}], "edges": [{"from": "A", "to": "B"}, {"from": "A", "to": "C"}, {"from": "B", "to": "D"}, {"from": "B", "to": "E"}, {"from": "C", "to": "F"}]},
+          {"id": "queue", "type": "data-structure", "variant": "queue", "position": {"x": 960, "y": 870}}
+        ],
+        "timeline": [
+          {"action": "set-text", "target": "title", "value": "BFS Traversal"},
+          {"parallel": [
+            {"action": "fade-in", "target": "title", "duration": "0.5s"},
+            {"action": "fade-in", "target": "graph", "duration": "0.8s"},
+            {"action": "fade-in", "target": "queue", "duration": "0.3s"}
+          ]},
+          {"action": "set-text", "target": "step", "value": "Start at A — enqueue it"},
+          {"action": "fade-in", "target": "step", "duration": "0.3s"},
+          {"action": "highlight-node", "target": "graph", "node": "A", "color": "$current", "duration": "0.5s"},
+          {"action": "enqueue", "target": "queue", "values": ["A"], "duration": "0.4s"},
+          {"action": "pause", "duration": "3s"},
+
+          {"action": "set-text", "target": "step", "value": "Dequeue A — visit neighbors B, C"},
+          {"action": "dequeue", "target": "queue", "duration": "0.4s"},
+          {"action": "highlight-node", "target": "graph", "node": "A", "color": "$visited", "duration": "0.4s"},
+          {"action": "pause", "duration": "1s"},
+          {"parallel": [
+            {"action": "highlight-node", "target": "graph", "node": "B", "color": "$queued", "duration": "0.4s"},
+            {"action": "highlight-node", "target": "graph", "node": "C", "color": "$queued", "duration": "0.4s"},
+            {"action": "highlight-edge", "target": "graph", "edge": ["A", "B"], "color": "$highlight", "duration": "0.4s"},
+            {"action": "highlight-edge", "target": "graph", "edge": ["A", "C"], "color": "$highlight", "duration": "0.4s"}
+          ]},
+          {"action": "enqueue", "target": "queue", "values": ["B", "C"], "duration": "0.6s"},
+          {"action": "pause", "duration": "3s"},
+
+          {"action": "set-text", "target": "step", "value": "Dequeue B — visit neighbors D, E"},
+          {"action": "dequeue", "target": "queue", "duration": "0.4s"},
+          {"action": "highlight-node", "target": "graph", "node": "B", "color": "$visited", "duration": "0.4s"},
+          {"action": "pause", "duration": "1s"},
+          {"parallel": [
+            {"action": "highlight-node", "target": "graph", "node": "D", "color": "$queued", "duration": "0.4s"},
+            {"action": "highlight-node", "target": "graph", "node": "E", "color": "$queued", "duration": "0.4s"},
+            {"action": "highlight-edge", "target": "graph", "edge": ["B", "D"], "color": "$highlight", "duration": "0.4s"},
+            {"action": "highlight-edge", "target": "graph", "edge": ["B", "E"], "color": "$highlight", "duration": "0.4s"}
+          ]},
+          {"action": "enqueue", "target": "queue", "values": ["D", "E"], "duration": "0.6s"},
+          {"action": "pause", "duration": "3s"},
+
+          {"action": "set-text", "target": "step", "value": "Dequeue C — visit neighbor F"},
+          {"action": "dequeue", "target": "queue", "duration": "0.4s"},
+          {"action": "highlight-node", "target": "graph", "node": "C", "color": "$visited", "duration": "0.4s"},
+          {"action": "pause", "duration": "1s"},
+          {"action": "highlight-node", "target": "graph", "node": "F", "color": "$queued", "duration": "0.4s"},
+          {"action": "highlight-edge", "target": "graph", "edge": ["C", "F"], "color": "$highlight", "duration": "0.4s"},
+          {"action": "enqueue", "target": "queue", "values": ["F"], "duration": "0.4s"},
+          {"action": "pause", "duration": "3s"},
+
+          {"action": "set-text", "target": "step", "value": "Dequeue D — no unvisited neighbors"},
+          {"action": "dequeue", "target": "queue", "duration": "0.4s"},
+          {"action": "highlight-node", "target": "graph", "node": "D", "color": "$visited", "duration": "0.4s"},
+          {"action": "pause", "duration": "3s"},
+
+          {"action": "set-text", "target": "step", "value": "Dequeue E — no unvisited neighbors"},
+          {"action": "dequeue", "target": "queue", "duration": "0.4s"},
+          {"action": "highlight-node", "target": "graph", "node": "E", "color": "$visited", "duration": "0.4s"},
+          {"action": "pause", "duration": "3s"},
+
+          {"action": "set-text", "target": "step", "value": "Dequeue F — BFS complete!"},
+          {"action": "dequeue", "target": "queue", "duration": "0.4s"},
+          {"action": "highlight-node", "target": "graph", "node": "F", "color": "$visited", "duration": "0.4s"},
+          {"action": "pause", "duration": "3s"},
+
+          {"action": "set-text", "target": "step", "value": "Visit order: A → B → C → D → E → F"},
+          {"action": "pause", "duration": "4s"},
+          {"parallel": [
+            {"action": "fade-out", "target": "title", "duration": "0.5s"},
+            {"action": "fade-out", "target": "step", "duration": "0.5s"},
+            {"action": "fade-out", "target": "graph", "duration": "0.5s"},
+            {"action": "fade-out", "target": "queue", "duration": "0.5s"}
+          ]}
+        ]
+      }
+    },
+    {
+      "name": "recap",
+      "transition": {"type": "fade", "duration": "0.8s"},
+      "narration": "To recap: BFS uses a queue to visit nodes level by level. It guarantees the shortest path in unweighted graphs. Time complexity is O of V plus E.",
+      "manifest": {
+        "meta": {"title": "Recap", "canvas": {"width": 1920, "height": 1080, "background": "#0f0f23"}},
+        "objects": [
+          {"id": "title", "type": "text", "content": "", "position": {"x": 960, "y": 120}, "style": {"font": "bold 36px sans-serif", "align": "center", "color": "#ffffff"}},
+          {"id": "p1", "type": "text", "content": "", "position": {"x": 960, "y": 320}, "style": {"font": "24px sans-serif", "align": "center", "color": "#2ecc71"}},
+          {"id": "p2", "type": "text", "content": "", "position": {"x": 960, "y": 450}, "style": {"font": "24px sans-serif", "align": "center", "color": "#f1c40f"}},
+          {"id": "p3", "type": "text", "content": "", "position": {"x": 960, "y": 580}, "style": {"font": "24px sans-serif", "align": "center", "color": "#e67e22"}},
+          {"id": "p4", "type": "text", "content": "", "position": {"x": 960, "y": 750}, "style": {"font": "bold 28px sans-serif", "align": "center", "color": "#00F5FF"}}
+        ],
+        "timeline": [
+          {"action": "set-text", "target": "title", "value": "Key Takeaways"},
+          {"action": "fade-in", "target": "title", "duration": "0.6s"},
+          {"action": "pause", "duration": "2s"},
+          {"action": "set-text", "target": "p1", "value": "1. BFS uses a Queue (FIFO)"},
+          {"action": "fade-in", "target": "p1", "duration": "0.5s"},
+          {"action": "pause", "duration": "4s"},
+          {"action": "set-text", "target": "p2", "value": "2. Visits nodes level by level"},
+          {"action": "fade-in", "target": "p2", "duration": "0.5s"},
+          {"action": "pause", "duration": "4s"},
+          {"action": "set-text", "target": "p3", "value": "3. Finds shortest path in unweighted graphs"},
+          {"action": "fade-in", "target": "p3", "duration": "0.5s"},
+          {"action": "pause", "duration": "4s"},
+          {"action": "set-text", "target": "p4", "value": "Time: O(V + E)"},
+          {"action": "fade-in", "target": "p4", "duration": "0.6s", "easing": "easeOutBack"},
+          {"action": "pause", "duration": "4s"}
+        ]
+      }
     }
-  }]
+  ]
 }

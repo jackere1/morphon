@@ -1,0 +1,237 @@
+{
+  "meta": {
+    "title": "Bubble Sort",
+    "topic": "bubble-sort-web",
+    "canvas": {"width": 1920, "height": 1080, "background": "#0f0f23"},
+    "defaults": {
+      "data-structure": {"cellWidth": 90, "cellHeight": 55, "fillColor": "#2d4a7a", "borderColor": "#5b8fd9", "textColor": "#ffffff", "gap": 8},
+      "text": {"font": "22px sans-serif", "color": "#d0d0ee"}
+    },
+    "palette": {"comparing": "#f39c12", "swapping": "#e74c3c", "sorted": "#2ecc71", "active": "#9b59b6"},
+    "easing": "easeInOutCubic"
+  },
+  "scenes": [
+    {
+      "name": "intro",
+      "transition": "none",
+      "narration": "Welcome! Today we'll learn Bubble Sort, one of the simplest sorting algorithms. It works by repeatedly stepping through the list, comparing adjacent elements, and swapping them if they're in the wrong order.",
+      "manifest": {
+        "meta": {"title": "Intro", "canvas": {"width": 1920, "height": 1080, "background": "#0f0f23"}},
+        "objects": [
+          {"id": "title", "type": "text", "content": "", "position": {"x": 960, "y": 120}, "style": {"font": "bold 48px sans-serif", "align": "center", "color": "#ffffff"}},
+          {"id": "subtitle", "type": "text", "content": "", "position": {"x": 960, "y": 200}, "style": {"font": "24px sans-serif", "align": "center", "color": "#aaaacc"}},
+          {"id": "arr", "type": "data-structure", "variant": "array", "position": {"x": 960, "y": 480}},
+          {"id": "desc", "type": "text", "content": "", "position": {"x": 960, "y": 700}, "style": {"font": "20px sans-serif", "align": "center", "color": "#88aacc"}}
+        ],
+        "timeline": [
+          {"action": "set-text", "target": "title", "value": "Bubble Sort"},
+          {"action": "fade-in", "target": "title", "duration": "0.8s", "easing": "easeOutCubic"},
+          {"action": "pause", "duration": "1s"},
+          {"action": "set-text", "target": "subtitle", "value": "Compare adjacent pairs, swap if out of order"},
+          {"action": "fade-in", "target": "subtitle", "duration": "0.6s"},
+          {"action": "pause", "duration": "2s"},
+          {"action": "fade-in", "target": "arr", "duration": "0.3s"},
+          {"action": "init-cells", "target": "arr", "values": ["5", "3", "8", "1", "7", "2"], "duration": "2s"},
+          {"action": "pause", "duration": "3s"},
+          {"action": "set-text", "target": "desc", "value": "Unsorted array: [5, 3, 8, 1, 7, 2]"},
+          {"action": "fade-in", "target": "desc", "duration": "0.4s"},
+          {"action": "pause", "duration": "3s"},
+          {"action": "set-text", "target": "desc", "value": "The largest element 'bubbles up' to the end each pass"},
+          {"action": "pause", "duration": "4s"},
+          {"parallel": [
+            {"action": "fade-out", "target": "title", "duration": "0.5s"},
+            {"action": "fade-out", "target": "subtitle", "duration": "0.5s"},
+            {"action": "fade-out", "target": "arr", "duration": "0.5s"},
+            {"action": "fade-out", "target": "desc", "duration": "0.5s"}
+          ]}
+        ]
+      }
+    },
+    {
+      "name": "pass-1",
+      "transition": {"type": "crossfade", "duration": "0.8s"},
+      "narration": "Let's start pass one. We compare 5 and 3. Since 5 is greater than 3, we swap them. Next, 5 and 8... no swap needed, 5 is smaller. Now 8 and 1... 8 is larger, so we swap. Then 8 and 7... swap again. Finally 8 and 2... swap. After pass one, 8 has bubbled to its correct position at the end.",
+      "manifest": {
+        "meta": {"title": "Pass 1", "canvas": {"width": 1920, "height": 1080, "background": "#0f0f23"}},
+        "objects": [
+          {"id": "title", "type": "text", "content": "", "position": {"x": 960, "y": 60}, "style": {"font": "bold 36px sans-serif", "align": "center", "color": "#ffffff"}},
+          {"id": "step", "type": "text", "content": "", "position": {"x": 960, "y": 130}, "style": {"font": "22px sans-serif", "align": "center", "color": "#b0b0dd"}},
+          {"id": "arr", "type": "data-structure", "variant": "array", "position": {"x": 960, "y": 480}}
+        ],
+        "timeline": [
+          {"action": "set-text", "target": "title", "value": "Pass 1 — Bubble the largest up"},
+          {"parallel": [
+            {"action": "fade-in", "target": "title", "duration": "0.5s"},
+            {"action": "fade-in", "target": "arr", "duration": "0.3s"}
+          ]},
+          {"action": "init-cells", "target": "arr", "values": ["5", "3", "8", "1", "7", "2"], "duration": "1s"},
+          {"action": "set-text", "target": "step", "value": "Array: [5, 3, 8, 1, 7, 2]"},
+          {"action": "fade-in", "target": "step", "duration": "0.3s"},
+          {"action": "pause", "duration": "3s"},
+
+          {"action": "set-text", "target": "step", "value": "Compare [0] and [1]: 5 > 3 → Swap!"},
+          {"parallel": [
+            {"action": "highlight-cell", "target": "arr", "index": 0, "color": "$comparing", "duration": "0.5s"},
+            {"action": "highlight-cell", "target": "arr", "index": 1, "color": "$comparing", "duration": "0.5s"}
+          ]},
+          {"action": "pause", "duration": "2s"},
+          {"action": "swap-cells", "target": "arr", "indices": [0, 1], "duration": "1s"},
+          {"action": "pause", "duration": "3s"},
+
+          {"action": "set-text", "target": "step", "value": "Compare [1] and [2]: 5 < 8 → No swap"},
+          {"parallel": [
+            {"action": "highlight-cell", "target": "arr", "index": 1, "color": "$comparing", "duration": "0.5s"},
+            {"action": "highlight-cell", "target": "arr", "index": 2, "color": "$comparing", "duration": "0.5s"}
+          ]},
+          {"action": "pause", "duration": "3s"},
+
+          {"action": "set-text", "target": "step", "value": "Compare [2] and [3]: 8 > 1 → Swap!"},
+          {"parallel": [
+            {"action": "highlight-cell", "target": "arr", "index": 2, "color": "$comparing", "duration": "0.5s"},
+            {"action": "highlight-cell", "target": "arr", "index": 3, "color": "$comparing", "duration": "0.5s"}
+          ]},
+          {"action": "pause", "duration": "2s"},
+          {"action": "swap-cells", "target": "arr", "indices": [2, 3], "duration": "1s"},
+          {"action": "pause", "duration": "3s"},
+
+          {"action": "set-text", "target": "step", "value": "Compare [3] and [4]: 8 > 7 → Swap!"},
+          {"parallel": [
+            {"action": "highlight-cell", "target": "arr", "index": 3, "color": "$comparing", "duration": "0.5s"},
+            {"action": "highlight-cell", "target": "arr", "index": 4, "color": "$comparing", "duration": "0.5s"}
+          ]},
+          {"action": "pause", "duration": "2s"},
+          {"action": "swap-cells", "target": "arr", "indices": [3, 4], "duration": "1s"},
+          {"action": "pause", "duration": "3s"},
+
+          {"action": "set-text", "target": "step", "value": "Compare [4] and [5]: 8 > 2 → Swap!"},
+          {"parallel": [
+            {"action": "highlight-cell", "target": "arr", "index": 4, "color": "$comparing", "duration": "0.5s"},
+            {"action": "highlight-cell", "target": "arr", "index": 5, "color": "$comparing", "duration": "0.5s"}
+          ]},
+          {"action": "pause", "duration": "2s"},
+          {"action": "swap-cells", "target": "arr", "indices": [4, 5], "duration": "1s"},
+
+          {"action": "highlight-cell", "target": "arr", "index": 5, "color": "$sorted", "duration": "0.5s"},
+          {"action": "set-text", "target": "step", "value": "Pass 1 done! 8 is in final position. Array: [3, 5, 1, 7, 2, 8]"},
+          {"action": "pause", "duration": "4s"},
+
+          {"parallel": [
+            {"action": "fade-out", "target": "title", "duration": "0.5s"},
+            {"action": "fade-out", "target": "step", "duration": "0.5s"},
+            {"action": "fade-out", "target": "arr", "duration": "0.5s"}
+          ]}
+        ]
+      }
+    },
+    {
+      "name": "pass-2",
+      "transition": {"type": "crossfade", "duration": "0.8s"},
+      "narration": "Pass two. Starting from the result of pass one. We compare 3 and 5, no swap needed. Then 5 and 1, swap. Then 5 and 7, no swap. Then 7 and 2, swap. Now 7 and 8 are both in their final positions.",
+      "manifest": {
+        "meta": {"title": "Pass 2", "canvas": {"width": 1920, "height": 1080, "background": "#0f0f23"}},
+        "objects": [
+          {"id": "title", "type": "text", "content": "", "position": {"x": 960, "y": 60}, "style": {"font": "bold 36px sans-serif", "align": "center", "color": "#ffffff"}},
+          {"id": "step", "type": "text", "content": "", "position": {"x": 960, "y": 130}, "style": {"font": "22px sans-serif", "align": "center", "color": "#b0b0dd"}},
+          {"id": "arr", "type": "data-structure", "variant": "array", "position": {"x": 960, "y": 480}}
+        ],
+        "timeline": [
+          {"action": "set-text", "target": "title", "value": "Pass 2 — Second largest bubbles up"},
+          {"parallel": [
+            {"action": "fade-in", "target": "title", "duration": "0.5s"},
+            {"action": "fade-in", "target": "arr", "duration": "0.3s"}
+          ]},
+          {"action": "init-cells", "target": "arr", "values": ["3", "5", "1", "7", "2", "8"], "duration": "1s"},
+          {"action": "highlight-cell", "target": "arr", "index": 5, "color": "$sorted", "duration": "0.3s"},
+          {"action": "set-text", "target": "step", "value": "Array: [3, 5, 1, 7, 2, | 8]  (8 already sorted)"},
+          {"action": "fade-in", "target": "step", "duration": "0.3s"},
+          {"action": "pause", "duration": "3s"},
+
+          {"action": "set-text", "target": "step", "value": "Compare [0] and [1]: 3 < 5 → No swap"},
+          {"parallel": [
+            {"action": "highlight-cell", "target": "arr", "index": 0, "color": "$comparing", "duration": "0.5s"},
+            {"action": "highlight-cell", "target": "arr", "index": 1, "color": "$comparing", "duration": "0.5s"}
+          ]},
+          {"action": "pause", "duration": "3s"},
+
+          {"action": "set-text", "target": "step", "value": "Compare [1] and [2]: 5 > 1 → Swap!"},
+          {"parallel": [
+            {"action": "highlight-cell", "target": "arr", "index": 1, "color": "$comparing", "duration": "0.5s"},
+            {"action": "highlight-cell", "target": "arr", "index": 2, "color": "$comparing", "duration": "0.5s"}
+          ]},
+          {"action": "pause", "duration": "2s"},
+          {"action": "swap-cells", "target": "arr", "indices": [1, 2], "duration": "1s"},
+          {"action": "pause", "duration": "3s"},
+
+          {"action": "set-text", "target": "step", "value": "Compare [2] and [3]: 5 < 7 → No swap"},
+          {"parallel": [
+            {"action": "highlight-cell", "target": "arr", "index": 2, "color": "$comparing", "duration": "0.5s"},
+            {"action": "highlight-cell", "target": "arr", "index": 3, "color": "$comparing", "duration": "0.5s"}
+          ]},
+          {"action": "pause", "duration": "3s"},
+
+          {"action": "set-text", "target": "step", "value": "Compare [3] and [4]: 7 > 2 → Swap!"},
+          {"parallel": [
+            {"action": "highlight-cell", "target": "arr", "index": 3, "color": "$comparing", "duration": "0.5s"},
+            {"action": "highlight-cell", "target": "arr", "index": 4, "color": "$comparing", "duration": "0.5s"}
+          ]},
+          {"action": "pause", "duration": "2s"},
+          {"action": "swap-cells", "target": "arr", "indices": [3, 4], "duration": "1s"},
+
+          {"action": "highlight-cell", "target": "arr", "index": 4, "color": "$sorted", "duration": "0.5s"},
+          {"action": "set-text", "target": "step", "value": "Pass 2 done! Array: [3, 1, 5, 2, | 7, 8]"},
+          {"action": "pause", "duration": "4s"},
+
+          {"parallel": [
+            {"action": "fade-out", "target": "title", "duration": "0.5s"},
+            {"action": "fade-out", "target": "step", "duration": "0.5s"},
+            {"action": "fade-out", "target": "arr", "duration": "0.5s"}
+          ]}
+        ]
+      }
+    },
+    {
+      "name": "recap",
+      "transition": {"type": "fade", "duration": "0.8s"},
+      "narration": "Let's recap. Bubble sort compares adjacent elements and swaps them if out of order. Each pass places the next largest element in its final position. The time complexity is O of n squared, making it simple but slow for large datasets.",
+      "manifest": {
+        "meta": {"title": "Recap", "canvas": {"width": 1920, "height": 1080, "background": "#0f0f23"}},
+        "objects": [
+          {"id": "title", "type": "text", "content": "", "position": {"x": 960, "y": 120}, "style": {"font": "bold 36px sans-serif", "align": "center", "color": "#ffffff"}},
+          {"id": "p1", "type": "text", "content": "", "position": {"x": 960, "y": 300}, "style": {"font": "24px sans-serif", "align": "center", "color": "#2ecc71"}},
+          {"id": "p2", "type": "text", "content": "", "position": {"x": 960, "y": 420}, "style": {"font": "24px sans-serif", "align": "center", "color": "#f39c12"}},
+          {"id": "p3", "type": "text", "content": "", "position": {"x": 960, "y": 540}, "style": {"font": "24px sans-serif", "align": "center", "color": "#e74c3c"}},
+          {"id": "p4", "type": "text", "content": "", "position": {"x": 960, "y": 700}, "style": {"font": "bold 28px sans-serif", "align": "center", "color": "#00F5FF"}}
+        ],
+        "timeline": [
+          {"action": "set-text", "target": "title", "value": "Key Takeaways"},
+          {"action": "fade-in", "target": "title", "duration": "0.6s"},
+          {"action": "pause", "duration": "2s"},
+
+          {"action": "set-text", "target": "p1", "value": "1. Compare adjacent pairs, swap if out of order"},
+          {"action": "fade-in", "target": "p1", "duration": "0.5s"},
+          {"action": "pause", "duration": "4s"},
+
+          {"action": "set-text", "target": "p2", "value": "2. Each pass places the next largest element"},
+          {"action": "fade-in", "target": "p2", "duration": "0.5s"},
+          {"action": "pause", "duration": "4s"},
+
+          {"action": "set-text", "target": "p3", "value": "3. Repeat until no swaps needed"},
+          {"action": "fade-in", "target": "p3", "duration": "0.5s"},
+          {"action": "pause", "duration": "4s"},
+
+          {"action": "set-text", "target": "p4", "value": "Time: O(n^2) — Simple but slow"},
+          {"action": "fade-in", "target": "p4", "duration": "0.6s", "easing": "easeOutBack"},
+          {"action": "pause", "duration": "4s"},
+
+          {"parallel": [
+            {"action": "fade-out", "target": "title", "duration": "0.5s"},
+            {"action": "fade-out", "target": "p1", "duration": "0.5s"},
+            {"action": "fade-out", "target": "p2", "duration": "0.5s"},
+            {"action": "fade-out", "target": "p3", "duration": "0.5s"},
+            {"action": "fade-out", "target": "p4", "duration": "0.5s"}
+          ]}
+        ]
+      }
+    }
+  ]
+}

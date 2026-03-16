@@ -3,44 +3,185 @@
     "title": "Stack: Push & Pop",
     "topic": "stack-web",
     "canvas": {"width": 1920, "height": 1080, "background": "#0f0f23"},
-    "defaults": {"data-structure": {"cellWidth": 80, "cellHeight": 50, "fillColor": "#1a2a4a", "borderColor": "#5b8fd9", "textColor": "#ffffff"}},
+    "defaults": {
+      "data-structure": {"cellWidth": 80, "cellHeight": 50, "fillColor": "#1a2a4a", "borderColor": "#5b8fd9", "textColor": "#ffffff", "gap": 6},
+      "text": {"font": "22px sans-serif", "color": "#d0d0ee"}
+    },
+    "palette": {"push-color": "#2ecc71", "pop-color": "#e74c3c"},
     "easing": "easeInOutCubic"
   },
-  "scenes": [{
-    "name": "demo",
-    "transition": "none",
-    "manifest": {
-      "meta": {"title": "Stack Operations", "canvas": {"width": 1920, "height": 1080, "background": "#0f0f23"}},
-      "objects": [
-        {"id": "title", "type": "text", "content": "", "position": {"x": 960, "y": 100}, "style": {"font": "bold 44px sans-serif", "align": "center", "color": "#ffffff"}},
-        {"id": "stack", "type": "data-structure", "variant": "stack", "position": {"x": 960, "y": 500}},
-        {"id": "narration", "type": "text", "content": "", "position": {"x": 960, "y": 700}, "style": {"font": "24px sans-serif", "align": "center", "color": "#b0b0dd"}}
-      ],
-      "timeline": [
-        {"action": "set-text", "target": "title", "value": "Stack \u2014 Last In, First Out"},
-        {"action": "fade-in", "target": "title", "duration": "0.8s"},
-        {"action": "fade-in", "target": "stack", "duration": "0.3s"},
-        {"action": "pause", "duration": "1s"},
-        {"action": "set-text", "target": "narration", "value": "push(10)"},
-        {"action": "fade-in", "target": "narration", "duration": "0.3s"},
-        {"action": "push", "target": "stack", "values": ["10"], "duration": "0.5s"},
-        {"action": "pause", "duration": "1s"},
-        {"action": "set-text", "target": "narration", "value": "push(20)"},
-        {"action": "push", "target": "stack", "values": ["20"], "duration": "0.5s"},
-        {"action": "pause", "duration": "1s"},
-        {"action": "set-text", "target": "narration", "value": "push(30)"},
-        {"action": "push", "target": "stack", "values": ["30"], "duration": "0.5s"},
-        {"action": "pause", "duration": "1s"},
-        {"action": "set-text", "target": "narration", "value": "pop() -> 30 (last in, first out!)"},
-        {"action": "pop", "target": "stack", "duration": "0.6s"},
-        {"action": "pause", "duration": "1.5s"},
-        {"action": "set-text", "target": "narration", "value": "pop() -> 20"},
-        {"action": "pop", "target": "stack", "duration": "0.6s"},
-        {"action": "pause", "duration": "1.5s"},
-        {"action": "set-text", "target": "narration", "value": "pop() -> 10 \u2014 stack empty!"},
-        {"action": "pop", "target": "stack", "duration": "0.6s"},
-        {"action": "pause", "duration": "2s"}
-      ]
+  "scenes": [
+    {
+      "name": "intro",
+      "transition": "none",
+      "narration": "Welcome! Today we'll learn about the Stack data structure. A stack follows the Last-In, First-Out principle, or LIFO. Think of it like a stack of plates \u2014 you can only add or remove from the top.",
+      "manifest": {
+        "meta": {"title": "Intro", "canvas": {"width": 1920, "height": 1080, "background": "#0f0f23"}},
+        "objects": [
+          {"id": "title", "type": "text", "content": "", "position": {"x": 960, "y": 120}, "style": {"font": "bold 48px sans-serif", "align": "center", "color": "#ffffff"}},
+          {"id": "subtitle", "type": "text", "content": "", "position": {"x": 960, "y": 200}, "style": {"font": "24px sans-serif", "align": "center", "color": "#aaaacc"}},
+          {"id": "stack", "type": "data-structure", "variant": "stack", "position": {"x": 960, "y": 500}},
+          {"id": "desc", "type": "text", "content": "", "position": {"x": 960, "y": 700}, "style": {"font": "20px sans-serif", "align": "center", "color": "#88aacc"}}
+        ],
+        "timeline": [
+          {"action": "set-text", "target": "title", "value": "The Stack"},
+          {"action": "fade-in", "target": "title", "duration": "0.8s", "easing": "easeOutCubic"},
+          {"action": "pause", "duration": "1s"},
+          {"action": "set-text", "target": "subtitle", "value": "Last In, First Out (LIFO)"},
+          {"action": "fade-in", "target": "subtitle", "duration": "0.6s"},
+          {"action": "pause", "duration": "2s"},
+          {"action": "fade-in", "target": "stack", "duration": "0.3s"},
+          {"action": "set-text", "target": "desc", "value": "Two operations: Push (add to top) and Pop (remove from top)"},
+          {"action": "fade-in", "target": "desc", "duration": "0.4s"},
+          {"action": "pause", "duration": "4s"},
+          {"parallel": [
+            {"action": "fade-out", "target": "title", "duration": "0.5s"},
+            {"action": "fade-out", "target": "subtitle", "duration": "0.5s"},
+            {"action": "fade-out", "target": "stack", "duration": "0.5s"},
+            {"action": "fade-out", "target": "desc", "duration": "0.5s"}
+          ]}
+        ]
+      }
+    },
+    {
+      "name": "push-demo",
+      "transition": {"type": "crossfade", "duration": "0.8s"},
+      "narration": "Let's push some values. We push 10, then 20, then 30. Notice how each new value goes to the right end \u2014 that's the top of the stack. The last value pushed, 30, is at the top.",
+      "manifest": {
+        "meta": {"title": "Push Operations", "canvas": {"width": 1920, "height": 1080, "background": "#0f0f23"}},
+        "objects": [
+          {"id": "title", "type": "text", "content": "", "position": {"x": 960, "y": 60}, "style": {"font": "bold 36px sans-serif", "align": "center", "color": "#ffffff"}},
+          {"id": "step", "type": "text", "content": "", "position": {"x": 960, "y": 130}, "style": {"font": "22px sans-serif", "align": "center", "color": "#b0b0dd"}},
+          {"id": "stack", "type": "data-structure", "variant": "stack", "position": {"x": 960, "y": 480}},
+          {"id": "note", "type": "text", "content": "", "position": {"x": 960, "y": 700}, "style": {"font": "18px sans-serif", "align": "center", "color": "#88aacc"}}
+        ],
+        "timeline": [
+          {"action": "set-text", "target": "title", "value": "Push \u2014 Add to Top"},
+          {"parallel": [
+            {"action": "fade-in", "target": "title", "duration": "0.5s"},
+            {"action": "fade-in", "target": "stack", "duration": "0.3s"}
+          ]},
+          {"action": "pause", "duration": "1s"},
+
+          {"action": "set-text", "target": "step", "value": "Push 10"},
+          {"action": "fade-in", "target": "step", "duration": "0.3s"},
+          {"action": "push", "target": "stack", "values": ["10"], "duration": "0.6s"},
+          {"action": "set-text", "target": "note", "value": "Stack: [10]  \u2190 top"},
+          {"action": "fade-in", "target": "note", "duration": "0.3s"},
+          {"action": "pause", "duration": "3s"},
+
+          {"action": "set-text", "target": "step", "value": "Push 20"},
+          {"action": "push", "target": "stack", "values": ["20"], "duration": "0.6s"},
+          {"action": "set-text", "target": "note", "value": "Stack: [10, 20]  \u2190 top"},
+          {"action": "pause", "duration": "3s"},
+
+          {"action": "set-text", "target": "step", "value": "Push 30"},
+          {"action": "push", "target": "stack", "values": ["30"], "duration": "0.6s"},
+          {"action": "set-text", "target": "note", "value": "Stack: [10, 20, 30]  \u2190 top"},
+          {"action": "pause", "duration": "3s"},
+
+          {"action": "set-text", "target": "step", "value": "Push 40"},
+          {"action": "push", "target": "stack", "values": ["40"], "duration": "0.6s"},
+          {"action": "set-text", "target": "note", "value": "Stack: [10, 20, 30, 40]  \u2190 top"},
+          {"action": "pause", "duration": "3s"},
+
+          {"action": "set-text", "target": "step", "value": "4 values pushed. 40 is at the top."},
+          {"action": "pause", "duration": "4s"},
+          {"parallel": [
+            {"action": "fade-out", "target": "title", "duration": "0.5s"},
+            {"action": "fade-out", "target": "step", "duration": "0.5s"},
+            {"action": "fade-out", "target": "stack", "duration": "0.5s"},
+            {"action": "fade-out", "target": "note", "duration": "0.5s"}
+          ]}
+        ]
+      }
+    },
+    {
+      "name": "pop-demo",
+      "transition": {"type": "crossfade", "duration": "0.8s"},
+      "narration": "Now let's pop values off. Remember, LIFO \u2014 the last one in is the first one out. We pop 40, then 30, then 20. Each pop removes from the top. Finally we pop 10 and the stack is empty.",
+      "manifest": {
+        "meta": {"title": "Pop Operations", "canvas": {"width": 1920, "height": 1080, "background": "#0f0f23"}},
+        "objects": [
+          {"id": "title", "type": "text", "content": "", "position": {"x": 960, "y": 60}, "style": {"font": "bold 36px sans-serif", "align": "center", "color": "#ffffff"}},
+          {"id": "step", "type": "text", "content": "", "position": {"x": 960, "y": 130}, "style": {"font": "22px sans-serif", "align": "center", "color": "#b0b0dd"}},
+          {"id": "stack", "type": "data-structure", "variant": "stack", "position": {"x": 960, "y": 480}},
+          {"id": "note", "type": "text", "content": "", "position": {"x": 960, "y": 700}, "style": {"font": "18px sans-serif", "align": "center", "color": "#88aacc"}}
+        ],
+        "timeline": [
+          {"action": "set-text", "target": "title", "value": "Pop \u2014 Remove from Top"},
+          {"parallel": [
+            {"action": "fade-in", "target": "title", "duration": "0.5s"},
+            {"action": "fade-in", "target": "stack", "duration": "0.3s"}
+          ]},
+          {"action": "push", "target": "stack", "values": ["10", "20", "30", "40"], "duration": "0.8s"},
+          {"action": "set-text", "target": "note", "value": "Stack: [10, 20, 30, 40]  \u2190 top"},
+          {"action": "fade-in", "target": "note", "duration": "0.3s"},
+          {"action": "pause", "duration": "2s"},
+
+          {"action": "set-text", "target": "step", "value": "Pop \u2192 returns 40 (LIFO!)"},
+          {"action": "fade-in", "target": "step", "duration": "0.3s"},
+          {"action": "pop", "target": "stack", "duration": "0.6s"},
+          {"action": "set-text", "target": "note", "value": "Stack: [10, 20, 30]  \u2190 top"},
+          {"action": "pause", "duration": "3s"},
+
+          {"action": "set-text", "target": "step", "value": "Pop \u2192 returns 30"},
+          {"action": "pop", "target": "stack", "duration": "0.6s"},
+          {"action": "set-text", "target": "note", "value": "Stack: [10, 20]  \u2190 top"},
+          {"action": "pause", "duration": "3s"},
+
+          {"action": "set-text", "target": "step", "value": "Pop \u2192 returns 20"},
+          {"action": "pop", "target": "stack", "duration": "0.6s"},
+          {"action": "set-text", "target": "note", "value": "Stack: [10]  \u2190 top"},
+          {"action": "pause", "duration": "3s"},
+
+          {"action": "set-text", "target": "step", "value": "Pop \u2192 returns 10 \u2014 stack is empty!"},
+          {"action": "pop", "target": "stack", "duration": "0.6s"},
+          {"action": "set-text", "target": "note", "value": "Stack: []  (empty)"},
+          {"action": "pause", "duration": "3s"},
+
+          {"action": "set-text", "target": "step", "value": "Pop order: 40, 30, 20, 10 \u2014 reverse of push order!"},
+          {"action": "pause", "duration": "4s"},
+          {"parallel": [
+            {"action": "fade-out", "target": "title", "duration": "0.5s"},
+            {"action": "fade-out", "target": "step", "duration": "0.5s"},
+            {"action": "fade-out", "target": "stack", "duration": "0.5s"},
+            {"action": "fade-out", "target": "note", "duration": "0.5s"}
+          ]}
+        ]
+      }
+    },
+    {
+      "name": "recap",
+      "transition": {"type": "fade", "duration": "0.8s"},
+      "narration": "Let's recap. A stack is a LIFO structure. Push adds to the top, pop removes from the top. Both operations are O of 1. Stacks are used in function calls, undo systems, expression parsing, and DFS.",
+      "manifest": {
+        "meta": {"title": "Recap", "canvas": {"width": 1920, "height": 1080, "background": "#0f0f23"}},
+        "objects": [
+          {"id": "title", "type": "text", "content": "", "position": {"x": 960, "y": 120}, "style": {"font": "bold 36px sans-serif", "align": "center", "color": "#ffffff"}},
+          {"id": "p1", "type": "text", "content": "", "position": {"x": 960, "y": 300}, "style": {"font": "24px sans-serif", "align": "center", "color": "#2ecc71"}},
+          {"id": "p2", "type": "text", "content": "", "position": {"x": 960, "y": 420}, "style": {"font": "24px sans-serif", "align": "center", "color": "#f1c40f"}},
+          {"id": "p3", "type": "text", "content": "", "position": {"x": 960, "y": 540}, "style": {"font": "24px sans-serif", "align": "center", "color": "#e67e22"}},
+          {"id": "p4", "type": "text", "content": "", "position": {"x": 960, "y": 700}, "style": {"font": "bold 28px sans-serif", "align": "center", "color": "#00F5FF"}}
+        ],
+        "timeline": [
+          {"action": "set-text", "target": "title", "value": "Key Takeaways"},
+          {"action": "fade-in", "target": "title", "duration": "0.6s"},
+          {"action": "pause", "duration": "2s"},
+          {"action": "set-text", "target": "p1", "value": "1. LIFO \u2014 Last In, First Out"},
+          {"action": "fade-in", "target": "p1", "duration": "0.5s"},
+          {"action": "pause", "duration": "4s"},
+          {"action": "set-text", "target": "p2", "value": "2. Push = add to top, Pop = remove from top"},
+          {"action": "fade-in", "target": "p2", "duration": "0.5s"},
+          {"action": "pause", "duration": "4s"},
+          {"action": "set-text", "target": "p3", "value": "3. Used in: function calls, undo, DFS, parsers"},
+          {"action": "fade-in", "target": "p3", "duration": "0.5s"},
+          {"action": "pause", "duration": "4s"},
+          {"action": "set-text", "target": "p4", "value": "Push & Pop: O(1)"},
+          {"action": "fade-in", "target": "p4", "duration": "0.6s", "easing": "easeOutBack"},
+          {"action": "pause", "duration": "4s"}
+        ]
+      }
     }
-  }]
+  ]
 }

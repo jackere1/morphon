@@ -576,18 +576,19 @@ function normalizeAction(
 
     case 'fade-in':
     case 'fade-out':
-      if (!action.duration) action.duration = '0.5s';
+      if (!action.duration) action.duration = '0.8s';
       break;
 
     case 'dequeue':
     case 'pop':
-      if (!action.duration) action.duration = '0.5s';
+      if (!action.duration) action.duration = '0.8s';
       break;
 
     case 'pause':
-      if (!action.duration) action.duration = '3s';
+      if (!action.duration) action.duration = '5s';
       // Enforce minimum pause duration — AI consistently generates short pauses
-      action.duration = enforceMinPauseDuration(action.duration, 3);
+      // Bumped to 5s minimum for educational pacing (viewers need time to absorb)
+      action.duration = enforceMinPauseDuration(action.duration, 5);
       break;
 
     case 'camera-reset':

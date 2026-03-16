@@ -194,6 +194,7 @@ function initEditor() {
     if (!state.currentShow) return;
 
     const ttsEnabled = document.getElementById('tts-checkbox')?.checked ?? false;
+    const subtitlesEnabled = document.getElementById('subtitles-checkbox')?.checked ?? false;
 
     try {
       const response = await fetch('/api/v1/render/show', {
@@ -202,7 +203,8 @@ function initEditor() {
         body: JSON.stringify({
           show: state.currentShow,
           topic: state.currentShow.meta?.topic || document.getElementById('prompt-input').value.trim(),
-          tts: ttsEnabled
+          tts: ttsEnabled,
+          subtitles: subtitlesEnabled
         })
       });
 

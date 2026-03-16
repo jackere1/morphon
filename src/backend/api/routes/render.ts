@@ -4,7 +4,8 @@ import { resolve } from 'path';
 import { existsSync, renameSync, unlinkSync } from 'fs';
 import PQueue from 'p-queue';
 import { renderManifest, renderShow } from '../../services/render/render-service.js';
-import { generateNarration, mergeAudioWithVideo } from '../../services/ai/tts-service.js';
+import { generatePerSceneNarration, mergeAudioWithVideo } from '../../services/ai/tts-service.js';
+import { computeShowDurations, padSceneTimelines, injectSubtitles } from '../../services/render/duration-calculator.js';
 import * as jobStorage from '../../services/storage/jobStorage.js';
 import { validateRenderShowRequest, validateRenderRequest } from '../middleware/validation.js';
 import { asyncHandler } from '../middleware/errorHandler.js';
@@ -28,7 +29,7 @@ router.post(
   '/show',
   validateRenderShowRequest,
   asyncHandler(async (req, res) => {
-    const { show, topic, tts } = req.body;
+    const { show, topic, tts, subtitles } = req.body;
 
     const jobId = randomUUID();
     const now = Date.now();
@@ -49,46 +50,74 @@ router.post(
       jobStorage.updateJob(jobId, { status: 'rendering' });
 
       try {
-        // Step 1: Render video (silent)
-        const result = await renderShow(show, jobId, (percent) => {
-          // If TTS is enabled, video render is 0-70%, TTS is 70-90%, merge is 90-100%
-          const scaled = tts ? Math.floor(percent * 0.7) : Math.floor(percent);
-          jobStorage.updateJob(jobId, { progress: scaled });
-        });
+        let ttsResult: Awaited<ReturnType<typeof generatePerSceneNarration>> = null;
 
-        // Step 2: Generate TTS narration if requested
+        // ── TTS-first pipeline: generate audio BEFORE rendering ──
+        // This lets us pad the video timelines so video >= audio duration
         if (tts) {
-          jobStorage.updateJob(jobId, { progress: 70, title: 'Generating narration...' });
+          // Step 0: Inject subtitles if requested (extends video with narration text on screen)
+          if (subtitles !== false) {
+            const subCount = injectSubtitles(show);
+            if (subCount > 0) {
+              console.log(`[Sync] Injected subtitles into ${subCount} scene(s)`);
+            }
+          }
 
+          // Step 1: Compute per-scene video durations from manifest (after subtitles)
+          const { sceneDurations } = computeShowDurations(show);
+          console.log(`[Sync] Scene video durations: [${sceneDurations.map(d => d.toFixed(1) + 's').join(', ')}]`);
+          jobStorage.updateJob(jobId, { progress: 2, title: 'Computing durations...' });
+
+          // Step 2: Generate per-scene TTS audio
           const narrations = show.scenes.map((s: any) => s.narration || '');
           const hasAnyNarration = narrations.some((n: string) => n.trim().length > 0);
 
           if (hasAnyNarration) {
-            const ttsResult = await generateNarration(narrations, jobId, (scene, total) => {
-              const ttsProgress = 70 + Math.floor((scene / total) * 20);
+            ttsResult = await generatePerSceneNarration(narrations, jobId, (scene, total) => {
+              const ttsProgress = 5 + Math.floor((scene / total) * 20);
               jobStorage.updateJob(jobId, {
                 progress: ttsProgress,
                 title: `Narrating scene ${scene}/${total}...`,
               });
             });
 
+            // Step 3: Pad scene timelines where audio exceeds video
             if (ttsResult) {
-              // Step 3: Merge audio with video
-              jobStorage.updateJob(jobId, { progress: 90, title: 'Merging audio...' });
-
-              const silentVideo = resolve(result.outputPath);
-              const finalVideo = resolve(`output/${jobId}-final.mp4`);
-
-              mergeAudioWithVideo(silentVideo, ttsResult.audioPath, finalVideo);
-
-              // Replace silent video with merged version
-              unlinkSync(silentVideo);
-              renameSync(finalVideo, silentVideo);
-
-              // Clean up narration WAV
-              try { unlinkSync(ttsResult.audioPath); } catch {}
+              console.log(`[Sync] Audio durations: [${ttsResult.sceneAudioDurations.map(d => d.toFixed(1) + 's').join(', ')}]`);
+              const paddedCount = padSceneTimelines(show, sceneDurations, ttsResult.sceneAudioDurations);
+              if (paddedCount > 0) {
+                console.log(`[Sync] Padded ${paddedCount} scene(s) to match audio`);
+              }
             }
           }
+        }
+
+        // Step 4: Render video (with padded timelines if TTS was used)
+        jobStorage.updateJob(jobId, { progress: tts ? 25 : 0, title: 'Rendering video...' });
+        const result = await renderShow(show, jobId, (percent) => {
+          const scaled = tts
+            ? 25 + Math.floor(percent * 0.65)  // 25-90% for video when TTS
+            : Math.floor(percent);              // 0-100% for video without TTS
+          jobStorage.updateJob(jobId, { progress: scaled });
+        });
+
+        // Step 5: Merge audio with video
+        if (tts && ttsResult) {
+          jobStorage.updateJob(jobId, { progress: 90, title: 'Merging audio...' });
+
+          const silentVideo = resolve(result.outputPath);
+          const finalVideo = resolve(`output/${jobId}-final.mp4`);
+
+          mergeAudioWithVideo(silentVideo, ttsResult.combinedAudioPath, finalVideo);
+
+          // Replace silent video with merged version
+          unlinkSync(silentVideo);
+          renameSync(finalVideo, silentVideo);
+
+          // Clean up narration WAV
+          try { unlinkSync(ttsResult.combinedAudioPath); } catch {}
+
+          console.log(`[Sync] Final video rendered with synced narration`);
         }
 
         jobStorage.updateJob(jobId, {

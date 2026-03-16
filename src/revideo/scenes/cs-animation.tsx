@@ -1,10 +1,13 @@
-import {makeScene2D, Node} from '@revideo/2d';
-import {all, useScene, waitFor, createRef} from '@revideo/core';
-import type {Manifest, ActionStep, ResolvedShow} from '../types';
+import {makeScene2D, Node, Txt} from '@revideo/2d';
+import {all, useScene, waitFor, createRef, type ThreadGenerator} from '@revideo/core';
+import type {Manifest, ActionStep, ResolvedShow, ResolvedScene} from '../types';
 import {isParallelBlock} from '../types';
 import {createSceneObjects} from '../objects';
 import {executeAction} from '../actions';
 import {executeTransition} from '../actions/transition';
+
+const SUBTITLE_ID = '__subtitle';
+const WORDS_PER_SECOND = 2.5;
 
 export default makeScene2D('cs-animation', function* (view) {
   const dataJson = useScene().variables.get('manifest', '{}')();
@@ -46,6 +49,69 @@ function* executeTimeline(
       // Continue rendering remaining actions instead of stopping the video
     }
   }
+}
+
+/**
+ * Run subtitles as an independent parallel track.
+ * Cycles through chunks, distributing them evenly across the total scene duration.
+ * Each chunk: fade-in → hold → fade-out → brief gap.
+ */
+function* runSubtitleTrack(
+  subtitleRef: any,
+  chunks: string[],
+  totalDuration: number,
+): ThreadGenerator {
+  if (chunks.length === 0 || totalDuration <= 0) return;
+
+  // Distribute chunks evenly across the scene duration
+  const timePerChunk = totalDuration / chunks.length;
+  const fadeTime = 0.3;
+  const gapTime = 0.3;
+
+  for (let i = 0; i < chunks.length; i++) {
+    const holdTime = Math.max(timePerChunk - fadeTime * 2 - gapTime, 1.0);
+
+    // Set text, fade in, hold, fade out
+    subtitleRef().text(chunks[i]);
+    yield* subtitleRef().opacity(1, fadeTime);
+    yield* waitFor(holdTime);
+    yield* subtitleRef().opacity(0, fadeTime);
+
+    // Brief gap between chunks (except after last)
+    if (i < chunks.length - 1) {
+      yield* waitFor(gapTime);
+    }
+  }
+}
+
+/**
+ * Compute the total duration of a timeline by summing action durations.
+ * Used to know how long the subtitle track should run.
+ */
+function computeTimelineDuration(timeline: any[]): number {
+  let total = 0;
+  for (const entry of timeline) {
+    if (entry.parallel && Array.isArray(entry.parallel)) {
+      let maxDur = 0;
+      for (const step of entry.parallel) {
+        const d = parseDurationLocal(step.duration);
+        if (d > maxDur) maxDur = d;
+      }
+      total += maxDur;
+    } else {
+      total += parseDurationLocal(entry.duration);
+    }
+  }
+  return total;
+}
+
+function parseDurationLocal(dur?: string | number): number {
+  if (dur === undefined || dur === null) return 0;
+  if (typeof dur === 'number') return dur;
+  const match = String(dur).match(/^([\d.]+)\s*(s|ms)$/);
+  if (!match) return 0;
+  const val = parseFloat(match[1]);
+  return match[2] === 'ms' ? val / 1000 : val;
 }
 
 /** Renders a single scene manifest. */
@@ -102,8 +168,23 @@ function* renderShow(view: any, show: ResolvedShow) {
     camera().scale(1);
     camera().position([0, 0]);
 
-    // Execute this scene's timeline — camera ops target the camera node
-    yield* executeTimeline(manifest.timeline, objects, camera(), manifest.meta);
+    // Check for subtitle chunks (passed via ResolvedScene)
+    const subtitleChunks = scene.subtitleChunks || (manifest.meta as any).__subtitleChunks;
+    const subtitleEntry = subtitleChunks?.length > 0
+      ? objects.get(SUBTITLE_ID)
+      : null;
+
+    if (subtitleEntry && subtitleChunks) {
+      // Run timeline + subtitles IN PARALLEL — subtitles are an independent track
+      const sceneDuration = computeTimelineDuration(manifest.timeline);
+      yield* all(
+        executeTimeline(manifest.timeline, objects, camera(), manifest.meta),
+        runSubtitleTrack(subtitleEntry.refs.root, subtitleChunks, sceneDuration),
+      );
+    } else {
+      // No subtitles — run timeline normally
+      yield* executeTimeline(manifest.timeline, objects, camera(), manifest.meta);
+    }
 
     previousContainer = container();
   }

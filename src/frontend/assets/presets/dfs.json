@@ -10,47 +10,144 @@
     "palette": {"visited": "#e74c3c", "stacked": "#9b59b6", "current": "#2ecc71", "highlight": "#e67e22"},
     "easing": "easeInOutCubic"
   },
-  "scenes": [{
-    "name": "walkthrough",
-    "transition": "none",
-    "manifest": {
-      "meta": {"title": "DFS Traversal", "canvas": {"width": 1920, "height": 1080, "background": "#0f0f23"}},
-      "objects": [
-        {"id": "title", "type": "text", "content": "", "position": {"x": 960, "y": 60}, "style": {"font": "bold 36px sans-serif", "align": "center", "color": "#ffffff"}},
-        {"id": "graph", "type": "graph", "nodes": [{"id": "A", "label": "A", "x": 960, "y": 300}, {"id": "B", "label": "B", "x": 720, "y": 480}, {"id": "C", "label": "C", "x": 1200, "y": 480}, {"id": "D", "label": "D", "x": 840, "y": 660}], "edges": [{"from": "A", "to": "B"}, {"from": "A", "to": "C"}, {"from": "B", "to": "D"}]},
-        {"id": "stack", "type": "data-structure", "variant": "stack", "position": {"x": 960, "y": 870}},
-        {"id": "step", "type": "text", "content": "", "position": {"x": 960, "y": 140}, "style": {"font": "22px sans-serif", "align": "center", "color": "#b0b0dd"}}
-      ],
-      "timeline": [
-        {"action": "set-text", "target": "title", "value": "Depth-First Search"},
-        {"action": "fade-in", "target": "title", "duration": "0.6s"},
-        {"action": "fade-in", "target": "graph", "duration": "0.8s"},
-        {"action": "fade-in", "target": "stack", "duration": "0.3s"},
-        {"action": "pause", "duration": "1s"},
-        {"action": "set-text", "target": "step", "value": "Push A onto stack"},
-        {"action": "fade-in", "target": "step", "duration": "0.3s"},
-        {"action": "highlight-node", "target": "graph", "node": "A", "color": "$current", "duration": "0.5s"},
-        {"action": "push", "target": "stack", "values": ["A"], "duration": "0.4s"},
-        {"action": "pause", "duration": "1.5s"},
-        {"action": "set-text", "target": "step", "value": "Pop A \u2014 push C, B"},
-        {"action": "pop", "target": "stack", "duration": "0.4s"},
-        {"action": "highlight-node", "target": "graph", "node": "A", "color": "$visited", "duration": "0.4s"},
-        {"action": "push", "target": "stack", "values": ["C", "B"], "duration": "0.5s"},
-        {"action": "pause", "duration": "1.5s"},
-        {"action": "set-text", "target": "step", "value": "Pop B \u2014 push D"},
-        {"action": "pop", "target": "stack", "duration": "0.4s"},
-        {"action": "highlight-node", "target": "graph", "node": "B", "color": "$visited", "duration": "0.4s"},
-        {"action": "push", "target": "stack", "values": ["D"], "duration": "0.4s"},
-        {"action": "pause", "duration": "1.5s"},
-        {"action": "set-text", "target": "step", "value": "Pop D \u2014 leaf node"},
-        {"action": "pop", "target": "stack", "duration": "0.4s"},
-        {"action": "highlight-node", "target": "graph", "node": "D", "color": "$visited", "duration": "0.4s"},
-        {"action": "pause", "duration": "1s"},
-        {"action": "set-text", "target": "step", "value": "Pop C \u2014 DFS complete!"},
-        {"action": "pop", "target": "stack", "duration": "0.4s"},
-        {"action": "highlight-node", "target": "graph", "node": "C", "color": "$visited", "duration": "0.4s"},
-        {"action": "pause", "duration": "2s"}
-      ]
+  "scenes": [
+    {
+      "name": "intro",
+      "transition": "none",
+      "narration": "Welcome! Today we'll explore Depth-First Search, or DFS. Unlike BFS which explores level by level, DFS dives as deep as possible before backtracking. It uses a stack instead of a queue.",
+      "manifest": {
+        "meta": {"title": "Intro", "canvas": {"width": 1920, "height": 1080, "background": "#0f0f23"}},
+        "objects": [
+          {"id": "title", "type": "text", "content": "", "position": {"x": 960, "y": 120}, "style": {"font": "bold 48px sans-serif", "align": "center", "color": "#ffffff"}},
+          {"id": "subtitle", "type": "text", "content": "", "position": {"x": 960, "y": 200}, "style": {"font": "24px sans-serif", "align": "center", "color": "#aaaacc"}},
+          {"id": "graph", "type": "graph", "nodes": [{"id": "A", "label": "A", "x": 960, "y": 400}, {"id": "B", "label": "B", "x": 720, "y": 560}, {"id": "C", "label": "C", "x": 1200, "y": 560}, {"id": "D", "label": "D", "x": 600, "y": 720}, {"id": "E", "label": "E", "x": 840, "y": 720}, {"id": "F", "label": "F", "x": 1080, "y": 720}], "edges": [{"from": "A", "to": "B"}, {"from": "A", "to": "C"}, {"from": "B", "to": "D"}, {"from": "B", "to": "E"}, {"from": "C", "to": "F"}]},
+          {"id": "desc", "type": "text", "content": "", "position": {"x": 960, "y": 900}, "style": {"font": "20px sans-serif", "align": "center", "color": "#88aacc"}}
+        ],
+        "timeline": [
+          {"action": "set-text", "target": "title", "value": "Depth-First Search"},
+          {"action": "fade-in", "target": "title", "duration": "0.8s", "easing": "easeOutCubic"},
+          {"action": "pause", "duration": "1s"},
+          {"action": "set-text", "target": "subtitle", "value": "Go deep before going wide \u2014 uses a stack"},
+          {"action": "fade-in", "target": "subtitle", "duration": "0.6s"},
+          {"action": "pause", "duration": "2s"},
+          {"action": "fade-in", "target": "graph", "duration": "1s"},
+          {"action": "pause", "duration": "2s"},
+          {"action": "set-text", "target": "desc", "value": "DFS dives as deep as possible, then backtracks"},
+          {"action": "fade-in", "target": "desc", "duration": "0.4s"},
+          {"action": "pause", "duration": "4s"},
+          {"parallel": [
+            {"action": "fade-out", "target": "title", "duration": "0.5s"},
+            {"action": "fade-out", "target": "subtitle", "duration": "0.5s"},
+            {"action": "fade-out", "target": "graph", "duration": "0.5s"},
+            {"action": "fade-out", "target": "desc", "duration": "0.5s"}
+          ]}
+        ]
+      }
+    },
+    {
+      "name": "walkthrough",
+      "transition": {"type": "crossfade", "duration": "0.8s"},
+      "narration": "Let's trace through DFS. We push A onto the stack. Pop A, mark as visited, push its neighbors C and B. Pop B, mark visited, push E and D. Pop D, it's a leaf. Pop E, also a leaf. Pop C, push F. Pop F. Stack is empty, DFS complete.",
+      "manifest": {
+        "meta": {"title": "DFS Walkthrough", "canvas": {"width": 1920, "height": 1080, "background": "#0f0f23"}},
+        "objects": [
+          {"id": "title", "type": "text", "content": "", "position": {"x": 960, "y": 50}, "style": {"font": "bold 36px sans-serif", "align": "center", "color": "#ffffff"}},
+          {"id": "step", "type": "text", "content": "", "position": {"x": 960, "y": 120}, "style": {"font": "22px sans-serif", "align": "center", "color": "#b0b0dd"}},
+          {"id": "graph", "type": "graph", "nodes": [{"id": "A", "label": "A", "x": 960, "y": 300}, {"id": "B", "label": "B", "x": 720, "y": 460}, {"id": "C", "label": "C", "x": 1200, "y": 460}, {"id": "D", "label": "D", "x": 600, "y": 620}, {"id": "E", "label": "E", "x": 840, "y": 620}, {"id": "F", "label": "F", "x": 1080, "y": 620}], "edges": [{"from": "A", "to": "B"}, {"from": "A", "to": "C"}, {"from": "B", "to": "D"}, {"from": "B", "to": "E"}, {"from": "C", "to": "F"}]},
+          {"id": "stack", "type": "data-structure", "variant": "stack", "position": {"x": 960, "y": 870}}
+        ],
+        "timeline": [
+          {"action": "set-text", "target": "title", "value": "DFS Traversal"},
+          {"parallel": [
+            {"action": "fade-in", "target": "title", "duration": "0.5s"},
+            {"action": "fade-in", "target": "graph", "duration": "0.8s"},
+            {"action": "fade-in", "target": "stack", "duration": "0.3s"}
+          ]},
+          {"action": "set-text", "target": "step", "value": "Push A onto stack"},
+          {"action": "fade-in", "target": "step", "duration": "0.3s"},
+          {"action": "highlight-node", "target": "graph", "node": "A", "color": "$current", "duration": "0.5s"},
+          {"action": "push", "target": "stack", "values": ["A"], "duration": "0.4s"},
+          {"action": "pause", "duration": "3s"},
+          {"action": "set-text", "target": "step", "value": "Pop A \u2014 push neighbors C, B"},
+          {"action": "pop", "target": "stack", "duration": "0.4s"},
+          {"action": "highlight-node", "target": "graph", "node": "A", "color": "$visited", "duration": "0.4s"},
+          {"action": "pause", "duration": "1s"},
+          {"parallel": [
+            {"action": "highlight-edge", "target": "graph", "edge": ["A", "C"], "color": "$highlight", "duration": "0.4s"},
+            {"action": "highlight-edge", "target": "graph", "edge": ["A", "B"], "color": "$highlight", "duration": "0.4s"}
+          ]},
+          {"action": "push", "target": "stack", "values": ["C", "B"], "duration": "0.6s"},
+          {"action": "pause", "duration": "3s"},
+          {"action": "set-text", "target": "step", "value": "Pop B \u2014 push neighbors E, D"},
+          {"action": "pop", "target": "stack", "duration": "0.4s"},
+          {"action": "highlight-node", "target": "graph", "node": "B", "color": "$visited", "duration": "0.4s"},
+          {"action": "pause", "duration": "1s"},
+          {"parallel": [
+            {"action": "highlight-edge", "target": "graph", "edge": ["B", "E"], "color": "$highlight", "duration": "0.4s"},
+            {"action": "highlight-edge", "target": "graph", "edge": ["B", "D"], "color": "$highlight", "duration": "0.4s"}
+          ]},
+          {"action": "push", "target": "stack", "values": ["E", "D"], "duration": "0.6s"},
+          {"action": "pause", "duration": "3s"},
+          {"action": "set-text", "target": "step", "value": "Pop D \u2014 leaf node, no new neighbors"},
+          {"action": "pop", "target": "stack", "duration": "0.4s"},
+          {"action": "highlight-node", "target": "graph", "node": "D", "color": "$visited", "duration": "0.4s"},
+          {"action": "pause", "duration": "3s"},
+          {"action": "set-text", "target": "step", "value": "Pop E \u2014 leaf node, backtracking..."},
+          {"action": "pop", "target": "stack", "duration": "0.4s"},
+          {"action": "highlight-node", "target": "graph", "node": "E", "color": "$visited", "duration": "0.4s"},
+          {"action": "pause", "duration": "3s"},
+          {"action": "set-text", "target": "step", "value": "Pop C \u2014 push neighbor F"},
+          {"action": "pop", "target": "stack", "duration": "0.4s"},
+          {"action": "highlight-node", "target": "graph", "node": "C", "color": "$visited", "duration": "0.4s"},
+          {"action": "highlight-edge", "target": "graph", "edge": ["C", "F"], "color": "$highlight", "duration": "0.4s"},
+          {"action": "push", "target": "stack", "values": ["F"], "duration": "0.4s"},
+          {"action": "pause", "duration": "3s"},
+          {"action": "set-text", "target": "step", "value": "Pop F \u2014 DFS complete!"},
+          {"action": "pop", "target": "stack", "duration": "0.4s"},
+          {"action": "highlight-node", "target": "graph", "node": "F", "color": "$visited", "duration": "0.4s"},
+          {"action": "pause", "duration": "2s"},
+          {"action": "set-text", "target": "step", "value": "Visit order: A \u2192 B \u2192 D \u2192 E \u2192 C \u2192 F"},
+          {"action": "pause", "duration": "4s"},
+          {"parallel": [
+            {"action": "fade-out", "target": "title", "duration": "0.5s"},
+            {"action": "fade-out", "target": "step", "duration": "0.5s"},
+            {"action": "fade-out", "target": "graph", "duration": "0.5s"},
+            {"action": "fade-out", "target": "stack", "duration": "0.5s"}
+          ]}
+        ]
+      }
+    },
+    {
+      "name": "recap",
+      "transition": {"type": "fade", "duration": "0.8s"},
+      "narration": "To recap. DFS uses a stack and explores as deep as possible before backtracking. It's great for finding paths and detecting cycles. Same time complexity as BFS, O of V plus E.",
+      "manifest": {
+        "meta": {"title": "Recap", "canvas": {"width": 1920, "height": 1080, "background": "#0f0f23"}},
+        "objects": [
+          {"id": "title", "type": "text", "content": "", "position": {"x": 960, "y": 120}, "style": {"font": "bold 36px sans-serif", "align": "center", "color": "#ffffff"}},
+          {"id": "p1", "type": "text", "content": "", "position": {"x": 960, "y": 320}, "style": {"font": "24px sans-serif", "align": "center", "color": "#2ecc71"}},
+          {"id": "p2", "type": "text", "content": "", "position": {"x": 960, "y": 450}, "style": {"font": "24px sans-serif", "align": "center", "color": "#9b59b6"}},
+          {"id": "p3", "type": "text", "content": "", "position": {"x": 960, "y": 580}, "style": {"font": "24px sans-serif", "align": "center", "color": "#e67e22"}},
+          {"id": "p4", "type": "text", "content": "", "position": {"x": 960, "y": 750}, "style": {"font": "bold 28px sans-serif", "align": "center", "color": "#00F5FF"}}
+        ],
+        "timeline": [
+          {"action": "set-text", "target": "title", "value": "Key Takeaways"},
+          {"action": "fade-in", "target": "title", "duration": "0.6s"},
+          {"action": "pause", "duration": "2s"},
+          {"action": "set-text", "target": "p1", "value": "1. DFS uses a Stack (LIFO)"},
+          {"action": "fade-in", "target": "p1", "duration": "0.5s"},
+          {"action": "pause", "duration": "4s"},
+          {"action": "set-text", "target": "p2", "value": "2. Goes deep before going wide"},
+          {"action": "fade-in", "target": "p2", "duration": "0.5s"},
+          {"action": "pause", "duration": "4s"},
+          {"action": "set-text", "target": "p3", "value": "3. Great for path finding & cycle detection"},
+          {"action": "fade-in", "target": "p3", "duration": "0.5s"},
+          {"action": "pause", "duration": "4s"},
+          {"action": "set-text", "target": "p4", "value": "Time: O(V + E)"},
+          {"action": "fade-in", "target": "p4", "duration": "0.6s", "easing": "easeOutBack"},
+          {"action": "pause", "duration": "4s"}
+        ]
+      }
     }
-  }]
+  ]
 }

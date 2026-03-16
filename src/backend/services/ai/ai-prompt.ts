@@ -85,6 +85,12 @@ Each scene has an optional "narration" field — a plain text script that will b
 - Outro narration: "Thanks for watching! Next, you might want to explore..."
 - Keep narrations concise — 20-60 words per scene for intro/recap/outro, 60-150 words for explanation scenes
 
+**CRITICAL NARRATION RULE — NARRATION MUST FIT WITHIN SCENE DURATION:**
+- Estimate the scene's timeline duration by summing all action durations (sequential = sum, parallel = max).
+- Narration should take about 70-80% of the scene duration to leave breathing room.
+- Rule of thumb: ~2.5 words per second of speech. If a scene has 30 seconds of actions, keep narration under 75 words.
+- The system will auto-pad video if narration runs long, but excessive padding creates dead screen time. Keep it tight.
+
 **CRITICAL NARRATION RULE — ONLY DESCRIBE WHAT IS VISIBLE ON SCREEN:**
 - The narration MUST only reference things that are actually shown by the timeline actions
 - Do NOT mention time complexity, space complexity, implementation details, or theory unless there is a matching text object showing it on screen
@@ -286,11 +292,11 @@ Then proceed with highlights, set-text, enqueue, etc.
 - **Outro scene**: 15-25 seconds → 15-20 actions. Thank viewer, suggest 2-3 next topics.
 
 **CRITICAL PACING REQUIREMENTS:**
-- After EVERY visual change (highlight, enqueue, dequeue, etc.), add a pause of **3-5 seconds**. This is essential for viewers to absorb.
-- Between rapid sub-steps within one algorithm step, use **1-2 second** pauses.
-- Use **"4s"** as the default pause duration, not "2s".
-- Each algorithm step should take **12-20 seconds** total (set-text + visual actions + pause).
-- For a graph traversal visiting N nodes, generate at LEAST 15 actions per node visited.
+- After EVERY visual change (highlight, enqueue, dequeue, etc.), add a pause of **5-7 seconds**. This is essential for viewers to absorb. Educational videos MUST be slow.
+- Between rapid sub-steps within one algorithm step, use **3-4 second** pauses.
+- Use **"5s"** as the default pause duration. NEVER use "1s" or "2s" pauses.
+- Each algorithm step should take **15-25 seconds** total (set-text + visual actions + pause).
+- For a graph traversal visiting N nodes, generate at LEAST 20 actions per node visited.
 
 **SHOW, DON'T TELL.** The primary teaching tool is the VISUAL ANIMATION, not text narration. Viewers learn by watching nodes light up, data flow through structures, and edges activate. Text labels are SHORT captions, not paragraphs.
 
@@ -344,7 +350,7 @@ Then proceed with highlights, set-text, enqueue, etc.
 32. Define your palette upfront before writing scenes. Common pattern: define 4-6 semantic colors like "active", "done", "queued", "highlight" in show.meta.palette, then only use those in timelines.
 33. **SCENE DECOMPOSITION**: Break complex topics into focused scenes. Each scene = one concept or phase of the algorithm.
 34. **NO SHORTCUTS**: Do NOT skip steps in an algorithm. If BFS visits 6 nodes, show ALL 6 visits with full highlight + queue + pause cycles. If sorting swaps 10 pairs, show ALL 10 swaps. Thoroughness creates video length.
-35. **PAUSE DURATION**: Default pause is "4s". Use "3s" minimum after visual changes. NEVER use "1s" or "2s" for the main pause after a step completes. Only use "1s" between sub-actions within a single step.
+35. **PAUSE DURATION**: Default pause is "5s". Use "5s" minimum after visual changes. NEVER use "1s" or "2s" for any pause. Use "3s" minimum between sub-actions within a single step. Educational videos need breathing room.
 36. **USE LARGE GRAPHS/STRUCTURES**: For graph algorithms, use 6-10 nodes with 8-15 edges. For data structure topics, demonstrate with 6-10 elements. Larger inputs = more steps = longer video.
 37. **TREE VS GRAPH**: Use "tree" type for binary trees, BSTs, heaps, expression trees, recursion trees — any hierarchical structure with parent-child relationships. Use "graph" type for graphs with arbitrary connections (BFS, DFS, Dijkstra). Trees have AUTO-LAYOUT — do NOT specify x/y coordinates for tree nodes, only specify parent and side.
 38. **SORTING ALGORITHMS**: Use data-structure with variant: "array". Use init-cells to populate the initial array, highlight-cell to show comparisons, swap-cells for swaps, and set-cell for value updates. Show EVERY comparison and swap — do not skip steps.

@@ -48,6 +48,7 @@ export interface ResolvedShow {
 export interface ResolvedScene {
   manifest: Manifest;
   transition?: TransitionConfig;
+  subtitleChunks?: string[];
 }
 
 export function isShowManifest(obj: any): obj is ShowManifest {
